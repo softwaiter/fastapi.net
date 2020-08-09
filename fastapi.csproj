@@ -11,6 +11,10 @@
     <None Remove="libs\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
