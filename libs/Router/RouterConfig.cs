@@ -49,14 +49,14 @@ namespace CodeM.FastApi.Router
             {
                 get;
                 set;
-            } = 3;
+            } = 10;
 
             //最大并发请求数
             public int MaxConcurrent
             {
                 get;
                 set;
-            } = 10;
+            } = 100;
 
             //每个处理器最大使用次数
             public int MaxInvokePerInstance

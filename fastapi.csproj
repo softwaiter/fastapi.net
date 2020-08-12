@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject></StartupObject>
+    <UserSecretsId>a6af7ceb-db91-4c17-b2f2-e4009bc1e53a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\netcoreORM\Library\CodeM.Common.Orm.csproj" />
     <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

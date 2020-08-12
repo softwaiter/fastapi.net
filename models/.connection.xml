@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<connection>
+    <dialect>sqlite</dialect>
+    <host>fastapi.db</host>
+    <port></port>
+    <user></user>
+    <password></password>
+    <database></database>
+    <pool max="100" min="0">true</pool>
+</connection>

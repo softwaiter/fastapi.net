@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<model name="User" table="t_user">
+    <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
+    <property name="Name" field="f_name" length="32" notNull="true" uniqueGroup="uc_name" joinInsert="true" joinUpdate="true" desc="名称" />
+    <property name="Age" field="f_age" type="UInt16" unsigned="true" joinInsert="true" joinUpdate="true" desc="年龄" />
+    <property name="Birthday" type="DateTime" field="f_birthday" fieldType="Date" desc="出生日期" defaultValue="1980/01/01" />
+    <property name="Deposit" field="f_deposit" type="Decimal" precision="2" desc="银行存款" defaultValue="12345" />
+    <property name="IsAdmin" field="f_is_admin" type="Boolean" desc="是否超级管理员" />
+</model>

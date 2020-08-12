@@ -1,3 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <routers>
+    <router path="/user" handler="CodeM.FastApi.Controller.User.Handle"></router>
 </routers>

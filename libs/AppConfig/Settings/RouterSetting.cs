@@ -8,28 +8,28 @@
         {
             get;
             set;
-        } = 200;
+        } = 65535;
 
         //每个路由最大空闲处理器数量
         public int MaxIdlePerRouter
         {
             get;
             set;
-        } = 5;
+        } = 10;
 
         //每个路由最大并发处理器数量
         public int MaxConcurrentPerRouter
         {
             get;
             set;
-        } = 30;
+        } = 100;
 
         //每个路由处理器实例最大使用次数
         public int MaxInvokePerInstance
         {
             get;
             set;
-        } = 5000;
+        } = 10000;
 
     }
 }

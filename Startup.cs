@@ -26,7 +26,7 @@ namespace fastapi
 
             string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
             RouterManager.Current.Init(appConfig, routerFile);
-            //RouterManager.Current.MountRouters(app);
+            RouterManager.Current.MountRouters(app);
         }
     }
 }
