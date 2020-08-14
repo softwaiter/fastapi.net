@@ -1,31 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <StartupObject></StartupObject>
-    <UserSecretsId>a6af7ceb-db91-4c17-b2f2-e4009bc1e53a</UserSecretsId>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <StartupObject></StartupObject>
+        <UserSecretsId>a6af7ceb-db91-4c17-b2f2-e4009bc1e53a</UserSecretsId>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="libs\**" />
-    <Content Remove="libs\**" />
-    <EmbeddedResource Remove="libs\**" />
-    <None Remove="libs\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="libs\**" />
+        <Content Remove="libs\**" />
+        <EmbeddedResource Remove="libs\**" />
+        <None Remove="libs\**" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\netcoreORM\Library\CodeM.Common.Orm.csproj" />
-    <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include=".\**\*.xml" CopyToPublishDirectory="PreserveNewest" />
+        <Content Remove="bin\**"></Content>
+        <Content Remove="obj\**"></Content>
+        <None Remove="fastapi.db" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="models\" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\netcoreORM\Library\CodeM.Common.Orm.csproj" />
+        <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="models\" />
+    </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+    <ItemGroup>
+        <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
+    </ItemGroup>
+
+    <ProjectExtensions>
+        <VisualStudio>
+            <UserProperties appsettings_1json__JsonSchema="" />
+        </VisualStudio>
+    </ProjectExtensions>
 
 </Project>
