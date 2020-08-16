@@ -2,6 +2,7 @@
 using CodeM.FastApi.Config;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CodeM.FastApi.Router
@@ -86,6 +87,25 @@ namespace CodeM.FastApi.Router
                 {
                     if (nodeInfo.Path == "/routers/router")
                     {
+                        string include = nodeInfo.GetAttribute("include");
+                        if (!string.IsNullOrWhiteSpace(include))
+                        {
+                            include = include.Replace("/", "\\");
+                            if (include.StartsWith("\\"))
+                            {
+                                include = include.Substring(1);
+                            }
+
+                            FileInfo fi = new FileInfo(file);
+                            string includeFile = Path.Combine(fi.DirectoryName, include);
+                            if (!File.Exists(includeFile))
+                            {
+                                throw new FileNotFoundException("文件不存在", includeFile);
+                            }
+                            Load(config, includeFile);
+                            return true;
+                        }
+
                         RouterItem item = new RouterItem();
                         item.MaxIdle = config.Router.MaxIdlePerRouter;
                         item.MaxConcurrent = config.Router.MaxConcurrentPerRouter;

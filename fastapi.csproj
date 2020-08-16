@@ -8,15 +8,20 @@
 
     <ItemGroup>
         <Compile Remove="libs\**" />
+        <Compile Remove="Properties\PublishProfiles\**" />
         <Content Remove="libs\**" />
+        <Content Remove="Properties\PublishProfiles\**" />
         <EmbeddedResource Remove="libs\**" />
+        <EmbeddedResource Remove="Properties\PublishProfiles\**" />
         <None Remove="libs\**" />
+        <None Remove="Properties\PublishProfiles\**" />
     </ItemGroup>
 
     <ItemGroup>
         <Content Include=".\**\*.xml" CopyToPublishDirectory="PreserveNewest" />
         <Content Remove="bin\**"></Content>
         <Content Remove="obj\**"></Content>
+        <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <None Remove="fastapi.db" />
     </ItemGroup>
 
@@ -26,11 +31,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="models\" />
+        <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
+      <Folder Include=".\" />
     </ItemGroup>
 
     <ProjectExtensions>
