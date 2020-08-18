@@ -11,5 +11,7 @@ namespace CodeM.FastApi.Config
 
         public CookieSetting Cookie { get; set; } = new CookieSetting();
 
+        public dynamic Settings { get; set; } = null;
+
     }
 }

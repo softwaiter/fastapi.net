@@ -4,6 +4,8 @@
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <StartupObject></StartupObject>
         <UserSecretsId>a6af7ceb-db91-4c17-b2f2-e4009bc1e53a</UserSecretsId>
+        <Authors>softwaiter</Authors>
+        <Description>快速、轻量级、跨平台、自动化API框架</Description>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,16 +28,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\netcoreORM\Library\CodeM.Common.Orm.csproj" />
         <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="CodeM.Common.Tools" Version="1.0.2" />
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include=".\" />
     </ItemGroup>
 
     <ProjectExtensions>
