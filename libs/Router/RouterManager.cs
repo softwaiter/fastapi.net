@@ -1,9 +1,12 @@
-﻿using CodeM.FastApi.Config;
+﻿using CodeM.FastApi.Common;
+using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Router
@@ -29,50 +32,57 @@ namespace CodeM.FastApi.Router
             mRouterConfig.Load(config, routerFile);
         }
 
-        private async Task<bool> _ThroughMiddlewares(ControllerContext cc, RouterConfig.RouterItem item)
-        {
-            List<string> middlewares = new List<string>();
-            middlewares.AddRange(mAppConfig.Middlewares);
-            middlewares.AddRange(item.Middlewares);
-
-            if (middlewares.Count > 0)
-            {
-                foreach (string middleware in middlewares)
-                {
-                    string middlewareMethod = string.Concat(middleware, ".Process");
-                    object result = await mMethodInvoker.InvokeAsync(middlewareMethod, cc, 
-                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
-                    if (result != null)
-                    {
-                        bool bRet;
-                        if (!bool.TryParse(result.ToString(), out bRet))
-                        {
-                            bRet = false;
-                        }
-
-                        if (!bRet)
-                        {
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
         private async Task _RequestHandler(HttpContext context,
             RouterConfig.RouterItem item, string handlerName)
         {
             ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
-            if (await _ThroughMiddlewares(cc, item))
+
+            try
             {
-                await mMethodInvoker.InvokeAsync(handlerName, cc,
-                    item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
+                Stack<string> _responseMiddlewares = new Stack<string>();
+
+                List<string> middlewares = new List<string>();
+                middlewares.AddRange(mAppConfig.Middlewares);
+                middlewares.AddRange(item.Middlewares);
+                foreach (string middleware in middlewares)
+                {
+                    string middlewareMethod = string.Concat(middleware, ".Request");
+                    await mMethodInvoker.InvokeAsync(middlewareMethod, cc,
+                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
+
+                    _responseMiddlewares.Push(middleware);
+
+                    if (cc.Breaked)
+                    {
+                        break;
+                    }
+                }
+
+                if (!cc.Breaked)
+                {
+                    await mMethodInvoker.InvokeAsync(handlerName, cc,
+                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
+                }
+
+                while (_responseMiddlewares.Count > 0)
+                {
+                    string middleware = _responseMiddlewares.Pop();
+                    string middlewareMethod = string.Concat(middleware, ".Response");
+                    await mMethodInvoker.InvokeAsync(middlewareMethod, cc,
+                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
+                }
+            }
+            catch (Exception exp)
+            {
+                if (await Utils.IsDevelopment())
+                {
+                    cc.State = 500;
+                    await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                }
+                else
+                {
+                    throw exp;
+                }
             }
         }
 

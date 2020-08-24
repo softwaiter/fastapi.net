@@ -185,5 +185,22 @@ namespace CodeM.FastApi.Context
             }
         }
 
+        /// <summary>
+        /// 控制中间件是否中止向下运行，即刻返回
+        /// </summary>
+        private bool mBreaked = false;
+        public void Break()
+        {
+            mBreaked = true;
+        }
+
+        public bool Breaked
+        {
+            get
+            {
+                return mBreaked;
+            }
+        }
+
     }
 }

@@ -1,7 +1,9 @@
 ﻿using CodeM.Common.Ioc;
+using CodeM.FastApi.Common;
 using CodeM.FastApi.Context;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +19,8 @@ namespace CodeM.FastApi.Router
         ConcurrentDictionary<string, int> mHandlerExecNumbers = new ConcurrentDictionary<string, int>();
 
         long mAllHandlerCounter = 0;    //全部请求处理器计数，总阀门控制
+
+        Dictionary<string, bool> mTypeMethods = new Dictionary<string, bool>();
 
         private ConcurrentStack<object> _GetHandlerStack(string handlerFullName)
         {
@@ -106,25 +110,18 @@ namespace CodeM.FastApi.Router
 
             if (result == null && _IncHandlerCount(handlerFullName, maxConcurrent))
             {
-                bool isControllerExists = true;
-
                 try
                 {
                     result = IocUtils.GetObject<object>(handlerClass);
                     if (result == null)
                     {
-                        _DecHandlerCount(handlerFullName);
-                        isControllerExists = false;
+                        throw new Exception();
                     }
                 }
                 catch
                 {
                     _DecHandlerCount(handlerFullName);
-                }
-
-                if (!isControllerExists)
-                {
-                    throw new Exception("路由处理器不存在。");
+                    throw new Exception(string.Concat("Instantiation exception(", handlerFullName, ")"));
                 }
             }
 
@@ -172,15 +169,24 @@ namespace CodeM.FastApi.Router
             await Task.CompletedTask;
         }
 
+        private async Task<bool> _methodIsExists(Type _typ, string methodName)
+        {
+            string key = string.Concat(_typ.FullName, "`", methodName);
+            if (!mTypeMethods.ContainsKey(key))
+            {
+                MethodInfo mi = _typ.GetMethod(methodName, 
+                    BindingFlags.Instance | BindingFlags.Public | 
+                    BindingFlags.IgnoreCase);
+                mTypeMethods[key] = mi != null;
+            }
+            await Task.CompletedTask;
+            return mTypeMethods[key];
+        }
+
         public async Task<object> InvokeAsync(string handlerFullName, ControllerContext cc,
-            int maxConcurrent, int maxIdle, int maxInvokePerInstance)
+            int maxConcurrent, int maxIdle, int maxInvokePerInstance, bool ignoreMethodNotExists = false)
         {
             int pos = handlerFullName.LastIndexOf(".");
-            if (pos <= 0)
-            {
-                cc.State = 500; //路由处理器配置错误
-                return null;
-            }
             string handlerMethod = handlerFullName.Substring(pos + 1);
 
             object result = null;
@@ -194,20 +200,35 @@ namespace CodeM.FastApi.Router
                     {
                         try
                         {
-                            result = handlerInst.GetType().InvokeMember(handlerMethod,
+                            Type handlerType = handlerInst.GetType();
+
+                            if (ignoreMethodNotExists && !await _methodIsExists(handlerType, handlerMethod))
+                            {
+                                return null;
+                            }
+
+                            result = handlerType.InvokeMember(handlerMethod,
                                 BindingFlags.IgnoreCase | BindingFlags.Public | 
                                 BindingFlags.Instance | BindingFlags.InvokeMethod,
                                 null, handlerInst, new object[] { cc });
 
+                            if (await Utils.IsDevelopment())
+                            {
+                                Type _resultTyp = result.GetType();
+                                if (_resultTyp.IsGenericType)
+                                {
+                                    if (_resultTyp.GetGenericTypeDefinition() == typeof(Task<>))
+                                    {
+                                        Task _taskResult = (Task)result;
+                                        if (_taskResult.Exception != null)
+                                        {
+                                            throw _taskResult.Exception;
+                                        }
+                                    }
+                                }
+                            }
+
                             _IncHandlerExecNum(handlerInst);
-                        }
-                        catch (MissingMethodException)
-                        {
-                            cc.State = 501; //路由对应处理方法不存在
-                        }
-                        catch
-                        {
-                            cc.State = 500; //执行路由处理方法异常
                         }
                         finally
                         {
@@ -216,12 +237,8 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        cc.State = 503;   //路由繁忙，暂时不可用
+                        throw new Exception(string.Concat("Router busy(", cc.Request.Path, ")"));
                     }
-                }
-                catch
-                {
-                    cc.State = 500; //创建路由处理器异常
                 }
                 finally
                 {
@@ -231,7 +248,7 @@ namespace CodeM.FastApi.Router
             else
             {
                 Interlocked.Decrement(ref mAllHandlerCounter);
-                cc.State = 503;   //系统繁忙，暂时不可用
+                throw new Exception("System busy.");
             }
 
             return result;
