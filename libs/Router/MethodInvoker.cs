@@ -3,7 +3,6 @@ using CodeM.FastApi.Common;
 using CodeM.FastApi.Context;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +18,6 @@ namespace CodeM.FastApi.Router
         ConcurrentDictionary<string, int> mHandlerExecNumbers = new ConcurrentDictionary<string, int>();
 
         long mAllHandlerCounter = 0;    //全部请求处理器计数，总阀门控制
-
-        Dictionary<string, bool> mTypeMethods = new Dictionary<string, bool>();
 
         private ConcurrentStack<object> _GetHandlerStack(string handlerFullName)
         {
@@ -150,7 +147,7 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private async Task _ReleaseHandler(string handlerFullName, object handler, 
+        private void _ReleaseHandler(string handlerFullName, object handler, 
             int maxIdle, int maxInvokePerInstance)
         {
             ConcurrentStack<object> stack = _GetHandlerStack(handlerFullName);
@@ -165,25 +162,9 @@ namespace CodeM.FastApi.Router
 
                 _DecHandlerCount(handlerFullName);
             }
-
-            await Task.CompletedTask;
         }
 
-        private async Task<bool> _methodIsExists(Type _typ, string methodName)
-        {
-            string key = string.Concat(_typ.FullName, "`", methodName);
-            if (!mTypeMethods.ContainsKey(key))
-            {
-                MethodInfo mi = _typ.GetMethod(methodName, 
-                    BindingFlags.Instance | BindingFlags.Public | 
-                    BindingFlags.IgnoreCase);
-                mTypeMethods[key] = mi != null;
-            }
-            await Task.CompletedTask;
-            return mTypeMethods[key];
-        }
-
-        public async Task<object> InvokeAsync(string handlerFullName, ControllerContext cc,
+        public object Invoke(string handlerFullName, ControllerContext cc,
             int maxConcurrent, int maxIdle, int maxInvokePerInstance, bool ignoreMethodNotExists = false)
         {
             int pos = handlerFullName.LastIndexOf(".");
@@ -202,7 +183,7 @@ namespace CodeM.FastApi.Router
                         {
                             Type handlerType = handlerInst.GetType();
 
-                            if (ignoreMethodNotExists && !await _methodIsExists(handlerType, handlerMethod))
+                            if (ignoreMethodNotExists && !Utils.IsMethodExists(handlerType, handlerMethod))
                             {
                                 return null;
                             }
@@ -212,7 +193,7 @@ namespace CodeM.FastApi.Router
                                 BindingFlags.Instance | BindingFlags.InvokeMethod,
                                 null, handlerInst, new object[] { cc });
 
-                            if (await Utils.IsDevelopment())
+                            if (Utils.IsDevelopment())
                             {
                                 Type _resultTyp = result.GetType();
                                 if (_resultTyp.IsGenericType)
@@ -232,7 +213,7 @@ namespace CodeM.FastApi.Router
                         }
                         finally
                         {
-                            await _ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
+                            _ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
                         }
                     }
                     else

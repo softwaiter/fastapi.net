@@ -1,4 +1,5 @@
-﻿using CodeM.FastApi.Common;
+﻿using CodeM.Common.Ioc;
+using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +33,7 @@ namespace CodeM.FastApi.Router
             mRouterConfig.Load(config, routerFile);
         }
 
-        private async Task _RequestHandler(HttpContext context,
+        private async Task _RequestHandlerAsync(HttpContext context,
             RouterConfig.RouterItem item, string handlerName)
         {
             ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
@@ -47,7 +48,7 @@ namespace CodeM.FastApi.Router
                 foreach (string middleware in middlewares)
                 {
                     string middlewareMethod = string.Concat(middleware, ".Request");
-                    await mMethodInvoker.InvokeAsync(middlewareMethod, cc,
+                    mMethodInvoker.Invoke(middlewareMethod, cc,
                         item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
 
                     _responseMiddlewares.Push(middleware);
@@ -60,7 +61,7 @@ namespace CodeM.FastApi.Router
 
                 if (!cc.Breaked)
                 {
-                    await mMethodInvoker.InvokeAsync(handlerName, cc,
+                    mMethodInvoker.Invoke(handlerName, cc,
                         item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
                 }
 
@@ -68,13 +69,13 @@ namespace CodeM.FastApi.Router
                 {
                     string middleware = _responseMiddlewares.Pop();
                     string middlewareMethod = string.Concat(middleware, ".Response");
-                    await mMethodInvoker.InvokeAsync(middlewareMethod, cc,
+                    mMethodInvoker.Invoke(middlewareMethod, cc,
                         item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
                 }
             }
             catch (Exception exp)
             {
-                if (await Utils.IsDevelopment())
+                if (Utils.IsDevelopment())
                 {
                     cc.State = 500;
                     await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
@@ -94,34 +95,36 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapGet(item.Path, async (context) =>
                 {
-                    await _RequestHandler(context, item, item.Handler);
+                    await _RequestHandlerAsync(context, item, item.Handler);
                 });
             }
             else if ("POST".Equals(method))
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
-                    await _RequestHandler(context, item, item.Handler);
+                    await _RequestHandlerAsync(context, item, item.Handler);
                 });
             }
             else if ("PUT".Equals(method))
             {
                 builder.MapPut(item.Path, async (context) =>
                 {
-                    await _RequestHandler(context, item, item.Handler);
+                    await _RequestHandlerAsync(context, item, item.Handler);
                 });
             }
             else if ("DELETE".Equals(method))
             {
                 builder.MapDelete(item.Path, async (context) =>
                 {
-                    await _RequestHandler(context, item, item.Handler);
+                    await _RequestHandlerAsync(context, item, item.Handler);
                 });
             }
         }
 
         private void _MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
+            object resouceInst = IocUtils.GetObject(item.Resource);
+
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))
             {
@@ -133,39 +136,54 @@ namespace CodeM.FastApi.Router
             }
 
             //增
-            builder.MapPost(item.Path, async (context) =>
+            if (Utils.IsMethodExists(resouceInst, "Create"))
             {
-                string handlerFullName = string.Concat(item.Resource, ".Create");
-                await _RequestHandler(context, item, handlerFullName);
-            });
+                builder.MapPost(item.Path, async (context) =>
+                {
+                    string handlerFullName = string.Concat(item.Resource, ".Create");
+                    await _RequestHandlerAsync(context, item, handlerFullName);
+                });
+            }
 
             //删
-            builder.MapDelete(individualPath, async (context) =>
+            if (Utils.IsMethodExists(resouceInst, "Delete"))
             {
-                string handlerFullName = string.Concat(item.Resource, ".Delete");
-                await _RequestHandler(context, item, handlerFullName);
-            });
+                builder.MapDelete(individualPath, async (context) =>
+                {
+                    string handlerFullName = string.Concat(item.Resource, ".Delete");
+                    await _RequestHandlerAsync(context, item, handlerFullName);
+                });
+            }
 
             //改
-            builder.MapPut(individualPath, async (context) =>
+            if (Utils.IsMethodExists(resouceInst, "Update"))
             {
-                string handlerFullName = string.Concat(item.Resource, ".Update");
-                await _RequestHandler(context, item, handlerFullName);
-            });
+                builder.MapPut(individualPath, async (context) =>
+                {
+                    string handlerFullName = string.Concat(item.Resource, ".Update");
+                    await _RequestHandlerAsync(context, item, handlerFullName);
+                });
+            }
 
             //查（列表）
-            builder.MapGet(item.Path, async (context) =>
+            if (Utils.IsMethodExists(resouceInst, "List"))
             {
-                string handlerFullName = string.Concat(item.Resource, ".List");
-                await _RequestHandler(context, item, handlerFullName);
-            });
+                builder.MapGet(item.Path, async (context) =>
+                {
+                    string handlerFullName = string.Concat(item.Resource, ".List");
+                    await _RequestHandlerAsync(context, item, handlerFullName);
+                });
+            }
 
             //查（个体）
-            builder.MapGet(individualPath, async (context) =>
+            if (Utils.IsMethodExists(resouceInst, "Detail"))
             {
-                string handlerFullName = string.Concat(item.Resource, ".Detail");
-                await _RequestHandler(context, item, handlerFullName);
-            });
+                builder.MapGet(individualPath, async (context) =>
+                {
+                    string handlerFullName = string.Concat(item.Resource, ".Detail");
+                    await _RequestHandlerAsync(context, item, handlerFullName);
+                });
+            }
         }
 
         private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)

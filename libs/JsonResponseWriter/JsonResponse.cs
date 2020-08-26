@@ -15,7 +15,7 @@ namespace CodeM.FastApi.Context
             }
         }
 
-        public static async Task Json(this ControllerContext cc, object _data = null)
+        public static async Task JsonAsync(this ControllerContext cc, object _data = null)
         {
             CheckContentType(cc.Response);
 
@@ -27,7 +27,7 @@ namespace CodeM.FastApi.Context
             await cc.Response.WriteAsync(result);
         }
 
-        public static async Task Json(this ControllerContext cc, int _code, object _data= null)
+        public static async Task JsonAsync(this ControllerContext cc, int _code, object _data= null)
         {
             CheckContentType(cc.Response);
 

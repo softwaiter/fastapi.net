@@ -1,22 +1,42 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace CodeM.FastApi.Common
 {
     public static class Utils
     {
-        private static bool mIsDevelopmentChecked = false;
-        private static bool mIsDevelopment = false;
-        public static async Task<bool> IsDevelopment()
+        private static bool sIsDevelopmentChecked = false;
+        private static bool sIsDevelopment = false;
+        public static bool IsDevelopment()
         {
-            if (!mIsDevelopmentChecked)
+            if (!sIsDevelopmentChecked)
             {
                 string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                mIsDevelopment = "Development".Equals(env, StringComparison.OrdinalIgnoreCase);
-                mIsDevelopmentChecked = true;
+                sIsDevelopment = "Development".Equals(env, StringComparison.OrdinalIgnoreCase);
+                sIsDevelopmentChecked = true;
             }
-            await Task.CompletedTask;
-            return mIsDevelopment;
+            return sIsDevelopment;
+        }
+
+        private static Dictionary<string, bool> sTypeMethods = new Dictionary<string, bool>();
+        public static bool IsMethodExists(Type _typ, string method)
+        {
+            string key = string.Concat(_typ.FullName, "`", method);
+            if (!sTypeMethods.ContainsKey(key))
+            {
+                MethodInfo mi = _typ.GetMethod(method,
+                    BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.Static | BindingFlags.IgnoreCase);
+                sTypeMethods[key] = mi != null;
+            }
+            return sTypeMethods[key];
+        }
+
+        public static bool IsMethodExists(object obj, string method)
+        {
+            Type _typ = obj.GetType();
+            return IsMethodExists(_typ, method);
         }
     }
 }
