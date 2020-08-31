@@ -1,5 +1,6 @@
 using CodeM.Common.Tools.Config;
 using CodeM.FastApi.Config;
+using CodeM.FastApi.Logger;
 using CodeM.FastApi.Router;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,8 @@ namespace CodeM.FastApi
     {
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory factory)
         {
+            LogUtils.Init(factory);
+
             AppConfig appConfig = new AppConfig();
 
             IConfigurationBuilder builder = new ConfigurationBuilder()
