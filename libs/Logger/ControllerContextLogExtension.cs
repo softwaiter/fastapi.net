@@ -1,7 +1,8 @@
 ﻿using CodeM.FastApi.Logger;
+using System;
 
 namespace CodeM.FastApi.Context
-{ 
+{
     public static class ControllerContextLogExtension
     {
 
@@ -29,10 +30,22 @@ namespace CodeM.FastApi.Context
             LogUtils.Warn(callerName, message, args);
         }
 
+        public static void Warn(this ControllerContext cc, Exception exp)
+        {
+            string callerName = LogUtils.GetCallerName(1);
+            LogUtils.Warn(callerName, exp);
+        }
+
         public static void Error(this ControllerContext cc, string message, params object[] args)
         {
             string callerName = LogUtils.GetCallerName(1);
             LogUtils.Error(callerName, message, args);
+        }
+
+        public static void Error(this ControllerContext cc, Exception exp)
+        {
+            string callerName = LogUtils.GetCallerName(1);
+            LogUtils.Error(callerName, exp);
         }
 
         /// <summary>
@@ -44,6 +57,12 @@ namespace CodeM.FastApi.Context
         {
             string callerName = LogUtils.GetCallerName(1);
             LogUtils.Fatal(callerName, message, args);
+        }
+
+        public static void Fatal(this ControllerContext cc, Exception exp)
+        {
+            string callerName = LogUtils.GetCallerName(1);
+            LogUtils.Fatal(callerName, exp);
         }
 
     }

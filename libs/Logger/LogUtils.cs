@@ -108,6 +108,19 @@ namespace CodeM.FastApi.Logger
             Warn(callerName, message, args);
         }
 
+        public static void Warn(string tag, Exception exp)
+        {
+            _CheckInit();
+            ILogger logger = _GetLogger(tag);
+            logger.LogWarning(exp, string.Empty);
+        }
+
+        public static void Warn(Exception exp)
+        {
+            string callerName = GetCallerName(1);
+            Warn(callerName, exp);
+        }
+
         public static void Error(string tag, string message, params object[] args)
         {
             _CheckInit();
@@ -119,6 +132,19 @@ namespace CodeM.FastApi.Logger
         {
             string callerName = GetCallerName(1);
             Error(callerName, message, args);
+        }
+
+        public static void Error(string tag, Exception exp)
+        {
+            _CheckInit();
+            ILogger logger = _GetLogger(tag);
+            logger.LogError(exp, string.Empty);
+        }
+
+        public static void Error(Exception exp)
+        {
+            string callerName = GetCallerName(1);
+            Error(callerName, exp);
         }
 
         /// <summary>
@@ -145,5 +171,17 @@ namespace CodeM.FastApi.Logger
             Fatal(callerName, message, args);
         }
 
+        public static void Fatal(string tag, Exception exp)
+        {
+            _CheckInit();
+            ILogger logger = _GetLogger(tag);
+            logger.LogCritical(exp, string.Empty);
+        }
+
+        public static void Fatal(Exception exp)
+        {
+            string callerName = GetCallerName(1);
+            Fatal(callerName, exp);
+        }
     }
 }

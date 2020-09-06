@@ -90,8 +90,8 @@ namespace CodeM.FastApi.Router
                         string include = nodeInfo.GetAttribute("include");
                         if (!string.IsNullOrWhiteSpace(include))
                         {
-                            include = include.Replace("/", "\\");
-                            if (include.StartsWith("\\"))
+                            include = include.Replace('/', Path.DirectorySeparatorChar);
+                            if (include.StartsWith(Path.DirectorySeparatorChar))
                             {
                                 include = include.Substring(1);
                             }

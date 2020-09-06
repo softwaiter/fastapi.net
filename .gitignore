@@ -29,3 +29,5 @@ bld/
 fastapi.db
 
 PublishProfiles/
+
+logs/

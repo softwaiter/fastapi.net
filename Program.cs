@@ -13,11 +13,15 @@ namespace CodeM.FastApi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureLogging((logging) =>
+                .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.ClearProviders();
-                    logging.AddDebug();
-                    logging.AddConsole();
+                    if (hostingContext.HostingEnvironment.IsDevelopment())
+                    {
+                        logging.AddDebug();
+                        logging.AddConsole();
+                    }
+                    logging.AddFile();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
