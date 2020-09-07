@@ -59,6 +59,27 @@ namespace CodeM.FastApi.Context.Params
             return false;
         }
 
+        public string Get(string key, string defaultValue)
+        {
+            if (ContainsKey(key))
+            {
+                return this[key];
+            }
+            return defaultValue;
+        }
+
+        public string Get(int index, string defaultValue)
+        {
+            if (mForm != null)
+            {
+                if (index >= 0 && index < mForm.Count)
+                {
+                    return this[index];
+                }
+            }
+            return defaultValue;
+        }
+
         public int Count
         {
             get
