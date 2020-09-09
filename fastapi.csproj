@@ -11,12 +11,16 @@
 
     <ItemGroup>
         <Compile Remove="libs\**" />
+        <Compile Remove="logs\**" />
         <Compile Remove="Properties\PublishProfiles\**" />
         <Content Remove="libs\**" />
+        <Content Remove="logs\**" />
         <Content Remove="Properties\PublishProfiles\**" />
         <EmbeddedResource Remove="libs\**" />
+        <EmbeddedResource Remove="logs\**" />
         <EmbeddedResource Remove="Properties\PublishProfiles\**" />
         <None Remove="libs\**" />
+        <None Remove="logs\**" />
         <None Remove="Properties\PublishProfiles\**" />
     </ItemGroup>
 
@@ -24,6 +28,7 @@
         <Content Include=".\**\*.xml" CopyToPublishDirectory="PreserveNewest" />
         <Content Remove="bin\**"></Content>
         <Content Remove="obj\**"></Content>
+        <EntityDeploy Remove="logs\**" />
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <None Remove="fastapi.db" />
     </ItemGroup>

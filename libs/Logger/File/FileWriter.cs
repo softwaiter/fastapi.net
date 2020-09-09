@@ -34,7 +34,7 @@ namespace CodeM.FastApi.Logger.File
         /// <summary>
         /// 日志方式分割类型
         /// </summary>
-        public static SplitType SplitType { get; set; } = SplitType.Size;
+        public static SplitType SplitType { get; set; } = SplitType.None;
 
         /// <summary>
         /// 日志最大备份文件数（），默认保留10个最近的日志文件；如果设置为0，则保留所有日志文件（注意空间占用问题）
@@ -79,6 +79,11 @@ namespace CodeM.FastApi.Logger.File
                     TimeSpan diffDay = nextDay2 - nowDay;
                     if (Math.Abs(diffDay.TotalSeconds) < 2)
                     {
+                        DateTime deleteDay = nowDay.AddHours(-MaxFileBackups);
+                        string deleteFile = Path.Combine(FilePath,
+                            string.Concat(FileShortName.Substring(0, FileShortName.Length - FileExtension.Length), "_", deleteDay.ToString("yyyy-MM-dd"), FileExtension));
+                        System.IO.File.Delete(deleteFile);
+
                         string destFile = Path.Combine(FilePath,
                             string.Concat(FileShortName.Substring(0, FileShortName.Length - FileExtension.Length), "_", nowDay.ToString("yyyy-MM-dd"), FileExtension));
                         System.IO.File.Move(FileFullName, destFile, true);
@@ -92,6 +97,11 @@ namespace CodeM.FastApi.Logger.File
                     TimeSpan diffHour = nextHour2 - nowHour;
                     if (Math.Abs(diffHour.TotalSeconds) < 2)
                     {
+                        DateTime deleteHour = nowHour.AddHours(-MaxFileBackups);
+                        string deleteFile = Path.Combine(FilePath,
+                            string.Concat(FileShortName.Substring(0, FileShortName.Length - FileExtension.Length), "_", deleteHour.ToString("yyyy-MM-dd-HH"), FileExtension));
+                        System.IO.File.Delete(deleteFile);
+
                         string destFile = Path.Combine(FilePath,
                             string.Concat(FileShortName.Substring(0, FileShortName.Length - FileExtension.Length), "_", nowHour.ToString("yyyy-MM-dd-HH"), FileExtension));
                         System.IO.File.Move(FileFullName, destFile, true);
