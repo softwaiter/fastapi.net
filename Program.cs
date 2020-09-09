@@ -1,3 +1,4 @@
+using CodeM.FastApi.Logger.File;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,8 @@ namespace CodeM.FastApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
                 {
+                    InitApp(hostingContext);
+
                     logging.ClearProviders();
                     if (hostingContext.HostingEnvironment.IsDevelopment())
                     {
@@ -27,5 +30,12 @@ namespace CodeM.FastApi
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        private static void InitApp(HostBuilderContext hostingContext)
+        {
+            FileWriter.InitConfig(hostingContext.Configuration);
+        }
+
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text;
@@ -47,6 +48,47 @@ namespace CodeM.FastApi.Logger.File
         public static int MaxFileSize { get; set; } = 2 * 1024 * 1024;
 
         private static ConcurrentQueue<string> sLogs = new ConcurrentQueue<string>();
+
+        public static void InitConfig(IConfiguration config)
+        {
+            IConfigurationSection options = config.GetSection("Logging").GetSection("File").GetSection("Options");
+            if (options != null)
+            {
+                string fileName = options.GetValue<string>("FileName", null);
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    FileName = fileName;
+                }
+
+                string splitType = options.GetValue<string>("SplitType", null);
+                if (!string.IsNullOrEmpty(splitType))
+                {
+                    SplitType stResult;
+                    if (Enum.TryParse<SplitType>(splitType, out stResult))
+                    {
+                        SplitType = stResult;
+                    }
+                }
+
+                int? maxFileSize = options.GetValue<int?>("MaxFileSize", null);
+                if (maxFileSize != null)
+                {
+                    MaxFileSize = (int)maxFileSize;
+                }
+
+                int? maxFileBackups = options.GetValue<int?>("MaxFileBackups", null);
+                if (maxFileBackups != null)
+                {
+                    MaxFileBackups = (int)maxFileBackups;
+                }
+
+                string encoding = options.GetValue<string>("Encoding", null);
+                if (!string.IsNullOrEmpty(encoding))
+                {
+                    FileEncoding = Encoding.GetEncoding(encoding);
+                }
+            }
+        }
 
         private static void Init()
         {
