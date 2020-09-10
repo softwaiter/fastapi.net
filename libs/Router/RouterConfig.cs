@@ -1,4 +1,5 @@
-﻿using CodeM.Common.Tools.Xml;
+﻿using CodeM.Common.Orm;
+using CodeM.Common.Tools.Xml;
 using CodeM.FastApi.Config;
 using System;
 using System.Collections.Generic;
@@ -169,6 +170,11 @@ namespace CodeM.FastApi.Router
                                 throw new Exception("model属性不能为空。 " + file + " - Line " + nodeInfo.Line);
                             }
                             item.Model = model.Trim().ToLower();
+
+                            if (!OrmUtils.IsDefind(item.Model))
+                            {
+                                throw new Exception("指定model未定义。" + file + " - Line " + nodeInfo.Line);
+                            }
                         }
                         if (!string.IsNullOrWhiteSpace(item.Method) &&
                             !string.IsNullOrWhiteSpace(item.Model))

@@ -1,7 +1,9 @@
+using CodeM.Common.Orm;
 using CodeM.FastApi.Logger.File;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace CodeM.FastApi
 {
@@ -33,7 +35,13 @@ namespace CodeM.FastApi
 
         private static void InitApp(HostBuilderContext hostingContext)
         {
+            //日志文件写入器初始化
             FileWriter.InitConfig(hostingContext.Configuration);
+
+            //ORM模型库初始化
+            OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
+            OrmUtils.Load();
+            OrmUtils.CreateTables();
         }
 
     }
