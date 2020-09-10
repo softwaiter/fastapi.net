@@ -53,13 +53,13 @@ namespace CodeM.FastApi.Router
 
                     _responseMiddlewares.Push(middleware);
 
-                    if (cc.Breaked)
+                    if (cc.RequestBreaked)
                     {
                         break;
                     }
                 }
 
-                if (!cc.Breaked)
+                if (!cc.RequestBreaked)
                 {
                     mMethodInvoker.Invoke(handlerName, cc,
                         item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
