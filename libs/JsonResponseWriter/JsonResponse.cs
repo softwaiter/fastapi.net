@@ -22,21 +22,9 @@ namespace CodeM.FastApi.Context
 
             string result = JsonFormatter.SerializeObject(new
             {
-                code = 0,   //code默认为0，代表成功
-                data = _data,
-                error = string.Empty
-            });
-            await cc.Response.WriteAsync(result);
-        }
-
-        public static async Task JsonAsync(this ControllerContext cc, Exception _exp)
-        {
-            CheckContentType(cc.Response);
-
-            string result = JsonFormatter.SerializeObject(new
-            {
-                code = -1,  //code默认为-1，代表出错
-                error = _exp.Message
+                code = _data is Exception ? -1 : 0,   //0，成功；-1：失败
+                data = _data is Exception ? null : _data,
+                error = _data is Exception ? (_data as Exception).Message : null
             });
             await cc.Response.WriteAsync(result);
         }
