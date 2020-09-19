@@ -1,4 +1,5 @@
-﻿using CodeM.FastApi.Config;
+﻿using CodeM.Common.Tools.Json;
+using CodeM.FastApi.Config;
 using CodeM.FastApi.Context.Params;
 using CodeM.FastApi.Context.Wrappers;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ namespace CodeM.FastApi.Context
         private QueryParams mQueryParams = null;
         private string mPostContent = null;
         private PostForms mPostForms = null;
+        private dynamic mPostJson = null;
         private CookieWrapper mCookies = null;
 
         public static ControllerContext FromHttpContext(HttpContext context, AppConfig config)
@@ -139,6 +141,24 @@ namespace CodeM.FastApi.Context
                     }
                 }
                 return mPostForms;
+            }
+        }
+
+        public dynamic PostJson
+        {
+            get
+            {
+                if (mPostJson == null && mContext != null)
+                {
+                    if (mContext.Request != null && ("" + mContext.Request.ContentType).ToLower().Contains("json"))
+                    {
+                        if (!string.IsNullOrEmpty(PostContent))
+                        {
+                            mPostJson = new Json2Dynamic().Parse(PostContent);
+                        }
+                    }
+                }
+                return mPostJson;
             }
         }
 
