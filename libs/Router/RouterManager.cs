@@ -1,4 +1,5 @@
 ﻿using CodeM.Common.Ioc;
+using CodeM.Common.Orm;
 using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Router
@@ -186,9 +188,190 @@ namespace CodeM.FastApi.Router
             }
         }
 
+        private string _GetParamValue(ControllerContext cc, string name)
+        {
+            if (cc.PostJson != null && cc.PostJson.Has(name))
+            {
+                object result;
+                if (cc.PostJson.TryGetValue(name, out result))
+                {
+                    return "" + result;
+                }
+            }
+
+            if (cc.PostForms != null && cc.PostForms.ContainsKey(name))
+            {
+                return cc.PostForms[name];
+            }
+
+            return cc.QueryParams[name];
+        }
+
+        private async Task _CreateAndSaveModel(ControllerContext cc, RouterConfig.RouterItem item)
+        {
+            try
+            {
+                Model m = OrmUtils.Model(item.Model);
+                dynamic obj = m.NewObject();
+
+                int count = m.PropertyCount;
+                for (int i = 0; i < count; i++)
+                {
+                    Property p = m.GetProperty(i);
+                    if (!p.AutoIncrement)
+                    {
+                        string v = _GetParamValue(cc, p.Name);
+                        if (v != null)
+                        {
+                            obj.SetValue(p.Name, v);
+                        }
+                    }
+                }
+
+                m.SetValues(obj).Save(true);
+
+                await cc.JsonAsync();
+            }
+            catch (Exception exp)
+            {
+                await cc.JsonAsync(exp);
+            }
+        }
+
+        private Regex mReOP = new Regex(">=|<=|<>|!=|>|<|=");
+        //TODO  Like NotLike IsNull IsNotNull  In  NotIn
+
+        private async Task _QueryModelList(ControllerContext cc, RouterConfig.RouterItem item)
+        {
+            int pagesize = 100;
+            int.TryParse(cc.QueryParams.Get("pagesize", "100"), out pagesize);
+
+            int pageindex = 1;
+            int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
+
+            SubFilter filter = new SubFilter();
+            string where = cc.QueryParams.Get("where", null);
+            if (!string.IsNullOrEmpty(where))
+            {
+                string[] subWheres = where.Split(",");
+                foreach (string expr in subWheres)
+                {
+                    Match mc= mReOP.Match(expr);
+                    if (mc.Success)
+                    {
+                        string name = expr.Substring(0, mc.Index);
+                        string value = expr.Substring(mc.Index + mc.Length);
+                        switch (mc.Value)
+                        {
+                            case ">=":
+                                filter.Gte(name, value);
+                                break;
+                            case "<=":
+                                filter.Lte(name, value);
+                                break;
+                            case "<>":
+                            case "!=":
+                                filter.NotEquals(name, value);
+                                break;
+                            case ">":
+                                filter.Gt(name, value);
+                                break;
+                            case "<":
+                                filter.Lt(name, value);
+                                break;
+                            case "=":
+                                filter.Equals(name, value);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception(string.Concat("不识别的查询条件：where=", expr));
+                    }
+                }
+            }
+
+            Model m = OrmUtils.Model(item.Model);
+
+            long total = -1;
+
+            bool getTotal = false;
+            bool.TryParse(cc.QueryParams.Get("gettotal", "false"), out getTotal);
+            if (getTotal)
+            {
+                total = m.And(filter).Count();
+            }
+
+            string sort = cc.QueryParams.Get("sort", null);
+            if (!string.IsNullOrEmpty(sort))
+            {
+                string[] subSorts = sort.Split(",");
+                foreach (string ss in subSorts)
+                {
+                    string sItem = ss.ToLower();
+                    if (sItem.EndsWith("_desc"))
+                    {
+                        m.DescendingSort(sItem.Substring(0, sItem.Length - 5));
+                    }
+                    else if (sItem.EndsWith("_asc"))
+                    {
+                        m.AscendingSort(sItem.Substring(0, sItem.Length - 4));
+                    }
+                    else
+                    {
+                        m.AscendingSort(sItem);
+                    }
+                }
+            }
+            
+            List<dynamic> result = m.And(filter).PageSize(pagesize).PageIndex(pageindex).Query();
+            await cc.JsonAsync(new
+            {
+                result = result,
+                total = total
+            });
+        }
+
         private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             //TODO
+            string individualPath = item.Path;
+            if (individualPath.EndsWith("/"))
+            {
+                individualPath += "{id}";
+            }
+            else
+            {
+                individualPath += "/{id}";
+            }
+
+            //新建
+            builder.MapPost(item.Path, async (context) =>
+            {
+                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
+                try
+                {
+                    await _CreateAndSaveModel(cc, item);
+                }
+                catch (Exception exp)
+                {
+                    await cc.JsonAsync(exp);
+                }
+            });
+
+            //查列表
+            builder.MapGet(item.Path, async (context) =>
+            {
+                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
+                try
+                {
+                    await _QueryModelList(cc, item);
+                }
+                catch (Exception exp)
+                {
+                    await cc.JsonAsync(exp);
+                }
+            });
         }
 
         private void _MountRouters(RouterConfig.RouterItem item, RouteBuilder builder)

@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodeM.Common.Ioc" Version="1.0.1" />
-    <PackageReference Include="CodeM.Common.Orm" Version="1.0.0" />
+    <PackageReference Include="CodeM.Common.Orm" Version="1.0.1" />
     <PackageReference Include="CodeM.Common.Tools" Version="1.0.3" />
   </ItemGroup>
 
