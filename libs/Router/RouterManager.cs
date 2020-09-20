@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Router
@@ -332,6 +333,34 @@ namespace CodeM.FastApi.Router
             });
         }
 
+        private async Task _QueryModelDetail(ControllerContext cc, RouterConfig.RouterItem item)
+        {
+            Model m = OrmUtils.Model(item.Model);
+
+            string id = cc.RouteParams["id"];
+            string[] ids = id.Split("|");
+            if (ids.Length != m.PrimaryKeyCount)
+            {
+                throw new Exception("无效的参数。");
+            }
+
+            for (int i = 0; i < m.PrimaryKeyCount; i++)
+            {
+                Property p = m.GetPrimaryKey(i);
+                m.Equals(p.Name, ids[i]);
+            }
+
+            object detailObj = null;
+
+            List<dynamic> result = m.Top(1).Query();
+            if (result.Count > 0)
+            {
+                detailObj = result[0];
+            }
+
+            await cc.JsonAsync(detailObj);
+        }
+
         private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             //TODO
@@ -366,6 +395,20 @@ namespace CodeM.FastApi.Router
                 try
                 {
                     await _QueryModelList(cc, item);
+                }
+                catch (Exception exp)
+                {
+                    await cc.JsonAsync(exp);
+                }
+            });
+
+            //查详情
+            builder.MapGet(individualPath, async (context) =>
+            {
+                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
+                try
+                {
+                    await _QueryModelDetail(cc, item);
                 }
                 catch (Exception exp)
                 {
