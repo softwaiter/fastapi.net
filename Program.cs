@@ -1,8 +1,12 @@
 using CodeM.Common.Orm;
+using CodeM.FastApi.Logger;
 using CodeM.FastApi.Logger.File;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace CodeM.FastApi
@@ -18,8 +22,6 @@ namespace CodeM.FastApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
                 {
-                    InitApp(hostingContext);
-
                     logging.ClearProviders();
                     if (hostingContext.HostingEnvironment.IsDevelopment())
                     {
@@ -27,6 +29,11 @@ namespace CodeM.FastApi
                         logging.AddConsole();
                     }
                     logging.AddFile();
+
+                    ILoggerFactory factory = logging.Services.BuildServiceProvider().GetService<ILoggerFactory>();
+                    LogUtils.Init(factory);
+
+                    InitApp(hostingContext);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -35,13 +42,21 @@ namespace CodeM.FastApi
 
         private static void InitApp(HostBuilderContext hostingContext)
         {
-            //日志文件写入器初始化
-            FileWriter.InitConfig(hostingContext.Configuration);
+            try
+            {
+                //日志文件写入器初始化
+                FileWriter.InitConfig(hostingContext.Configuration);
 
-            //ORM模型库初始化
-            OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
-            OrmUtils.Load();
-            OrmUtils.CreateTables();
+                //ORM模型库初始化
+                OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
+                OrmUtils.Load();
+                OrmUtils.CreateTables();
+            }
+            catch (Exception exp)
+            {
+                LogUtils.Fatal(exp);
+                Process.GetCurrentProcess().Kill();
+            }
         }
 
     }

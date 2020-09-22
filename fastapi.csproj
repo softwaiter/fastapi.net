@@ -31,10 +31,20 @@
         <EntityDeploy Remove="logs\**" />
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <None Remove="fastapi.db" />
+        <None Remove="models\feature.model.xml" />
+        <None Remove="models\organization.model.xml" />
+        <None Remove="models\permission.model.xml" />
+        <None Remove="models\production.model.xml" />
+        <None Remove="models\role.model.xml" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="models\.connection.xml" />
+      <Content Include="models\feature.model.xml" />
+      <Content Include="models\organization.model.xml" />
+      <Content Include="models\permission.model.xml" />
+      <Content Include="models\production.model.xml" />
+      <Content Include="models\role.model.xml" />
       <Content Include="models\user.model.xml" />
     </ItemGroup>
 

@@ -384,7 +384,15 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    await cc.JsonAsync(exp);
+                    if (Utils.IsDevelopment())
+                    {
+                        cc.State = 500;
+                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
             });
 
@@ -398,7 +406,15 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    await cc.JsonAsync(exp);
+                    if (Utils.IsDevelopment())
+                    {
+                        cc.State = 500;
+                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
             });
 
@@ -412,9 +428,22 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    await cc.JsonAsync(exp);
+                    if (Utils.IsDevelopment())
+                    {
+                        cc.State = 500;
+                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
             });
+
+            //builder.MapDelete(individualPath, async (context) =>
+            //{
+
+            //});
         }
 
         private void _MountRouters(RouterConfig.RouterItem item, RouteBuilder builder)

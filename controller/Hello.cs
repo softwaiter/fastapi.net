@@ -8,6 +8,7 @@ namespace CodeM.FastApi.Controller
 
         public async Task Handle(ControllerContext cc)
         {
+            throw new System.Exception("asdfasdf");
             await cc.JsonAsync("Hello World.");
         }
 
