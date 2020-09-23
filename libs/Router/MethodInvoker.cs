@@ -3,6 +3,7 @@ using CodeM.FastApi.Common;
 using CodeM.FastApi.Context;
 using System;
 using System.Collections.Concurrent;
+using System.Dynamic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +17,6 @@ namespace CodeM.FastApi.Router
 
         ConcurrentDictionary<string, int> mHandlerCounters = new ConcurrentDictionary<string, int>();
         ConcurrentDictionary<string, int> mHandlerExecNumbers = new ConcurrentDictionary<string, int>();
-
-        long mAllHandlerCounter = 0;    //全部请求处理器计数，总阀门控制
 
         private ConcurrentStack<object> _GetHandlerStack(string handlerFullName)
         {
@@ -172,64 +171,49 @@ namespace CodeM.FastApi.Router
 
             object result = null;
 
-            if (Interlocked.Increment(ref mAllHandlerCounter) <= cc.Config.Router.MaxConcurrentTotal)
+            object handlerInst = _GetHandler(handlerFullName, maxConcurrent);
+            if (handlerInst != null)
             {
                 try
                 {
-                    object handlerInst = _GetHandler(handlerFullName, maxConcurrent);
-                    if (handlerInst != null)
+                    Type handlerType = handlerInst.GetType();
+
+                    if (ignoreMethodNotExists && !Utils.IsMethodExists(handlerType, handlerMethod))
                     {
-                        try
+                        return null;
+                    }
+
+                    result = handlerType.InvokeMember(handlerMethod,
+                        BindingFlags.IgnoreCase | BindingFlags.Public | 
+                        BindingFlags.Instance | BindingFlags.InvokeMethod,
+                        null, handlerInst, new object[] { cc });
+
+                    if (Utils.IsDevelopment())
+                    {
+                        Type _resultTyp = result.GetType();
+                        if (_resultTyp.IsGenericType)
                         {
-                            Type handlerType = handlerInst.GetType();
-
-                            if (ignoreMethodNotExists && !Utils.IsMethodExists(handlerType, handlerMethod))
+                            if (_resultTyp.GetGenericTypeDefinition() == typeof(Task<>))
                             {
-                                return null;
-                            }
-
-                            result = handlerType.InvokeMember(handlerMethod,
-                                BindingFlags.IgnoreCase | BindingFlags.Public | 
-                                BindingFlags.Instance | BindingFlags.InvokeMethod,
-                                null, handlerInst, new object[] { cc });
-
-                            if (Utils.IsDevelopment())
-                            {
-                                Type _resultTyp = result.GetType();
-                                if (_resultTyp.IsGenericType)
+                                Task _taskResult = (Task)result;
+                                if (_taskResult.Exception != null)
                                 {
-                                    if (_resultTyp.GetGenericTypeDefinition() == typeof(Task<>))
-                                    {
-                                        Task _taskResult = (Task)result;
-                                        if (_taskResult.Exception != null)
-                                        {
-                                            throw _taskResult.Exception;
-                                        }
-                                    }
+                                    throw _taskResult.Exception;
                                 }
                             }
+                        }
+                    }
 
-                            _IncHandlerExecNum(handlerInst);
-                        }
-                        finally
-                        {
-                            _ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception(string.Concat("Router busy(", cc.Request.Path, ")"));
-                    }
+                    _IncHandlerExecNum(handlerInst);
                 }
                 finally
                 {
-                    Interlocked.Decrement(ref mAllHandlerCounter);
+                    _ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
                 }
             }
             else
             {
-                Interlocked.Decrement(ref mAllHandlerCounter);
-                throw new Exception("System busy.");
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
             }
 
             return result;

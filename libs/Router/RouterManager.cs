@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -36,58 +37,83 @@ namespace CodeM.FastApi.Router
             mRouterConfig.Load(config, routerFile);
         }
 
-        private async Task _RequestHandlerAsync(HttpContext context,
-            RouterConfig.RouterItem item, string handlerName)
+        private delegate Task ControllerInvokeDelegate(ControllerContext cc, RouterConfig.RouterItem item, params object[] args);
+
+        private long mAllHandlerCounter = 0;    //全部请求处理器计数，总阀门控制
+        private async Task _ThroughRequestPipelineAsync(ControllerInvokeDelegate ControllerDelegate, 
+            HttpContext context, RouterConfig.RouterItem item, params object[] args)
         {
-            ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
-
-            try
+            if (Interlocked.Increment(ref mAllHandlerCounter) <= mAppConfig.Router.MaxConcurrentTotal)
             {
-                Stack<string> _responseMiddlewares = new Stack<string>();
+                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
 
-                List<string> middlewares = new List<string>();
-                middlewares.AddRange(mAppConfig.Middlewares);
-                middlewares.AddRange(item.Middlewares);
-                foreach (string middleware in middlewares)
+                try
                 {
-                    string middlewareMethod = string.Concat(middleware, ".Request");
-                    mMethodInvoker.Invoke(middlewareMethod, cc,
-                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
+                    Stack<string> _responseMiddlewares = new Stack<string>();
 
-                    _responseMiddlewares.Push(middleware);
-
-                    if (cc.RequestBreaked)
+                    List<string> middlewares = new List<string>();
+                    middlewares.AddRange(mAppConfig.Middlewares);
+                    middlewares.AddRange(item.Middlewares);
+                    foreach (string middleware in middlewares)
                     {
-                        break;
+                        string middlewareMethod = string.Concat(middleware, ".Request");
+                        mMethodInvoker.Invoke(middlewareMethod, cc,
+                            int.MaxValue, mAppConfig.Router.MaxIdlePerRouter,
+                            mAppConfig.Router.MaxInvokePerInstance, true);
+
+                        _responseMiddlewares.Push(middleware);
+
+                        if (cc.RequestBreaked)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (!cc.RequestBreaked)
+                    {
+                        await ControllerDelegate(cc, item, args);
+                    }
+
+                    while (_responseMiddlewares.Count > 0)
+                    {
+                        string middleware = _responseMiddlewares.Pop();
+                        string middlewareMethod = string.Concat(middleware, ".Response");
+                        mMethodInvoker.Invoke(middlewareMethod, cc,
+                            int.MaxValue, mAppConfig.Router.MaxIdlePerRouter,
+                            mAppConfig.Router.MaxInvokePerInstance, true);
                     }
                 }
-
-                if (!cc.RequestBreaked)
+                catch (Exception exp)
                 {
-                    mMethodInvoker.Invoke(handlerName, cc,
-                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
+                    if (Utils.IsDevelopment())
+                    {
+                        cc.State = 500;
+                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
-
-                while (_responseMiddlewares.Count > 0)
+                finally
                 {
-                    string middleware = _responseMiddlewares.Pop();
-                    string middlewareMethod = string.Concat(middleware, ".Response");
-                    mMethodInvoker.Invoke(middlewareMethod, cc,
-                        item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance, true);
+                    Interlocked.Decrement(ref mAllHandlerCounter);
                 }
             }
-            catch (Exception exp)
+            else
             {
-                if (Utils.IsDevelopment())
-                {
-                    cc.State = 500;
-                    await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
-                }
-                else
-                {
-                    throw exp;
-                }
+                Interlocked.Decrement(ref mAllHandlerCounter);
+                throw new Exception("System busy.");
             }
+        }
+
+
+        private async Task _DefaultRouterHandlerAsync(ControllerContext cc,
+            RouterConfig.RouterItem item, params object[] args)
+        {
+            mMethodInvoker.Invoke(args[0] + "", cc,
+                item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
+            await Task.CompletedTask;
         }
 
         private void _MountSingleHandler(RouterConfig.RouterItem item, RouteBuilder builder)
@@ -98,32 +124,41 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapGet(item.Path, async (context) =>
                 {
-                    await _RequestHandlerAsync(context, item, item.Handler);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync), 
+                        context, item, item.Handler);
                 });
             }
             else if ("POST".Equals(method))
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
-                    await _RequestHandlerAsync(context, item, item.Handler);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, item.Handler);
                 });
             }
             else if ("PUT".Equals(method))
             {
                 builder.MapPut(item.Path, async (context) =>
                 {
-                    await _RequestHandlerAsync(context, item, item.Handler);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, item.Handler);
                 });
             }
             else if ("DELETE".Equals(method))
             {
                 builder.MapDelete(item.Path, async (context) =>
                 {
-                    await _RequestHandlerAsync(context, item, item.Handler);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, item.Handler);
                 });
             }
         }
 
+        #region Resource Router
         private void _MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             object resouceInst = IocUtils.GetObject(item.Resource);
@@ -144,7 +179,9 @@ namespace CodeM.FastApi.Router
                 builder.MapPost(item.Path, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Create");
-                    await _RequestHandlerAsync(context, item, handlerFullName);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, handlerFullName);
                 });
             }
 
@@ -154,7 +191,9 @@ namespace CodeM.FastApi.Router
                 builder.MapDelete(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Delete");
-                    await _RequestHandlerAsync(context, item, handlerFullName);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, handlerFullName);
                 });
             }
 
@@ -164,7 +203,9 @@ namespace CodeM.FastApi.Router
                 builder.MapPut(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Update");
-                    await _RequestHandlerAsync(context, item, handlerFullName);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, handlerFullName);
                 });
             }
 
@@ -174,7 +215,9 @@ namespace CodeM.FastApi.Router
                 builder.MapGet(item.Path, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".List");
-                    await _RequestHandlerAsync(context, item, handlerFullName);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, handlerFullName);
                 });
             }
 
@@ -184,10 +227,16 @@ namespace CodeM.FastApi.Router
                 builder.MapGet(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Detail");
-                    await _RequestHandlerAsync(context, item, handlerFullName);
+                    await _ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                        context, item, handlerFullName);
                 });
             }
         }
+
+        #endregion
+
+        #region Model Router
 
         private string _GetParamValue(ControllerContext cc, string name)
         {
@@ -208,162 +257,227 @@ namespace CodeM.FastApi.Router
             return cc.QueryParams[name];
         }
 
-        private async Task _CreateAndSaveModel(ControllerContext cc, RouterConfig.RouterItem item)
+        private async Task _CreateAndSaveModelAsync(ControllerContext cc, 
+            RouterConfig.RouterItem item, params object[] args)
         {
-            try
+            string key = string.Concat(item.Model, "_CREATE");
+            if (mModelRouterConcurrents.GetOrAdd(key, 0) <= item.MaxConcurrent)
             {
-                Model m = OrmUtils.Model(item.Model);
-                dynamic obj = m.NewObject();
-
-                int count = m.PropertyCount;
-                for (int i = 0; i < count; i++)
+                mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
                 {
-                    Property p = m.GetProperty(i);
-                    if (!p.AutoIncrement)
+                    return itemValue + 1;
+                });
+
+                try
+                {
+                    Model m = OrmUtils.Model(item.Model);
+                    dynamic obj = m.NewObject();
+
+                    int count = m.PropertyCount;
+                    for (int i = 0; i < count; i++)
                     {
-                        string v = _GetParamValue(cc, p.Name);
-                        if (v != null)
+                        Property p = m.GetProperty(i);
+                        if (!p.AutoIncrement)
                         {
-                            obj.SetValue(p.Name, v);
+                            string v = _GetParamValue(cc, p.Name);
+                            if (v != null)
+                            {
+                                obj.SetValue(p.Name, v);
+                            }
                         }
                     }
+
+                    m.SetValues(obj).Save(true);
+
+                    await cc.JsonAsync();
                 }
-
-                m.SetValues(obj).Save(true);
-
-                await cc.JsonAsync();
+                finally
+                {
+                    mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                    {
+                        return Math.Max(0, itemValue - 1);
+                    });
+                }
             }
-            catch (Exception exp)
+            else
             {
-                await cc.JsonAsync(exp);
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
             }
         }
 
         private Regex mReOP = new Regex(">=|<=|<>|!=|>|<|=");
         //TODO  Like NotLike IsNull IsNotNull  In  NotIn
 
-        private async Task _QueryModelList(ControllerContext cc, RouterConfig.RouterItem item)
+        private ConcurrentDictionary<string, long> mModelRouterConcurrents = new ConcurrentDictionary<string, long>();
+        private async Task _QueryModelListAsync(ControllerContext cc, 
+            RouterConfig.RouterItem item, params object[] args)
         {
-            int pagesize = 100;
-            int.TryParse(cc.QueryParams.Get("pagesize", "100"), out pagesize);
-
-            int pageindex = 1;
-            int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
-
-            SubFilter filter = new SubFilter();
-            string where = cc.QueryParams.Get("where", null);
-            if (!string.IsNullOrEmpty(where))
+            string key = string.Concat(item.Model, "_LIST");
+            if (mModelRouterConcurrents.GetOrAdd(key, 0) <= item.MaxConcurrent)
             {
-                string[] subWheres = where.Split(",");
-                foreach (string expr in subWheres)
+                mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
                 {
-                    Match mc= mReOP.Match(expr);
-                    if (mc.Success)
+                    return itemValue + 1;
+                });
+
+                try
+                {
+                    int pagesize = 100;
+                    int.TryParse(cc.QueryParams.Get("pagesize", "100"), out pagesize);
+
+                    int pageindex = 1;
+                    int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
+
+                    SubFilter filter = new SubFilter();
+                    string where = cc.QueryParams.Get("where", null);
+                    if (!string.IsNullOrEmpty(where))
                     {
-                        string name = expr.Substring(0, mc.Index);
-                        string value = expr.Substring(mc.Index + mc.Length);
-                        switch (mc.Value)
+                        string[] subWheres = where.Split(",");
+                        foreach (string expr in subWheres)
                         {
-                            case ">=":
-                                filter.Gte(name, value);
-                                break;
-                            case "<=":
-                                filter.Lte(name, value);
-                                break;
-                            case "<>":
-                            case "!=":
-                                filter.NotEquals(name, value);
-                                break;
-                            case ">":
-                                filter.Gt(name, value);
-                                break;
-                            case "<":
-                                filter.Lt(name, value);
-                                break;
-                            case "=":
-                                filter.Equals(name, value);
-                                break;
+                            Match mc = mReOP.Match(expr);
+                            if (mc.Success)
+                            {
+                                string name = expr.Substring(0, mc.Index);
+                                string value = expr.Substring(mc.Index + mc.Length);
+                                switch (mc.Value)
+                                {
+                                    case ">=":
+                                        filter.Gte(name, value);
+                                        break;
+                                    case "<=":
+                                        filter.Lte(name, value);
+                                        break;
+                                    case "<>":
+                                    case "!=":
+                                        filter.NotEquals(name, value);
+                                        break;
+                                    case ">":
+                                        filter.Gt(name, value);
+                                        break;
+                                    case "<":
+                                        filter.Lt(name, value);
+                                        break;
+                                    case "=":
+                                        filter.Equals(name, value);
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception(string.Concat("不识别的查询条件：where=", expr));
+                            }
                         }
                     }
-                    else
+
+                    Model m = OrmUtils.Model(item.Model);
+
+                    long total = -1;
+
+                    bool getTotal = false;
+                    bool.TryParse(cc.QueryParams.Get("gettotal", "false"), out getTotal);
+                    if (getTotal)
                     {
-                        throw new Exception(string.Concat("不识别的查询条件：where=", expr));
+                        total = m.And(filter).Count();
                     }
+
+                    string sort = cc.QueryParams.Get("sort", null);
+                    if (!string.IsNullOrEmpty(sort))
+                    {
+                        string[] subSorts = sort.Split(",");
+                        foreach (string ss in subSorts)
+                        {
+                            string sItem = ss.ToLower();
+                            if (sItem.EndsWith("_desc"))
+                            {
+                                m.DescendingSort(sItem.Substring(0, sItem.Length - 5));
+                            }
+                            else if (sItem.EndsWith("_asc"))
+                            {
+                                m.AscendingSort(sItem.Substring(0, sItem.Length - 4));
+                            }
+                            else
+                            {
+                                m.AscendingSort(sItem);
+                            }
+                        }
+                    }
+
+                    List<dynamic> result = m.And(filter).PageSize(pagesize).PageIndex(pageindex).Query();
+                    await cc.JsonAsync(new
+                    {
+                        result = result,
+                        total = total
+                    });
                 }
-            }
-
-            Model m = OrmUtils.Model(item.Model);
-
-            long total = -1;
-
-            bool getTotal = false;
-            bool.TryParse(cc.QueryParams.Get("gettotal", "false"), out getTotal);
-            if (getTotal)
-            {
-                total = m.And(filter).Count();
-            }
-
-            string sort = cc.QueryParams.Get("sort", null);
-            if (!string.IsNullOrEmpty(sort))
-            {
-                string[] subSorts = sort.Split(",");
-                foreach (string ss in subSorts)
+                finally
                 {
-                    string sItem = ss.ToLower();
-                    if (sItem.EndsWith("_desc"))
+                    mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
                     {
-                        m.DescendingSort(sItem.Substring(0, sItem.Length - 5));
-                    }
-                    else if (sItem.EndsWith("_asc"))
-                    {
-                        m.AscendingSort(sItem.Substring(0, sItem.Length - 4));
-                    }
-                    else
-                    {
-                        m.AscendingSort(sItem);
-                    }
+                        return Math.Max(0, itemValue - 1);
+                    });
                 }
             }
-            
-            List<dynamic> result = m.And(filter).PageSize(pagesize).PageIndex(pageindex).Query();
-            await cc.JsonAsync(new
+            else
             {
-                result = result,
-                total = total
-            });
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
+            }
         }
 
-        private async Task _QueryModelDetail(ControllerContext cc, RouterConfig.RouterItem item)
+        private async Task _QueryModelDetailAsync(ControllerContext cc, 
+            RouterConfig.RouterItem item, params object[] args)
         {
-            Model m = OrmUtils.Model(item.Model);
-
-            string id = cc.RouteParams["id"];
-            string[] ids = id.Split("|");
-            if (ids.Length != m.PrimaryKeyCount)
+            string key = string.Concat(item.Model, "_DETAIL");
+            if (mModelRouterConcurrents.GetOrAdd(key, 0) <= item.MaxConcurrent)
             {
-                throw new Exception("无效的参数。");
-            }
+                mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                {
+                    return itemValue + 1;
+                });
 
-            for (int i = 0; i < m.PrimaryKeyCount; i++)
+                try
+                {
+                    Model m = OrmUtils.Model(item.Model);
+
+                    string id = cc.RouteParams["id"];
+                    string[] ids = id.Split("|");
+                    if (ids.Length != m.PrimaryKeyCount)
+                    {
+                        throw new Exception("无效的参数。");
+                    }
+
+                    for (int i = 0; i < m.PrimaryKeyCount; i++)
+                    {
+                        Property p = m.GetPrimaryKey(i);
+                        m.Equals(p.Name, ids[i]);
+                    }
+
+                    object detailObj = null;
+
+                    List<dynamic> result = m.Top(1).Query();
+                    if (result.Count > 0)
+                    {
+                        detailObj = result[0];
+                    }
+
+                    await cc.JsonAsync(detailObj);
+                }
+                finally
+                {
+                    mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                    {
+                        return Math.Max(0, itemValue - 1);
+                    });
+                }
+            }
+            else
             {
-                Property p = m.GetPrimaryKey(i);
-                m.Equals(p.Name, ids[i]);
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
             }
-
-            object detailObj = null;
-
-            List<dynamic> result = m.Top(1).Query();
-            if (result.Count > 0)
-            {
-                detailObj = result[0];
-            }
-
-            await cc.JsonAsync(detailObj);
         }
 
         private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
-            //TODO
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))
             {
@@ -377,74 +491,35 @@ namespace CodeM.FastApi.Router
             //新建
             builder.MapPost(item.Path, async (context) =>
             {
-                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
-                try
-                {
-                    await _CreateAndSaveModel(cc, item);
-                }
-                catch (Exception exp)
-                {
-                    if (Utils.IsDevelopment())
-                    {
-                        cc.State = 500;
-                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
-                    }
-                    else
-                    {
-                        throw exp;
-                    }
-                }
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateAndSaveModelAsync), context, item);
             });
 
             //查列表
             builder.MapGet(item.Path, async (context) =>
             {
-                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
-                try
-                {
-                    await _QueryModelList(cc, item);
-                }
-                catch (Exception exp)
-                {
-                    if (Utils.IsDevelopment())
-                    {
-                        cc.State = 500;
-                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
-                    }
-                    else
-                    {
-                        throw exp;
-                    }
-                }
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelListAsync), context, item);
             });
 
             //查详情
             builder.MapGet(individualPath, async (context) =>
             {
-                ControllerContext cc = ControllerContext.FromHttpContext(context, mAppConfig);
-                try
-                {
-                    await _QueryModelDetail(cc, item);
-                }
-                catch (Exception exp)
-                {
-                    if (Utils.IsDevelopment())
-                    {
-                        cc.State = 500;
-                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
-                    }
-                    else
-                    {
-                        throw exp;
-                    }
-                }
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelDetailAsync), context, item);
             });
 
+            //删除
             //builder.MapDelete(individualPath, async (context) =>
             //{
 
             //});
+
+            //修改
+            //builder.MapPut(individualPath, async (context) =>
+            //{
+
+            //});
         }
+
+        #endregion
 
         private void _MountRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
