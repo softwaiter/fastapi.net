@@ -257,7 +257,7 @@ namespace CodeM.FastApi.Router
             return cc.QueryParams[name];
         }
 
-        private async Task _CreateAndSaveModelAsync(ControllerContext cc, 
+        private async Task _CreateModelAsync(ControllerContext cc, 
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_CREATE");
@@ -476,6 +476,119 @@ namespace CodeM.FastApi.Router
             }
         }
 
+        private async Task _DeleteModelAsync(ControllerContext cc,
+            RouterConfig.RouterItem item, params object[] args)
+        {
+            string key = string.Concat(item.Model, "_DETAIL");
+            if (mModelRouterConcurrents.GetOrAdd(key, 0) <= item.MaxConcurrent)
+            {
+                mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                {
+                    return itemValue + 1;
+                });
+
+                try
+                {
+                    Model m = OrmUtils.Model(item.Model);
+
+                    string id = cc.RouteParams["id"];
+                    string[] ids = id.Split("|");
+                    if (ids.Length != m.PrimaryKeyCount)
+                    {
+                        throw new Exception("无效的参数。");
+                    }
+
+                    for (int i = 0; i < m.PrimaryKeyCount; i++)
+                    {
+                        Property p = m.GetPrimaryKey(i);
+                        m.Equals(p.Name, ids[i]);
+                    }
+
+                    if (m.Delete())
+                    {
+                        await cc.JsonAsync();
+                    }
+                    else
+                    {
+                        await cc.JsonAsync(-1, null, "指定模型数据不存在。");
+                    }
+                }
+                finally
+                {
+                    mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                    {
+                        return Math.Max(0, itemValue - 1);
+                    });
+                }
+            }
+            else
+            {
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
+            }
+        }
+
+        private async Task _UpdateModelAsync(ControllerContext cc,
+            RouterConfig.RouterItem item, params object[] args)
+        {
+            string key = string.Concat(item.Model, "_UPDATE");
+            if (mModelRouterConcurrents.GetOrAdd(key, 0) <= item.MaxConcurrent)
+            {
+                mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                {
+                    return itemValue + 1;
+                });
+
+                try
+                {
+                    Model m = OrmUtils.Model(item.Model);
+
+                    string id = cc.RouteParams["id"];
+                    string[] ids = id.Split("|");
+                    if (ids.Length != m.PrimaryKeyCount)
+                    {
+                        throw new Exception("无效的参数。");
+                    }
+
+                    dynamic obj = m.NewObject();
+
+                    for (int i = 0; i < m.PrimaryKeyCount; i++)
+                    {
+                        Property p = m.GetPrimaryKey(i);
+                        m.Equals(p.Name, ids[i]);
+                    }
+
+                    int count = m.PropertyCount;
+                    for (int i = 0; i < count; i++)
+                    {
+                        Property p = m.GetProperty(i);
+                        if (!p.AutoIncrement)
+                        {
+                            string v = _GetParamValue(cc, p.Name);
+                            if (v != null)
+                            {
+                                obj.SetValue(p.Name, v);
+                            }
+                        }
+                    }
+
+                    m.SetValues(obj).Update();
+
+                    await cc.JsonAsync();
+                }
+                finally
+                {
+                    mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
+                    {
+                        return Math.Max(0, itemValue - 1);
+                    });
+                }
+            }
+            else
+            {
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
+            }
+        }
+
         private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             string individualPath = item.Path;
@@ -491,7 +604,7 @@ namespace CodeM.FastApi.Router
             //新建
             builder.MapPost(item.Path, async (context) =>
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateAndSaveModelAsync), context, item);
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateModelAsync), context, item);
             });
 
             //查列表
@@ -507,16 +620,16 @@ namespace CodeM.FastApi.Router
             });
 
             //删除
-            //builder.MapDelete(individualPath, async (context) =>
-            //{
-
-            //});
+            builder.MapDelete(individualPath, async (context) =>
+            {
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_DeleteModelAsync), context, item);
+            });
 
             //修改
-            //builder.MapPut(individualPath, async (context) =>
-            //{
-
-            //});
+            builder.MapPut(individualPath, async (context) =>
+            {
+                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_UpdateModelAsync), context, item);
+            });
         }
 
         #endregion
