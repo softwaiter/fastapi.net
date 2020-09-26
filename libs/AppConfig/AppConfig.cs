@@ -11,6 +11,8 @@ namespace CodeM.FastApi.Config
 
         public CookieSetting Cookie { get; set; } = new CookieSetting();
 
+        public CorsSetting Cors { get; set; } = new CorsSetting();
+
         public dynamic Settings { get; set; } = null;
 
     }

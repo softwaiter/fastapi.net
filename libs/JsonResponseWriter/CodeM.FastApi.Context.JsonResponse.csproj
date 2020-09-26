@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>CodeM.FastApi.Context.JsonResponse</AssemblyName>
     <RootNamespace>CodeM.FastApi.Context</RootNamespace>
+    <Authors>softwaiter</Authors>
   </PropertyGroup>
 
   <ItemGroup>

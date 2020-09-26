@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<model name="Production" table="t_production">
+    <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
+    <property name="Code" field="f_code" length="32" notNull="true" uniqueGroup="uc_code" joinUpdate="false" desc="产品编码" />
+    <property name="Name" field="f_name" length="128" notNull="true" uniqueGroup="uc_name" desc="产品名称" />
+    <property name="Url" field="f_url" length="128" desc="链接地址" />
+    <property name="Desc" field="f_desc" length="256" desc="产品描述" />
+    <property name="State" field="f_state" type="Int16" desc="状态（0:正常，1:停用，2:删除）" defaultValue="0" />
+    <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" desc="创建时间" />
+    <property name="UpdateTime" type="DateTime" field="f_updatetime" desc="更新时间" />
+</model>

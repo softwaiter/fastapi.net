@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>CodeM.FastApi.Router</AssemblyName>
     <RootNamespace>CodeM.FastApi.Router</RootNamespace>
+    <Authors>softwaiter</Authors>
   </PropertyGroup>
 
   <ItemGroup>

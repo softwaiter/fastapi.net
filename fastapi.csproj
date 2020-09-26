@@ -50,6 +50,7 @@
 
     <ItemGroup>
         <ProjectReference Include="libs\Logger\CodeM.FastApi.Logger.csproj" />
+        <ProjectReference Include="libs\Middlewares\CodeM.FastApi.Middlewares.csproj" />
         <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
     </ItemGroup>
 

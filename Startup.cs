@@ -1,6 +1,7 @@
 using CodeM.Common.Tools.Json;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Logger;
+using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,7 @@ namespace CodeM.FastApi
 {
     public class Startup
     {
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             try
@@ -30,6 +32,11 @@ namespace CodeM.FastApi
                 string envSettingFile = Path.Combine(env.ContentRootPath, string.Concat("appsettings.", env.EnvironmentName, ".json"));
                 Json2Dynamic j2d = new Json2Dynamic().AddJsonFile(settingFile).AddJsonFile(envSettingFile);
                 appConfig.Settings = j2d.Parse();
+
+                if (appConfig.Cors.Enable)
+                {
+                    app.UseMiddleware<CorsMiddleware>(appConfig);
+                }
 
                 string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
                 RouterManager.Current.Init(appConfig, routerFile);
