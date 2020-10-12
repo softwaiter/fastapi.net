@@ -45,7 +45,11 @@ namespace CodeM.FastApi.Middlewares
             string allowMethods = "*";
             if (mConfig.Cors.Options.AllowMethods != null)
             {
-                allowMethods = string.Join(",", mConfig.Cors.Options.AllowMethods);
+                allowMethods = string.Join(",", mConfig.Cors.Options.AllowMethods).ToUpper();
+            }
+            if (allowMethods.Contains("*"))
+            {
+                allowMethods = "GET,POST,HEAD,PATCH,PUT,DELETE,OPTIONS,TRACE,CONNECT";
             }
             context.Response.Headers.Add("Access-Control-Allow-Methods", allowMethods);
 
