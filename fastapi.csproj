@@ -55,7 +55,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CodeM.Common.Tools" Version="1.0.3" />
+        <PackageReference Include="CodeM.Common.Tools" Version="1.0.4" />
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
 
