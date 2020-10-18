@@ -3,4 +3,5 @@
     <router path="/hello" handler="CodeM.FastApi.Controller.Hello.Handle"></router>
     <router path="/user" model="User"></router>
     <router path="/production" model="Production"></router>
+    <router path="/org" model="Organization"></router>
 </routers>

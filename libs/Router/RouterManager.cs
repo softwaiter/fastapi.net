@@ -305,8 +305,144 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private Regex mReOP = new Regex(">=|<=|<>|!=|>|<|=");
-        //TODO  Like NotLike IsNull IsNotNull  In  NotIn
+        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|!=|~=|>|<|=", RegexOptions.IgnoreCase);
+        //TODO  IsNull IsNotNull  In  NotIn
+
+        private void BuildWhereFilter(IFilter filter, string op, string name, string value)
+        {
+            switch (op)
+            {
+                case ">=":
+                    filter.Gte(name, value);
+                    break;
+                case "<=":
+                    filter.Lte(name, value);
+                    break;
+                case "<>":
+                case "!=":
+                    filter.NotEquals(name, value);
+                    break;
+                case ">":
+                    filter.Gt(name, value);
+                    break;
+                case "<":
+                    filter.Lt(name, value);
+                    break;
+                case "=":
+                    filter.Equals(name, value);
+                    break;
+                case "~=":
+                    filter.Like(name, value);
+                    break;
+                case "~!=":
+                    filter.NotLike(name, value);
+                    break;
+            }
+        }
+
+        private IFilter ParseQueryWhereCondition(string where)
+        {
+            IFilter result = new SubFilter();
+
+            if (!string.IsNullOrEmpty(where))
+            {
+                IFilter current = result;
+                int offset = 0;
+                string exprName = null;
+                string exprValue;
+                string aop = null;
+                int bracket = 0;
+
+                MatchCollection mc = mReOP.Matches(where);
+                for (int i = 0; i < mc.Count; i++)
+                {
+                    Match m = mc[i];
+
+                    string curOP = m.Value.Trim();
+                    if ("AND".Equals(curOP, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (exprName != null)
+                        {
+                            exprValue = where.Substring(offset, m.Index - offset);
+
+                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            exprName = null;
+                        }
+
+                        offset = m.Index + m.Length;
+
+                        if (bracket == 0 && current.Parent != null)
+                        {
+                            current = current.Parent;
+                        }
+
+                        SubFilter andFilter = new SubFilter();
+                        current.And(andFilter);
+                        current = andFilter;
+                    }
+                    else if ("OR".Equals(curOP, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (exprName != null)
+                        {
+                            exprValue = where.Substring(offset, m.Index - offset);
+
+                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            exprName = null;
+                        }
+
+                        offset = m.Index + m.Length;
+
+                        if (bracket == 0 && current.Parent != null)
+                        {
+                            current = current.Parent;
+                        }
+
+                        SubFilter orFilter = new SubFilter();
+                        current.Or(orFilter);
+                        current = orFilter;
+                    }
+                    else if ("(".Equals(curOP))
+                    {
+                        bracket++;
+                        offset = m.Index + m.Length;
+                    }
+                    else if (")".Equals(curOP))
+                    {
+                        if (exprName != null)
+                        {
+                            exprValue = where.Substring(offset, m.Index - offset);
+
+                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            exprName = null;
+                        }
+
+                        bracket--;
+                        offset = m.Index + m.Length;
+
+                        if (current.Parent != null)
+                        {
+                            current = current.Parent;
+                        }
+                    }
+                    else
+                    {
+                        exprName = where.Substring(offset, m.Index - offset);
+                        aop = curOP;
+                        offset = m.Index + m.Length;
+
+                        if (i == mc.Count - 1)
+                        {
+                            exprValue = where.Substring(offset).Trim();
+
+                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            exprName = null;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
 
         private ConcurrentDictionary<string, long> mModelRouterConcurrents = new ConcurrentDictionary<string, long>();
         private async Task _QueryModelListAsync(ControllerContext cc, 
@@ -328,47 +464,8 @@ namespace CodeM.FastApi.Router
                     int pageindex = 1;
                     int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
 
-                    SubFilter filter = new SubFilter();
                     string where = cc.QueryParams.Get("where", null);
-                    if (!string.IsNullOrEmpty(where))
-                    {
-                        string[] subWheres = where.Split(",");
-                        foreach (string expr in subWheres)
-                        {
-                            Match mc = mReOP.Match(expr);
-                            if (mc.Success)
-                            {
-                                string name = expr.Substring(0, mc.Index);
-                                string value = expr.Substring(mc.Index + mc.Length);
-                                switch (mc.Value)
-                                {
-                                    case ">=":
-                                        filter.Gte(name, value);
-                                        break;
-                                    case "<=":
-                                        filter.Lte(name, value);
-                                        break;
-                                    case "<>":
-                                    case "!=":
-                                        filter.NotEquals(name, value);
-                                        break;
-                                    case ">":
-                                        filter.Gt(name, value);
-                                        break;
-                                    case "<":
-                                        filter.Lt(name, value);
-                                        break;
-                                    case "=":
-                                        filter.Equals(name, value);
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception(string.Concat("不识别的查询条件：where=", expr));
-                            }
-                        }
-                    }
+                    IFilter filter = ParseQueryWhereCondition(where);
 
                     Model m = OrmUtils.Model(item.Model);
 
