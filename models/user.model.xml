@@ -1,9 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <model name="User" table="t_user">
     <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
+    <property name="OrgId" field="f_org_id" type="Organization" fieldType="Int32" notNull="true" desc="所属机构主键" />
+    <property name="Code" field="f_code" length="32" notNull="true" uniqueGroup="uc_code" joinUpdate="false" desc="编码" />
     <property name="Name" field="f_name" length="32" notNull="true" uniqueGroup="uc_name" joinInsert="true" joinUpdate="true" desc="名称" />
-    <property name="Age" field="f_age" type="UInt16" unsigned="true" joinInsert="true" joinUpdate="true" desc="年龄" />
-    <property name="Birthday" type="DateTime" field="f_birthday" fieldType="Date" desc="出生日期" defaultValue="1980/01/01" />
-    <property name="Deposit" field="f_deposit" type="Decimal" precision="2" desc="银行存款" defaultValue="12345" />
-    <property name="IsAdmin" field="f_is_admin" type="Boolean" desc="是否超级管理员" />
+    <property name="Mobile" field="f_mobile" uniqueGroup="uc_mobile" length="16" desc="手机号码" />
+    <property name="Email" field="f_email" uniqueGroup="uc_email" length="128" desc="常用邮箱" />
+    <property name="PassSalt" field="f_pass_salt" length="32" notNull="true" desc="密码加盐" />
+    <property name="Password" field="f_password" length="256" notNull="true" desc="密码" />
+    <property name="Expiration" type="DateTime" fieldType="Date" desc="有效期" defaultValue="9999-12-31" />
+    <property name="IsAdmin" field="f_is_admin" type="Boolean" desc="是否超级管理员" defaultValue="false" />
+    <property name="State" field="f_state" type="Int16" desc="状态（0:正常，1:冻结，2:删除）" defaultValue="0" />
+    <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" desc="创建时间" />
+    <property name="UpdateTime" type="DateTime" field="f_updatetime" desc="更新时间" />
 </model>

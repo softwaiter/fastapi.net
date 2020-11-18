@@ -6,9 +6,9 @@
     <property name="Type" field="f_type" type="Int16" desc="类型（0:企业法人，1:个体工商户，2:事业单位，3:政府机构，4:社会团体，99:其他组织）" defaultValue="0" />
     <property name="Address" field="f_address" length="256" desc="机构地址" />
     <property name="Person" field="f_person" length="32" desc="负责人" />
-    <property name="Mobile" field="f_mobile" length="16" desc="手机号码" />
-    <property name="Email" field="f_email" length="128" desc="常用邮箱" />
-    <property name="IsCertification" field="f_is_certification" type="Boolean" desc="是否已认证" defaultValue="false" />
+    <property name="Mobile" field="f_mobile" uniqueGroup="uc_mobile" length="16" desc="手机号码" />
+    <property name="Email" field="f_email" uniqueGroup="uc_email" length="128" desc="常用邮箱" />
+    <property name="Certification" field="f_is_certification" type="Int16" desc="认证进度（0:未认证，1:审核中，2:已驳回，3:已认证）" defaultValue="0" />
     <property name="State" field="f_state" type="Int16" desc="状态（0:正常，1:冻结，2:删除）" defaultValue="0" />
     <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" desc="创建时间" />
     <property name="UpdateTime" type="DateTime" field="f_updatetime" desc="更新时间" />

@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<model name="Feature" table="t_feature">
+<model name="Module" table="t_module">
     <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
+    <property name="ProductionId" field="f_production_id" type="Production" fieldType="Int32" notNull="true" desc="所属产品主键" />
     <property name="Code" field="f_code" length="32" notNull="true" uniqueGroup="uc_code" joinUpdate="false" desc="功能编码" />
     <property name="Name" field="f_name" length="128" notNull="true" uniqueGroup="uc_name" desc="功能名称" />
-    <property name="ProductionId" field="f_production_id" type="Production" fieldType="Int32" notNull="true" desc="所属产品主键" />
+    <property name="State" field="f_state" desc="状态（0:正常，1:停用, 2:删除）" defaultValue="0" />
     <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" desc="创建时间" />
     <property name="UpdateTime" type="DateTime" field="f_updatetime" desc="更新时间" />
 </model>

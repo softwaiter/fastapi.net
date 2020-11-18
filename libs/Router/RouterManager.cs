@@ -352,6 +352,7 @@ namespace CodeM.FastApi.Router
                 string exprValue;
                 string aop = null;
                 int bracket = 0;
+                string prevOP = null;
 
                 MatchCollection mc = mReOP.Matches(where);
                 for (int i = 0; i < mc.Count; i++)
@@ -403,6 +404,14 @@ namespace CodeM.FastApi.Router
                     }
                     else if ("(".Equals(curOP))
                     {
+                        if (!("AND".Equals(prevOP) &&
+                            "OR".Equals(prevOP)))
+                        {
+                            SubFilter andFilter = new SubFilter();
+                            current.And(andFilter);
+                            current = andFilter;
+                        }
+
                         bracket++;
                         offset = m.Index + m.Length;
                     }
@@ -438,6 +447,8 @@ namespace CodeM.FastApi.Router
                             exprName = null;
                         }
                     }
+
+                    prevOP = curOP.ToUpper();
                 }
             }
 
@@ -458,8 +469,9 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    int pagesize = 100;
-                    int.TryParse(cc.QueryParams.Get("pagesize", "100"), out pagesize);
+                    int pagesize = 50;
+                    int.TryParse(cc.QueryParams.Get("pagesize", "50"), out pagesize);
+                    pagesize = Math.Min(pagesize, 200); //安全考虑，最大每页数据不能超过200条
 
                     int pageindex = 1;
                     int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
