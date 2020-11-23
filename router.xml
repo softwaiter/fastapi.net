@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <routers>
     <router path="/hello" handler="CodeM.FastApi.Controller.Hello.Handle"></router>
-    <router path="/production" model="Production"></router>
-    <router path="/module" model="Module"></router>
-    <router path="/org" model="Organization"></router>
     <router path="/user" model="User"></router>
 </routers>
