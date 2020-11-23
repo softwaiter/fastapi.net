@@ -512,11 +512,11 @@ namespace CodeM.FastApi.Router
                         }
                     }
 
-                    List<dynamic> result = m.And(filter).PageSize(pagesize).PageIndex(pageindex).Query();
+                    List<dynamic> list = m.And(filter).PageSize(pagesize).PageIndex(pageindex).Query();
                     await cc.JsonAsync(new
                     {
-                        result = result,
-                        total = total
+                        list,
+                        total
                     });
                 }
                 finally
