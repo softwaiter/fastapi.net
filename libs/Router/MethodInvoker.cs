@@ -213,7 +213,7 @@ namespace CodeM.FastApi.Router
             }
             else
             {
-                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, ")"));
+                throw new Exception(string.Concat("Router busy(", cc.Request.Method, " ", cc.Request.Path, "): ", maxConcurrent));
             }
 
             return result;

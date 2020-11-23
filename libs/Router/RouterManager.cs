@@ -103,7 +103,7 @@ namespace CodeM.FastApi.Router
             else
             {
                 Interlocked.Decrement(ref mAllHandlerCounter);
-                throw new Exception("System busy.");
+                throw new Exception(string.Concat("System busy: ", mAppConfig.Router.MaxConcurrentTotal, "."));
             }
         }
 
