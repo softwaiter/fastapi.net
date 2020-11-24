@@ -36,7 +36,6 @@
 
     <ItemGroup>
       <Content Include="models\.connection.xml" />
-      <Content Include="models\org.model.xml" />
       <Content Include="models\organization.model.xml" />
       <Content Include="models\user.model.xml" />
     </ItemGroup>
