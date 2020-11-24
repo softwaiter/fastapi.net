@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <model name="User" table="t_user">
     <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
-    <property name="OrgId" type="Org" field="f_org_id" fieldType="Int32" notNull="True" indexGroup="idx_orgid" desc="所属机构" />
+    <property name="OrgId" type="Organization" field="f_org_id" fieldType="Int32" notNull="True" indexGroup="idx_orgid" desc="所属机构" />
     <property name="Code" field="f_code" length="32" notNull="true" uniqueGroup="uc_code" joinUpdate="false" desc="编码" />
     <property name="Name" field="f_name" length="32" notNull="true" uniqueGroup="uc_name" joinInsert="true" joinUpdate="true" desc="名称" />
     <property name="Mobile" field="f_mobile" uniqueGroup="uc_mobile" length="16" desc="手机号码" />
