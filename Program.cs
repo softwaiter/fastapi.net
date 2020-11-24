@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace CodeM.FastApi
 {
@@ -55,6 +56,8 @@ namespace CodeM.FastApi
             catch (Exception exp)
             {
                 LogUtils.Fatal(exp);
+                Thread.Sleep(1000);
+
                 Process.GetCurrentProcess().Kill();
             }
         }

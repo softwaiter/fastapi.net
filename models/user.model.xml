@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <model name="User" table="t_user">
     <property name="Id" field="f_id" notNull="True" primary="true" autoIncrement="true" joinInsert="false" jojnUpdate="false" desc="主键"/>
+    <property name="OrgId" type="Org" field="f_org_id" fieldType="Int32" indexGroup="idx_orgid" desc="所属机构" />
     <property name="Code" field="f_code" length="32" notNull="true" uniqueGroup="uc_code" joinUpdate="false" desc="编码" />
     <property name="Name" field="f_name" length="32" notNull="true" uniqueGroup="uc_name" joinInsert="true" joinUpdate="true" desc="名称" />
     <property name="Mobile" field="f_mobile" uniqueGroup="uc_mobile" length="16" desc="手机号码" />
     <property name="Email" field="f_email" uniqueGroup="uc_email" length="128" desc="常用邮箱" />
     <property name="State" field="f_state" type="Int16" desc="状态（0:正常，1:冻结，2:删除）" defaultValue="0" />
-    <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" desc="创建时间" />
-    <property name="UpdateTime" type="DateTime" field="f_updatetime" desc="更新时间" />
+    <property name="CreateTime" type="DateTime" field="f_createtime" joinUpdate="false" defaultValue="{{CurrentDateTime}}" desc="创建时间" />
+    <property name="UpdateTime" type="DateTime" field="f_updatetime" defaultValue="{{CurrentDateTime}}" desc="更新时间" />
 </model>

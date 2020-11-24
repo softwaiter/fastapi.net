@@ -482,12 +482,18 @@ namespace CodeM.FastApi.Router
                     Model m = OrmUtils.Model(item.Model);
 
                     long total = -1;
-
+                    
                     bool getTotal = false;
                     bool.TryParse(cc.QueryParams.Get("gettotal", "false"), out getTotal);
                     if (getTotal)
                     {
                         total = m.And(filter).Count();
+                    }
+
+                    string source = cc.QueryParams.Get("source", null);
+                    if (!string.IsNullOrWhiteSpace(source))
+                    {
+                        m.GetValue(source.Split(","));
                     }
 
                     string sort = cc.QueryParams.Get("sort", null);

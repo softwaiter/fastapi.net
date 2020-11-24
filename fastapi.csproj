@@ -31,10 +31,13 @@
         <EntityDeploy Remove="logs\**" />
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <None Remove="fastapi.db" />
+        <None Remove="models\organization.model.xml" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="models\.connection.xml" />
+      <Content Include="models\org.model.xml" />
+      <Content Include="models\organization.model.xml" />
       <Content Include="models\user.model.xml" />
     </ItemGroup>
 
