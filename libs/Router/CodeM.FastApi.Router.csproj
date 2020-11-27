@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodeM.Common.Ioc" Version="1.0.2" />
-    <PackageReference Include="CodeM.Common.Orm" Version="1.0.9" />
+    <PackageReference Include="CodeM.Common.Orm" Version="1.0.10" />
     <PackageReference Include="CodeM.Common.Tools" Version="1.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
