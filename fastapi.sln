@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Common", "lib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Logger", "libs\Logger\CodeM.FastApi.Logger.csproj", "{7C4C8975-7A29-461C-87DA-59E58AF1EAD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeM.FastApi.Middlewares", "libs\Middlewares\CodeM.FastApi.Middlewares.csproj", "{1F84A8D2-60FF-4481-B788-8CBB14F7D6DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Middlewares", "libs\Middlewares\CodeM.FastApi.Middlewares.csproj", "{1F84A8D2-60FF-4481-B788-8CBB14F7D6DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
