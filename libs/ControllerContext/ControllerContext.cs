@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Primitives;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Context
@@ -40,6 +39,19 @@ namespace CodeM.FastApi.Context
             if (config != null)
             {
                 Config = config;
+            }
+        }
+
+        private SessionWrapper mSession;
+        public SessionWrapper Session
+        {
+            get
+            {
+                if (mSession == null)
+                {
+                    mSession = new SessionWrapper(mContext);
+                }
+                return mSession;
             }
         }
 
