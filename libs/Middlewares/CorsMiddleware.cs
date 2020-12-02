@@ -10,9 +10,9 @@ namespace CodeM.FastApi.Middlewares
     public class CorsMiddleware
     {
         private readonly RequestDelegate _next;
-        private AppConfig mConfig;
+        private ApplicationConfig mConfig;
 
-        public CorsMiddleware(RequestDelegate next, AppConfig config)
+        public CorsMiddleware(RequestDelegate next, ApplicationConfig config)
         {
             _next = next;
             mConfig = config;

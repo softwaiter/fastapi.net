@@ -77,7 +77,7 @@ namespace CodeM.FastApi.Router
 
         public List<RouterItem> Items { get; } = new List<RouterItem>();
 
-        public void Load(AppConfig config, string file)
+        public void Load(ApplicationConfig config, string file)
         {
             Regex reInt = new Regex("^[1-9][0-9]*$");
             Regex reInt2 = new Regex("^[0-9]$");

@@ -44,6 +44,14 @@ namespace CodeM.FastApi.Logger
             sFactory = factory;
         }
 
+        public static bool Inited 
+        { 
+            get 
+            {
+                return sFactory != null;
+            } 
+        }
+
         private static void _CheckInit()
         {
             if (sFactory == null)

@@ -16,7 +16,20 @@ namespace CodeM.FastApi
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            try
+            {
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception exp)
+            {
+                if (LogUtils.Inited)
+                {
+                    LogUtils.Fatal(exp);
+                    Thread.Sleep(1000);
+                }
+                
+                Process.GetCurrentProcess().Kill();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -43,23 +56,13 @@ namespace CodeM.FastApi
 
         private static void InitApp(HostBuilderContext hostingContext)
         {
-            try
-            {
-                //日志文件写入器初始化
-                FileWriter.InitConfig(hostingContext.Configuration);
+            //日志文件写入器初始化
+            FileWriter.InitConfig(hostingContext.Configuration);
 
-                //ORM模型库初始化
-                OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
-                OrmUtils.Load();
-                OrmUtils.CreateTables();
-            }
-            catch (Exception exp)
-            {
-                LogUtils.Fatal(exp);
-                Thread.Sleep(1000);
-
-                Process.GetCurrentProcess().Kill();
-            }
+            //ORM模型库初始化
+            OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
+            OrmUtils.Load();
+            OrmUtils.CreateTables();
         }
 
     }

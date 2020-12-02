@@ -18,7 +18,7 @@ namespace CodeM.FastApi.Router
 {
     public class RouterManager
     {
-        private AppConfig mAppConfig;
+        private ApplicationConfig mAppConfig;
 
         private RouterConfig mRouterConfig;
         private MethodInvoker mMethodInvoker;
@@ -31,7 +31,7 @@ namespace CodeM.FastApi.Router
             mMethodInvoker = new MethodInvoker();
         }
 
-        public void Init(AppConfig config, string routerFile)
+        public void Init(ApplicationConfig config, string routerFile)
         {
             mAppConfig = config;
             mRouterConfig.Load(config, routerFile);
