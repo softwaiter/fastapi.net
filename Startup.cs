@@ -42,15 +42,27 @@ namespace CodeM.FastApi
         {
             if (AppConfig.Session.Enable)
             {
-                services.AddDistributedMemoryCache();
+                if (AppConfig.Session.Redis.Enable)
+                {
+                    services.AddDistributedRedisCache(options =>
+                    {
+                        options.Configuration = AppConfig.Session.Redis.ToString();
+                        options.InstanceName = AppConfig.Session.Redis.InstanceName;
+                    });
+                }
+                else
+                {
+                    services.AddDistributedMemoryCache();
+                }
+
                 services.AddSession(options =>
                 {
-                    options.IdleTimeout = AppConfig.Session.Options.TimeoutTimeSpan;
+                    options.IdleTimeout = AppConfig.Session.TimeoutTimeSpan;
 
-                    options.Cookie.Name = AppConfig.Session.Options.Cookie.Name;
-                    options.Cookie.HttpOnly = AppConfig.Session.Options.Cookie.HttpOnly;
-                    options.Cookie.SameSite = AppConfig.Session.Options.Cookie.SameSite;
-                    options.Cookie.MaxAge = AppConfig.Session.Options.Cookie.MaxAgeTimeSpan;
+                    options.Cookie.Name = AppConfig.Session.Cookie.Name;
+                    options.Cookie.HttpOnly = AppConfig.Session.Cookie.HttpOnly;
+                    options.Cookie.SameSite = AppConfig.Session.Cookie.SameSite;
+                    options.Cookie.MaxAge = AppConfig.Session.Cookie.MaxAgeTimeSpan;
                     options.Cookie.IsEssential = true;
                 });
 

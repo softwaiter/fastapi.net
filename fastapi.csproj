@@ -48,6 +48,7 @@
 
     <ItemGroup>
         <PackageReference Include="CodeM.Common.Tools" Version="1.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
 
