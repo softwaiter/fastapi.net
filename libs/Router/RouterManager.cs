@@ -769,6 +769,20 @@ namespace CodeM.FastApi.Router
         {
             RouteBuilder builder = new RouteBuilder(app);
 
+            //通过排序，将路由路径更长的放到前面
+            mRouterConfig.Items.Sort((left, right) => 
+            {
+                if (left.Path.Length > right.Path.Length)
+                {
+                    return -1;
+                }
+                else if (left.Path.Length < right.Path.Length)
+                {
+                    return 1;
+                }
+                return 0;
+            });
+
             mRouterConfig.Items.ForEach(item =>
             {
                 this._MountRouters(item, builder);
