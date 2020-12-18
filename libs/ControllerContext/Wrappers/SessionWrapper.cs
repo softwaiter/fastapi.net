@@ -37,5 +37,15 @@ namespace CodeM.FastApi.Context.Wrappers
         {
             return mContext.Session.GetInt32(key);
         }
+
+        public void SetBoolean(string key, bool value)
+        {
+            SetInt32(key, value ? 1 : 0);
+        }
+
+        public bool GetBoolean(string key)
+        {
+            return GetInt32(key) == 1;
+        }
     }
 }
