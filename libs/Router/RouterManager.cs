@@ -245,7 +245,7 @@ namespace CodeM.FastApi.Router
                 object result;
                 if (cc.PostJson.TryGetValue(name, out result))
                 {
-                    return "" + result;
+                    return result != null ? result.ToString() : null;
                 }
             }
 
