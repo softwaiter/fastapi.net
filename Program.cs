@@ -62,7 +62,7 @@ namespace CodeM.FastApi
             //ORM模型库初始化
             OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
             OrmUtils.Load();
-            OrmUtils.CreateTables();
+            OrmUtils.TryCreateTables();
         }
 
     }
