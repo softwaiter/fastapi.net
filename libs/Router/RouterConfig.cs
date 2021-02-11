@@ -46,6 +46,13 @@ namespace CodeM.FastApi.Router
                 set;
             }
 
+            //CURLD
+            public string ModelAction
+            {
+                get;
+                set;
+            } = "CURLD";
+
             //最小空闲处理器数量
             public int MaxIdle
             {
@@ -81,6 +88,7 @@ namespace CodeM.FastApi.Router
         {
             Regex reInt = new Regex("^[1-9][0-9]*$");
             Regex reInt2 = new Regex("^[0-9]$");
+            Regex reAction = new Regex("^[C|U|R|L|D]+$", RegexOptions.IgnoreCase);
 
             XmlUtils.Iterate(file, (XmlNodeInfo nodeInfo) =>
             {
@@ -179,7 +187,7 @@ namespace CodeM.FastApi.Router
                         if (!string.IsNullOrWhiteSpace(item.Method) &&
                             !string.IsNullOrWhiteSpace(item.Model))
                         {
-                            throw new Exception("method属性和resource属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
+                            throw new Exception("method属性和model属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
                         }
 
                         if (string.IsNullOrWhiteSpace(handler) &&
@@ -187,6 +195,31 @@ namespace CodeM.FastApi.Router
                             string.IsNullOrWhiteSpace(model))
                         {
                             throw new Exception("handler属性、resource属性、model属性必须设置一个。 " + file + " - Line " + nodeInfo.Line);
+                        }
+
+                        string actionStr = nodeInfo.GetAttribute("action");
+                        if (actionStr != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(handler))
+                            {
+                                throw new Exception("action属性和handler属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
+                            }
+                            else if (!string.IsNullOrWhiteSpace(resource))
+                            {
+                                throw new Exception("action属性和resource属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            if (string.IsNullOrWhiteSpace(actionStr))
+                            {
+                                throw new Exception("action属性不能为空。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            if (!reAction.IsMatch(actionStr.Trim()))
+                            {
+                                throw new Exception("action属性取值只能是CURLD字符的子集。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            item.ModelAction = actionStr.Trim().ToUpper();
                         }
 
                         string middlewares = nodeInfo.GetAttribute("middlewares");

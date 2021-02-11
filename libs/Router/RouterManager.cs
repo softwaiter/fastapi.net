@@ -721,34 +721,49 @@ namespace CodeM.FastApi.Router
             }
 
             //新建
-            builder.MapPost(item.Path, async (context) =>
+            if (item.ModelAction.Contains("C"))
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateModelAsync), context, item);
-            });
+                builder.MapPost(item.Path, async (context) =>
+                {
+                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateModelAsync), context, item);
+                });
+            }
 
             //查列表
-            builder.MapGet(item.Path, async (context) =>
+            if (item.ModelAction.Contains("L"))
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelListAsync), context, item);
-            });
+                builder.MapGet(item.Path, async (context) =>
+                {
+                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelListAsync), context, item);
+                });
+            }
 
             //查详情
-            builder.MapGet(individualPath, async (context) =>
+            if (item.ModelAction.Contains("D"))
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelDetailAsync), context, item);
-            });
+                builder.MapGet(individualPath, async (context) =>
+                {
+                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelDetailAsync), context, item);
+                });
+            }
 
             //删除
-            builder.MapDelete(individualPath, async (context) =>
+            if (item.ModelAction.Contains("R"))
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_DeleteModelAsync), context, item);
-            });
+                builder.MapDelete(individualPath, async (context) =>
+                {
+                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_DeleteModelAsync), context, item);
+                });
+            }
 
             //修改
-            builder.MapPut(individualPath, async (context) =>
+            if (item.ModelAction.Contains("U"))
             {
-                await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_UpdateModelAsync), context, item);
-            });
+                builder.MapPut(individualPath, async (context) =>
+                {
+                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_UpdateModelAsync), context, item);
+                });
+            }
         }
 
         #endregion
