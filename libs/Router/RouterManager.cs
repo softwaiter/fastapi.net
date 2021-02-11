@@ -162,6 +162,10 @@ namespace CodeM.FastApi.Router
         private void _MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             object resouceInst = IocUtils.GetObject(item.Resource);
+            if (resouceInst == null)
+            {
+                throw new Exception(string.Concat("Instantiation exception(", item.Resource, ")"));
+            }
 
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))

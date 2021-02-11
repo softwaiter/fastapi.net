@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeM.Common.Ioc" Version="1.0.2" />
+    <PackageReference Include="CodeM.Common.Ioc" Version="1.0.3" />
     <PackageReference Include="CodeM.Common.Orm" Version="1.0.14" />
     <PackageReference Include="CodeM.Common.Tools" Version="1.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
