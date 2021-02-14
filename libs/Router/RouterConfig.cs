@@ -53,6 +53,13 @@ namespace CodeM.FastApi.Router
                 set;
             } = "CURLD";
 
+            //CUR
+            public string ModelBatchAction
+            {
+                get;
+                set;
+            } = string.Empty;
+
             //最小空闲处理器数量
             public int MaxIdle
             {
@@ -220,6 +227,31 @@ namespace CodeM.FastApi.Router
                             }
 
                             item.ModelAction = actionStr.Trim().ToUpper();
+                        }
+
+                        string batchActionStr = nodeInfo.GetAttribute("batchAction");
+                        if (batchActionStr != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(handler))
+                            {
+                                throw new Exception("batchAction属性和handler属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
+                            }
+                            else if (!string.IsNullOrWhiteSpace(resource))
+                            {
+                                throw new Exception("batchAction属性和resource属性不能同时存在。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            if (string.IsNullOrWhiteSpace(batchActionStr))
+                            {
+                                throw new Exception("batchAction属性不能为空。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            if (!reAction.IsMatch(batchActionStr.Trim()))
+                            {
+                                throw new Exception("batchAction属性取值只能是CUR字符的子集。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            item.ModelBatchAction = batchActionStr.Trim().ToUpper();
                         }
 
                         string middlewares = nodeInfo.GetAttribute("middlewares");

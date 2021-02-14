@@ -2,5 +2,5 @@
 <routers>
     <router path="/hello" handler="CodeM.FastApi.Controller.Hello.Handle"></router>
     <router path="/org" model="Organization"></router>
-    <router path="/user" model="User"></router>
+    <router path="/user" model="User" batchAction="CUR"></router>
 </routers>
