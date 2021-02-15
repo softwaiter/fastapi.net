@@ -55,7 +55,8 @@ namespace CodeM.FastApi.Controller
 * handler - 指定路由具体执行业务逻辑的代码实现，需要填写完整代码路径，即命名空间+类名+方法名（可选）。
 * resource - 框架支持restful风格的路由定义，通过指定一个类，快速定义一组CRUD路由，需要指定类全名称（可选）。
 * model - 框架内置ORM能力，通过指定一个 model定义，快速定义一组针对指定model的CRUD路由（可选）。
-* action - 配合model定义路由的接口行为，取值范围CURLD，对应增、改、删、列表、详情，可自由组合，默认CURLD（可选）。
+* action - 配合model定义路由的接口行为，取值范围CURLD，对应增、改、删、列表、详情，可自由组合，默认CURLD。
+* batchAction - 配合model定义路由的接口批操作行为，取值范围CUR，对应批量增、批量改、批量删，可自由组合，默认空。
 * middlewares - 路由定义支持中间件设置，通过设置中间件可以在具体业务逻辑执行前或者执行后进行额外的处理（可选）。
 * maxConcurrent - 路由请求最大并发数，超过最大数，直接返回状态繁忙，默认100（可选）。
 * maxIdle - 指定路由空闲状态时，存活的最大实例数，默认10（可选）。
@@ -163,10 +164,13 @@ namespace CodeM.FastApi.Controller
 | 方法   | 路由       | 功能         | 参数                                                         |
 | ------ | ---------- | ------------ | ------------------------------------------------------------ |
 | POST   | /user      | 新建用户     | --                                                           |
+| POST   | /user      | 批量新建用户 | 只支持json传参，格式如下：<br>{<br>    "_items": [<br>        {<br>            "Name":"wangxm"<br>        },<br>        {<br>            "Name":"wangxm2"<br>        }<br>    ]<br>} |
 | GET    | /user      | 查询用户列表 | pagesize:  分页大小，默认为50；最大200。<br/><br>pageindex: 第几页，默认1。<br/><br>gettotal: 是否返回总数，默认false。<br/><br>sort: 排序方式，格式为排序“排序属性_排序方式”，排序方式分为ASC和DESC两种。<br>如按照用户名年龄降序排列：/user?sort=Age_desc；多个排序条件增加同名参数即可，如：/user?sort=Age_desc&sort=Name_asc<br><br>where: 查询条件，使用表达式进行定义，支持的操作符包括（、）、AND、OR、>=、<=、<>、>、<、=、~=、~!=；~=表示数据库的Like，~!=表示数据库的Not Like。<br>如查找用户名以王开头的用户：/user?where=Name~=王%<br><br>source: 返回的模型属性，默认返回所有属性；多个属性用,分隔。 |
 | GET    | /user/{id} | 查询用户详情 | --                                                           |
 | DELETE | /user/{id} | 删除用户     | --                                                           |
+| DELETE | /user      | 批量删除用户 | model主键：要删除的model模型的主键值，多个主键值可分别设置；如：?id=1&id=2&id=3 |
 | PUT    | /user/{id} | 修改用户详情 | --                                                           |
+| PUT    | /user      | 批量修改用户 | model主键：要删除的model模型的主键值，多个主键值可分别设置；如：?id=1&id=2&id=3 |
 
 配置action属性，可以定义生成哪些路由，假如只需要用户模型User的列表查询接口，可进行如下定义：
 
