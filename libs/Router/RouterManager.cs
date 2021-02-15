@@ -275,23 +275,74 @@ namespace CodeM.FastApi.Router
                 try
                 {
                     Model m = OrmUtils.Model(item.Model);
-                    dynamic obj = m.NewObject();
 
-                    int count = m.PropertyCount;
-                    for (int i = 0; i < count; i++)
+                    if (cc.PostJson != null && cc.PostJson.Has("_items") &&
+                        cc.PostJson._items  is List<dynamic> &&
+                        item.ModelBatchAction.Contains("C"))
                     {
-                        Property p = m.GetProperty(i);
-                        if (!p.AutoIncrement)
+                        List<dynamic> newObjs = new List<dynamic>();
+                        int count = m.PropertyCount;
+                        for (int i = 0; i < Math.Min(100, cc.PostJson._items.Count); i++)
                         {
-                            string v = _GetParamValue(cc, p.Name);
-                            if (v != null)
+                            dynamic postItem = cc.PostJson._items[i];
+                            dynamic obj = m.NewObject();
+                            for (int j = 0; j < count; j++)
                             {
-                                obj.SetValue(p.Name, v);
+                                Property p = m.GetProperty(j);
+                                if (!p.AutoIncrement)
+                                {
+                                    string v = null;
+                                    if (postItem.Has(p.Name))
+                                    {
+                                        object result;
+                                        if (postItem.TryGetValue(p.Name, out result))
+                                        {
+                                            v = result != null ? result.ToString() : null;
+                                        }
+                                    }
+
+                                    if (v != null)
+                                    {
+                                        obj.SetValue(p.Name, v);
+                                    }
+                                }
                             }
+                            newObjs.Add(obj);
+                        }
+
+                        int transCode = OrmUtils.GetTransaction();
+                        try
+                        {
+                            for (int i = 0; i < newObjs.Count; i++)
+                            {
+                                m.SetValues(newObjs[i]).Save(transCode, true);
+                            }
+                            OrmUtils.CommitTransaction(transCode);
+                        }
+                        catch (Exception exp)
+                        {
+                            OrmUtils.RollbackTransaction(transCode);
+                            throw exp;
                         }
                     }
-
-                    m.SetValues(obj).Save(true);
+                    else
+                    {
+                        dynamic obj = m.NewObject();
+                        int count = m.PropertyCount;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Property p = m.GetProperty(i);
+                            if (!p.AutoIncrement)
+                            {
+                                string v = _GetParamValue(cc, p.Name);
+                                if (v != null)
+                                {
+                                    obj.SetValue(p.Name, v);
+                                }
+                            }
+                        }
+                        m.SetValues(obj).Save(true);
+                    }
 
                     await cc.JsonAsync();
                 }
@@ -721,7 +772,8 @@ namespace CodeM.FastApi.Router
             }
 
             //新建
-            if (item.ModelAction.Contains("C"))
+            if (item.ModelAction.Contains("C") ||
+                item.ModelBatchAction.Contains("C"))
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
