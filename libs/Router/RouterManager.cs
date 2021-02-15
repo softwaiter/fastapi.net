@@ -310,7 +310,7 @@ namespace CodeM.FastApi.Router
                             newObjs.Add(obj);
                         }
 
-                        int transCode = OrmUtils.GetTransaction();
+                        int transCode = m.GetTransaction();
                         try
                         {
                             for (int i = 0; i < newObjs.Count; i++)
