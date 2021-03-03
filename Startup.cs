@@ -40,6 +40,11 @@ namespace CodeM.FastApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            if (AppConfig.Compression.Enable)
+            {
+                services.AddResponseCompression();
+            }
+
             if (AppConfig.Session.Enable)
             {
                 if (AppConfig.Session.Redis.Enable)
@@ -78,6 +83,11 @@ namespace CodeM.FastApi
         {
             try
             {
+                if (AppConfig.Compression.Enable)
+                {
+                    app.UseResponseCompression();
+                }
+
                 if (AppConfig.Session.Enable)
                 {
                     app.UseSession();

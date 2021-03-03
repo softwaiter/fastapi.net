@@ -5,6 +5,8 @@ namespace CodeM.FastApi.Config
 {
     public class ApplicationConfig
     {
+        public CompressionSetting Compression { get; set; } = new CompressionSetting();
+
         public RouterSetting Router { get; set; } = new RouterSetting();
 
         public List<string> Middlewares { get; set; } = new List<string>();
