@@ -1,12 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Swifter.Json;
 using System;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Context
 {
     public static class JsonResponse
     {
+        private static JsonSerializerOptions sJsonSerializerOptions = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
         private static void CheckContentType(HttpResponse response)
         {
@@ -20,12 +25,12 @@ namespace CodeM.FastApi.Context
         {
             CheckContentType(cc.Response);
 
-            string result = JsonFormatter.SerializeObject(new
+            string result = JsonSerializer.Serialize<dynamic>(new
             {
                 code = _data is Exception ? -1 : 0,   //0，成功；-1：失败
                 data = _data is Exception ? null : _data,
                 error = _data is Exception ? (_data as Exception).Message : null
-            });
+            }, sJsonSerializerOptions);
             await cc.Response.WriteAsync(result);
         }
 
@@ -33,12 +38,12 @@ namespace CodeM.FastApi.Context
         {
             CheckContentType(cc.Response);
 
-            string result = JsonFormatter.SerializeObject(new
+            string result = JsonSerializer.Serialize<dynamic>(new
             {
                 code = _code,
                 data = _data,
                 error = _error
-            });
+            }, sJsonSerializerOptions);
             await cc.Response.WriteAsync(result);
         }
 
