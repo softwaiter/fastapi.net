@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <routers>
-    <router path="/hello" handler="CodeM.FastApi.Controller.Hello.Handle"></router>
+    <router path="/hello" handler="CodeM.FastApi.Controllers.Hello.Handle"></router>
     <router path="/org" model="Organization"></router>
     <router path="/user" model="User" batchAction="CUR"></router>
 </routers>
