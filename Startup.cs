@@ -83,6 +83,11 @@ namespace CodeM.FastApi
         {
             try
             {
+                if ("Development".Equals(env.EnvironmentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    app.UseDeveloperExceptionPage();
+                }
+
                 if (AppConfig.Compression.Enable)
                 {
                     app.UseResponseCompression();
