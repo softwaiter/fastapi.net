@@ -177,6 +177,20 @@ public async Task Handle(ControllerContext cc)
 
 
 
+在没有ControllerContext上下文对象的地方，可以直接使用LogUtils的静态方法进行打印：
+
+```c#
+using CodeM.FastApi.Logger;
+
+public void GetUser(string userid)
+{
+    // do something
+    LogUtils.Debug("查询指定用户信息。");
+}
+```
+
+
+
 ## 高性能
 
 通常 Web 访问是高频访问，每次打印日志都写磁盘会造成频繁磁盘 IO，为了提高性能，我们采用的文件日志写入策略是：
