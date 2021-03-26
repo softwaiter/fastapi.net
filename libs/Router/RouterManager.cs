@@ -252,13 +252,7 @@ namespace CodeM.FastApi.Router
                     return result != null ? result.ToString() : null;
                 }
             }
-
-            if (cc.PostForms != null && cc.PostForms.ContainsKey(name))
-            {
-                return cc.PostForms[name];
-            }
-
-            return cc.QueryParams[name];
+            return null;
         }
 
         private async Task _CreateModelAsync(ControllerContext cc, 
