@@ -1,4 +1,5 @@
 using CodeM.Common.Orm;
+using CodeM.FastApi.DbUpgrade;
 using CodeM.FastApi.Logger;
 using CodeM.FastApi.Logger.File;
 using Microsoft.AspNetCore.Hosting;
@@ -63,6 +64,11 @@ namespace CodeM.FastApi
             OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
             OrmUtils.Load();
             OrmUtils.TryCreateTables();
+
+            //ORM版本控制
+            UpgradeManager.EnableVersionControl();
+            UpgradeManager.Load(Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models\\.upgrade.xml"));
+            UpgradeManager.Upgrade();
         }
 
     }

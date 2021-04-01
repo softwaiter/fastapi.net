@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CodeM.Common.Orm" Version="1.1.15" />
+    <PackageReference Include="CodeM.Common.Tools" Version="1.1.1" />
+  </ItemGroup>
+
+</Project>

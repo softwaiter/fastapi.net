@@ -31,16 +31,19 @@
         <EntityDeploy Remove="logs\**" />
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <None Remove="fastapi.db" />
+        <None Remove="models\.upgrade.xml" />
         <None Remove="models\organization.model.xml" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="models\.connection.xml" />
+      <Content Include="models\.upgrade.xml" />
       <Content Include="models\organization.model.xml" />
       <Content Include="models\user.model.xml" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="libs\DbUpgrade\CodeM.FastApi.DbUpgrade.csproj" />
         <ProjectReference Include="libs\Logger\CodeM.FastApi.Logger.csproj" />
         <ProjectReference Include="libs\Middlewares\CodeM.FastApi.Middlewares.csproj" />
         <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
