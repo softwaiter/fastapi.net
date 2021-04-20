@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeM.Common.Orm" Version="1.1.15" />
+    <PackageReference Include="CodeM.Common.Orm" Version="1.1.16" />
     <PackageReference Include="CodeM.Common.Tools" Version="1.1.1" />
   </ItemGroup>
 
