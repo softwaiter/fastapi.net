@@ -47,7 +47,7 @@ namespace CodeM.FastApi.Context
         {
             get
             {
-                if (mSession == null)
+                if (Config.Session.Enable && mSession == null)
                 {
                     mSession = new SessionWrapper(mContext);
                 }
