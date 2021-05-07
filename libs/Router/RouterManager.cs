@@ -271,7 +271,7 @@ namespace CodeM.FastApi.Router
                     Model m = OrmUtils.Model(item.Model);
 
                     if (cc.PostJson != null && cc.PostJson.Has("_items") &&
-                        cc.PostJson._items  is List<dynamic> &&
+                        cc.PostJson._items is List<dynamic> &&
                         item.ModelBatchAction.Contains("C"))
                     {
                         List<dynamic> newObjs = new List<dynamic>();
@@ -339,6 +339,18 @@ namespace CodeM.FastApi.Router
                     }
 
                     await cc.JsonAsync();
+                }
+                catch (Exception exp)
+                {
+                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
                 finally
                 {
@@ -780,6 +792,18 @@ namespace CodeM.FastApi.Router
 
                     await cc.JsonAsync();
                 }
+                catch (Exception exp)
+                {
+                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
+                }
                 finally
                 {
                     mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
@@ -841,6 +865,18 @@ namespace CodeM.FastApi.Router
                     m.SetValues(obj).Update();
 
                     await cc.JsonAsync();
+                }
+                catch (Exception exp)
+                {
+                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
                 }
                 finally
                 {
