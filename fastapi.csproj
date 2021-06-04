@@ -37,9 +37,7 @@
 
     <ItemGroup>
       <Content Include="models\.connection.xml" />
-      <Content Include="models\.upgrade.xml">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </Content>
+      <Content Include="models\.upgrade.xml" />
       <Content Include="models\organization.model.xml" />
       <Content Include="models\user.model.xml" />
     </ItemGroup>
