@@ -67,7 +67,7 @@ namespace CodeM.FastApi
 
             //ORM版本控制
             UpgradeManager.EnableVersionControl();
-            UpgradeManager.Load(Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models\\.upgrade.xml"));
+            UpgradeManager.Load(Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models", ".upgrade.xml"));
             UpgradeManager.Upgrade();
         }
 
