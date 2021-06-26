@@ -67,6 +67,7 @@ namespace CodeM.FastApi
                     options.Cookie.Name = AppConfig.Session.Cookie.Name;
                     options.Cookie.HttpOnly = AppConfig.Session.Cookie.HttpOnly;
                     options.Cookie.SameSite = AppConfig.Session.Cookie.SameSite;
+                    options.Cookie.SecurePolicy = AppConfig.Session.Cookie.Secure;
                     options.Cookie.MaxAge = AppConfig.Session.Cookie.MaxAgeTimeSpan;
                     options.Cookie.IsEssential = true;
                 });

@@ -133,6 +133,8 @@ namespace CodeM.FastApi.Config.Settings
 
             public SameSiteMode SameSite { get; set; } = SameSiteMode.Lax;
 
+            public CookieSecurePolicy Secure { get; set; } = CookieSecurePolicy.None;
+
             private string mMaxAge = null;
             /// <summary>
             /// cookie有效期，默认单位：秒，可随值指定单位，ms-毫秒，s-秒，m-分钟，h-小时，d-天
