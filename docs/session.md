@@ -25,6 +25,7 @@
     "Cookie": {
         "Name": "fastapi.sid",
         "SameSite": "None",
+        "Secure": "None",
         "HttpOnly": true,
         "MaxAge": "20m"
     }
@@ -39,7 +40,9 @@ Cookie：浏览器端存储session会话cookie的相关设置。
 
 ​		Name：Cookie的名称，默认fastapi.sid。
 
-​		SameSite：跨站请求时Cookie策略，默认Lax。
+​		SameSite：跨站请求时Cookie策略（None，Lax，Strict），默认None。
+
+​		Secure：是否只在HTTPS安全协议下传输（SameAsRequest，Always，None），默认None。
 
 ​		HttpOnly：是否禁止通过Javascript读取cookie，默认true。
 

@@ -131,7 +131,7 @@ namespace CodeM.FastApi.Config.Settings
 
             public bool HttpOnly { get; set; } = true;
 
-            public SameSiteMode SameSite { get; set; } = SameSiteMode.Lax;
+            public SameSiteMode SameSite { get; set; } = SameSiteMode.None;
 
             public CookieSecurePolicy Secure { get; set; } = CookieSecurePolicy.None;
 
