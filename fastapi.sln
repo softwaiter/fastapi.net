@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Logger", "lib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Middlewares", "libs\Middlewares\CodeM.FastApi.Middlewares.csproj", "{1F84A8D2-60FF-4481-B788-8CBB14F7D6DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeM.FastApi.DbUpgrade", "libs\DbUpgrade\CodeM.FastApi.DbUpgrade.csproj", "{20E6EC9E-53E7-416F-A29D-197A70813B2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.DbUpgrade", "libs\DbUpgrade\CodeM.FastApi.DbUpgrade.csproj", "{20E6EC9E-53E7-416F-A29D-197A70813B2D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScheduleManager", "libs\Schedule\ScheduleManager\ScheduleManager.csproj", "{73E256D8-51FB-492E-A9B7-90B5668B1423}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{20E6EC9E-53E7-416F-A29D-197A70813B2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20E6EC9E-53E7-416F-A29D-197A70813B2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20E6EC9E-53E7-416F-A29D-197A70813B2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73E256D8-51FB-492E-A9B7-90B5668B1423}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73E256D8-51FB-492E-A9B7-90B5668B1423}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73E256D8-51FB-492E-A9B7-90B5668B1423}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73E256D8-51FB-492E-A9B7-90B5668B1423}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
