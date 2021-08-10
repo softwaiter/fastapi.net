@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CodeM.Common.Tools;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Text;
 
@@ -50,66 +51,6 @@ namespace CodeM.FastApi.Config.Settings
             return result;
         }
 
-        private static TimeSpan? _GetTimeSpanFromString(string time)
-        {
-            TimeSpan? result = null;
-
-            if (!string.IsNullOrWhiteSpace(time))
-            {
-                int value;
-                string trimedTime = time.Trim().ToLower();
-                if (trimedTime.EndsWith("ms"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 2);
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromMilliseconds(value);
-                    }
-                }
-                else if (trimedTime.EndsWith("s"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 1);
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromSeconds(value);
-                    }
-                }
-                else if (trimedTime.EndsWith("m"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 1);
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromMinutes(value);
-                    }
-                }
-                else if (trimedTime.EndsWith("h"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 1);
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromHours(value);
-                    }
-                }
-                else if (trimedTime.EndsWith("d"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 1);
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromDays(value);
-                    }
-                }
-                else
-                {
-                    if (int.TryParse(trimedTime, out value))
-                    {
-                        result = TimeSpan.FromSeconds(value);
-                    }
-                }
-            }
-
-            return result;
-        }
-
         public class SessionSettingCookie
         {
             private string mName = "fastapi.sid";
@@ -156,7 +97,11 @@ namespace CodeM.FastApi.Config.Settings
             {
                 get
                 {
-                    return _GetTimeSpanFromString(mMaxAge);
+                    if (!string.IsNullOrWhiteSpace(mMaxAge))
+                    {
+                        return DateTimeUtils.GetTimeSpanFromString(mMaxAge);
+                    }
+                    return null;
                 }
             }
         }
@@ -295,7 +240,7 @@ namespace CodeM.FastApi.Config.Settings
         {
             get
             {
-                return (TimeSpan)_GetTimeSpanFromString(mTimeout);
+                return DateTimeUtils.GetTimeSpanFromString(mTimeout);
             }
         }
 
