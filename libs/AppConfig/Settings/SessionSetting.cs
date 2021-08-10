@@ -7,50 +7,6 @@ namespace CodeM.FastApi.Config.Settings
 {
     public class SessionSetting
     {
-        private static bool _CheckTimeValue(string time)
-        {
-            bool result = true;
-
-            if (!string.IsNullOrWhiteSpace(time))
-            {
-                int value;
-                string trimedTime = time.Trim().ToLower();
-                if (trimedTime.EndsWith("ms"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 2);
-                    result = int.TryParse(trimedTime, out value);
-                }
-                else if (trimedTime.EndsWith("s") || trimedTime.EndsWith("m") ||
-                    trimedTime.EndsWith("h") || trimedTime.EndsWith("d"))
-                {
-                    trimedTime = trimedTime.Substring(0, trimedTime.Length - 1);
-                    result = int.TryParse(trimedTime, out value);
-                }
-                else
-                {
-                    result = int.TryParse(trimedTime, out value);
-                }
-
-                if (!result)
-                {
-                    throw new Exception(string.Concat("错误的有效期格式，单位仅支持ms、s、m、h、d：", time));
-                }
-                else
-                {
-                    if (value < 0)
-                    {
-                        throw new Exception(string.Concat("有效期时间必须大于等于0：", time));
-                    }
-                }
-            }
-            else
-            {
-                throw new Exception("有效期不能设置空值。");
-            }
-
-            return result;
-        }
-
         public class SessionSettingCookie
         {
             private string mName = "fastapi.sid";
@@ -88,7 +44,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    _CheckTimeValue(value);
+                    DateTimeUtils.CheckStringTimeSpan(value);
                     mMaxAge = value;
                 }
             }
@@ -231,7 +187,7 @@ namespace CodeM.FastApi.Config.Settings
             }
             set
             {
-                _CheckTimeValue(mTimeout);
+                DateTimeUtils.CheckStringTimeSpan(mTimeout);
                 mTimeout = value;
             }
         }
@@ -240,7 +196,8 @@ namespace CodeM.FastApi.Config.Settings
         {
             get
             {
-                return DateTimeUtils.GetTimeSpanFromString(mTimeout);
+                TimeSpan? ts = DateTimeUtils.GetTimeSpanFromString(mTimeout, false);
+                return ts != null ? ts.Value : new TimeSpan();
             }
         }
 
