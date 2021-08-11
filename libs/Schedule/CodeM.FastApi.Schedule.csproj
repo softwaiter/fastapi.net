@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CodeM.Common.Tools" Version="1.1.10" />
     <PackageReference Include="Quartz" Version="3.3.3" />
   </ItemGroup>
 

@@ -33,6 +33,7 @@
         <None Remove="fastapi.db" />
         <None Remove="models\.upgrade.xml" />
         <None Remove="models\organization.model.xml" />
+        <None Remove="schedule.xml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -40,6 +41,7 @@
       <Content Include="models\.upgrade.xml" />
       <Content Include="models\organization.model.xml" />
       <Content Include="models\user.model.xml" />
+      <Content Include="schedule.xml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +49,7 @@
         <ProjectReference Include="libs\Logger\CodeM.FastApi.Logger.csproj" />
         <ProjectReference Include="libs\Middlewares\CodeM.FastApi.Middlewares.csproj" />
         <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
+        <ProjectReference Include="libs\Schedule\CodeM.FastApi.Schedule.csproj" />
     </ItemGroup>
 
     <ItemGroup>

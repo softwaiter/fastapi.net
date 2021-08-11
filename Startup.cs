@@ -3,6 +3,7 @@ using CodeM.FastApi.Config;
 using CodeM.FastApi.Logger;
 using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
+using CodeM.FastApi.Schedule;
 using CodeM.FastApi.System.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -110,6 +111,10 @@ namespace CodeM.FastApi
                 string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
+
+                string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
+                ScheduleManager.Load(scheduleFile);
+                ScheduleManager.Start();
             }
             catch (Exception exp)
             {
