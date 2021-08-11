@@ -114,7 +114,7 @@ namespace CodeM.FastApi
 
                 string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
                 ScheduleManager.Load(scheduleFile);
-                ScheduleManager.Start();
+                ScheduleManager.StartAll();
             }
             catch (Exception exp)
             {

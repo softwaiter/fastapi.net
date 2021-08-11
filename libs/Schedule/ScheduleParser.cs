@@ -1,5 +1,7 @@
-﻿using CodeM.Common.Tools;
+﻿using CodeM.Common.Ioc;
+using CodeM.Common.Tools;
 using CodeM.Common.Tools.Xml;
+using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -43,7 +45,7 @@ namespace CodeM.FastApi.Schedule
                         {
                             try
                             {
-                                DateTimeUtils.CheckStringTimeSpan(intervalStr);
+                                DateTimeUtils.CheckStringTimeSpan(intervalStr.Trim());
                             }
                             catch (Exception exp)
                             {
@@ -73,13 +75,21 @@ namespace CodeM.FastApi.Schedule
                         {
                             throw new Exception("handler属性不能为空。 " + file + " - Line " + nodeInfo.Line);
                         }
+                        else
+                        {
+                            object jobInst = IocUtils.GetSingleObject(handlerStr.Trim());
+                            if (!(jobInst is IJob))
+                            {
+                                throw new Exception("handerl指定类型必须实现IJob接口。 " + file + " - Line " + nodeInfo.Line);
+                            }
+                        }
 
                         ScheduleSetting setting = new ScheduleSetting();
-                        setting.Id = idStr;
-                        setting.Interval = intervalStr;
-                        setting.Cron = cronStr;
+                        setting.Id = idStr.Trim();
+                        setting.Interval = intervalStr != null ? intervalStr.Trim() : null;
+                        setting.Cron = cronStr != null ? cronStr.Trim() : null;
                         setting.Repeat = repeat;
-                        setting.Handler = handlerStr;
+                        setting.Handler = handlerStr.Trim();
                         result.Add(setting);
                     }
                 }
