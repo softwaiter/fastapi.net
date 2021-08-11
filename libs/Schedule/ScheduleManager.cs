@@ -1,4 +1,5 @@
 ﻿using CodeM.Common.Ioc;
+using CodeM.Common.Tools;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -30,10 +31,10 @@ namespace CodeM.FastApi.Schedule
         {
             sSettings.ForEach(setting =>
             {
-                object jobInst = IocUtils.GetSingleObject(setting.Handler);
+                object jobInst = IocUtils.GetSingleObject(setting.Class);
                 Type _typ = jobInst.GetType();
 
-                IJobDetail job = JobBuilder.Create(_typ).Build();
+                IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
 
                 ITrigger trigger;
                 if (!string.IsNullOrWhiteSpace(setting.Interval))
@@ -41,10 +42,11 @@ namespace CodeM.FastApi.Schedule
                     trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
                     {
 
-                        builder = builder.WithIntervalInSeconds(3);
+                        TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
+                        builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
                         if (setting.Repeat > 0)
                         {
-                            builder = builder.WithRepeatCount(3);
+                            builder = builder.WithRepeatCount(setting.Repeat);
                         }
                     }).Build();
                 }

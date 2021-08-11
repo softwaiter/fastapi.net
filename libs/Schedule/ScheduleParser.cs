@@ -57,6 +57,11 @@ namespace CodeM.FastApi.Schedule
                         string repeatStr = nodeInfo.GetAttribute("repeat");
                         if (repeatStr != null)
                         {
+                            if (!string.IsNullOrWhiteSpace(cronStr))
+                            {
+                                throw new Exception("repeat属性只能跟随interval属性出现。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
                             if (string.IsNullOrWhiteSpace(repeatStr))
                             {
                                 throw new Exception("repeat属性不能为空。 " + file + " - Line " + nodeInfo.Line);
@@ -70,17 +75,17 @@ namespace CodeM.FastApi.Schedule
                             repeat = int.Parse(repeatStr);
                         }
 
-                        string handlerStr = nodeInfo.GetAttribute("handler");
-                        if (string.IsNullOrWhiteSpace(handlerStr))
+                        string classStr = nodeInfo.GetAttribute("class");
+                        if (string.IsNullOrWhiteSpace(classStr))
                         {
-                            throw new Exception("handler属性不能为空。 " + file + " - Line " + nodeInfo.Line);
+                            throw new Exception("class属性不能为空。 " + file + " - Line " + nodeInfo.Line);
                         }
                         else
                         {
-                            object jobInst = IocUtils.GetSingleObject(handlerStr.Trim());
+                            object jobInst = IocUtils.GetSingleObject(classStr.Trim());
                             if (!(jobInst is IJob))
                             {
-                                throw new Exception("handerl指定类型必须实现IJob接口。 " + file + " - Line " + nodeInfo.Line);
+                                throw new Exception("class指定类型必须实现IJob接口。 " + file + " - Line " + nodeInfo.Line);
                             }
                         }
 
@@ -89,7 +94,7 @@ namespace CodeM.FastApi.Schedule
                         setting.Interval = intervalStr != null ? intervalStr.Trim() : null;
                         setting.Cron = cronStr != null ? cronStr.Trim() : null;
                         setting.Repeat = repeat;
-                        setting.Handler = handlerStr.Trim();
+                        setting.Class = classStr.Trim();
                         result.Add(setting);
                     }
                 }

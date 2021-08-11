@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <schedules>
-    <job id="demo" interval="10s" handler="CodeM.FastApi.Schedules.DemoJob" />
+    <job id="demo" interval="10s" class="CodeM.FastApi.Schedules.DemoJob" />
 </schedules>

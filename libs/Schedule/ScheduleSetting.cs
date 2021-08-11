@@ -20,8 +20,8 @@
         public string Cron { get; set; }
 
         /// <summary>
-        /// 定时任务执行器
+        /// 定时任务业务逻辑类
         /// </summary>
-        public string Handler { get; set; }
+        public string Class { get; set; }
     }
 }
