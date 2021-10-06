@@ -366,8 +366,8 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|!=|~=|>|<|=", RegexOptions.IgnoreCase);
-        //TODO  IsNull IsNotNull  In  NotIn
+        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=|~=|\\^=|>|<|=", RegexOptions.IgnoreCase);
+        //TODO  IsNull IsNotNull
 
         private void BuildWhereFilter(IFilter filter, string op, string name, string value)
         {
@@ -398,6 +398,12 @@ namespace CodeM.FastApi.Router
                 case "~!=":
                     filter.NotLike(name, value);
                     break;
+                case "^=":
+                    filter.In(name, value.Split(","));
+                    break;
+                case "^!=":
+                    filter.NotIn(name, value.Split(","));
+                    break;
             }
         }
 
@@ -425,7 +431,7 @@ namespace CodeM.FastApi.Router
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset);
+                            exprValue = where.Substring(offset, m.Index - offset).Trim();
 
                             BuildWhereFilter(current, aop, exprName, exprValue);
                             exprName = null;
@@ -446,7 +452,7 @@ namespace CodeM.FastApi.Router
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset);
+                            exprValue = where.Substring(offset, m.Index - offset).Trim();
 
                             BuildWhereFilter(current, aop, exprName, exprValue);
                             exprName = null;
@@ -480,7 +486,7 @@ namespace CodeM.FastApi.Router
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset);
+                            exprValue = where.Substring(offset, m.Index - offset).Trim();
 
                             BuildWhereFilter(current, aop, exprName, exprValue);
                             exprName = null;
@@ -496,7 +502,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        exprName = where.Substring(offset, m.Index - offset);
+                        exprName = where.Substring(offset, m.Index - offset).Trim();
                         aop = curOP;
                         offset = m.Index + m.Length;
 
