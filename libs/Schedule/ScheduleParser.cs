@@ -15,6 +15,7 @@ namespace CodeM.FastApi.Schedule
             List<ScheduleSetting> result = new List<ScheduleSetting>();
 
             Regex reInt = new Regex("^[1-9][0-9]*$");
+            Regex reBool = new Regex("^(true|false)$", RegexOptions.IgnoreCase);
 
             XmlUtils.Iterate(file, (XmlNodeInfo nodeInfo) =>
             {
@@ -89,12 +90,33 @@ namespace CodeM.FastApi.Schedule
                             }
                         }
 
+                        bool disable = false;
+                        string disableStr = nodeInfo.GetAttribute("disable");
+                        if (disableStr != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(disableStr))
+                            {
+                                throw new Exception("disable属性不能为空。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            if (!reBool.IsMatch(disableStr))
+                            {
+                                throw new Exception("disable属性必须是布尔型。 " + file + " - Line " + nodeInfo.Line);
+                            }
+
+                            disable = bool.Parse(disableStr.Trim());
+                        }
+
+                        string envStr = nodeInfo.GetAttribute("env");
+
                         ScheduleSetting setting = new ScheduleSetting();
                         setting.Id = idStr.Trim();
                         setting.Interval = intervalStr != null ? intervalStr.Trim() : null;
                         setting.Cron = cronStr != null ? cronStr.Trim() : null;
                         setting.Repeat = repeat;
                         setting.Class = classStr.Trim();
+                        setting.Disable = disable;
+                        setting.Environment = envStr != null ? envStr.ToLower() : null;
                         result.Add(setting);
                     }
                 }

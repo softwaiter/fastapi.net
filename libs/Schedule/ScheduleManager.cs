@@ -31,31 +31,34 @@ namespace CodeM.FastApi.Schedule
         {
             sSettings.ForEach(setting =>
             {
-                object jobInst = IocUtils.GetSingleObject(setting.Class);
-                Type _typ = jobInst.GetType();
-
-                IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
-
-                ITrigger trigger;
-                if (!string.IsNullOrWhiteSpace(setting.Interval))
+                if (!setting.Disable)
                 {
-                    trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
+                    object jobInst = IocUtils.GetSingleObject(setting.Class);
+                    Type _typ = jobInst.GetType();
+
+                    IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
+
+                    ITrigger trigger;
+                    if (!string.IsNullOrWhiteSpace(setting.Interval))
                     {
-
-                        TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
-                        builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
-                        if (setting.Repeat > 0)
+                        trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
                         {
-                            builder = builder.WithRepeatCount(setting.Repeat);
-                        }
-                    }).Build();
-                }
-                else
-                {
-                    trigger = TriggerBuilder.Create().WithCronSchedule(setting.Cron).Build();
-                }
 
-                sScheduler.ScheduleJob(job, trigger);
+                            TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
+                            builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
+                            if (setting.Repeat > 0)
+                            {
+                                builder = builder.WithRepeatCount(setting.Repeat);
+                            }
+                        }).Build();
+                    }
+                    else
+                    {
+                        trigger = TriggerBuilder.Create().WithCronSchedule(setting.Cron).Build();
+                    }
+
+                    sScheduler.ScheduleJob(job, trigger);
+                }
             });
         }
 

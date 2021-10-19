@@ -23,5 +23,15 @@
         /// 定时任务业务逻辑类
         /// </summary>
         public string Class { get; set; }
+
+        /// <summary>
+        /// 是否启动定时任务
+        /// </summary>
+        public bool Disable { get; set; } = false;
+
+        /// <summary>
+        /// 定时任务启动的环境，多个用逗号分隔
+        /// </summary>
+        public string Environment { get; set; }
     }
 }
