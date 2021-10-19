@@ -94,7 +94,7 @@ namespace CodeM.FastApi.Schedule
                         string disableStr = nodeInfo.GetAttribute("disable");
                         if (disableStr != null)
                         {
-                            if (!string.IsNullOrWhiteSpace(disableStr))
+                            if (string.IsNullOrWhiteSpace(disableStr))
                             {
                                 throw new Exception("disable属性不能为空。 " + file + " - Line " + nodeInfo.Line);
                             }
