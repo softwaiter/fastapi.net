@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -8,7 +9,7 @@ namespace CodeM.FastApi.Common
     {
         private static bool sIsDevelopmentChecked = false;
         private static bool sIsDevelopment = false;
-        public static bool IsDevelopment()
+        public static bool IsDev()
         {
             if (!sIsDevelopmentChecked)
             {
@@ -17,6 +18,33 @@ namespace CodeM.FastApi.Common
                 sIsDevelopmentChecked = true;
             }
             return sIsDevelopment;
+        }
+
+        private static bool sIsProductionChecked = false;
+        private static bool sIsProduction = false;
+        public static bool IsProd()
+        {
+            if (!sIsProductionChecked)
+            {
+                string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                sIsProduction = "Production".Equals(env, StringComparison.OrdinalIgnoreCase);
+                sIsProductionChecked = true;
+            }
+            return sIsProduction;
+        }
+
+        private static ConcurrentDictionary<string, bool> sEnvs = new ConcurrentDictionary<string, bool>();
+        public static bool IsEnv(string envName)
+        {
+            bool bRet = false;
+            string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string key = env != null ? env.ToLower() : "";
+            if (!sEnvs.TryGetValue(key, out bRet))
+            {
+                bRet = key.Equals(envName, StringComparison.OrdinalIgnoreCase);
+                sEnvs.TryAdd(key, bRet);
+            }
+            return bRet;
         }
 
         private static Dictionary<string, bool> sTypeMethods = new Dictionary<string, bool>();

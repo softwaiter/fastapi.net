@@ -188,7 +188,7 @@ namespace CodeM.FastApi.Router
                         BindingFlags.Instance | BindingFlags.InvokeMethod,
                         null, handlerInst, new object[] { cc });
 
-                    if (Utils.IsDevelopment())
+                    if (Utils.IsDev())
                     {
                         Type _resultTyp = result.GetType();
                         if (_resultTyp.IsGenericType)

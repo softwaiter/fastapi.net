@@ -85,7 +85,7 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    if (Utils.IsDevelopment())
+                    if (Utils.IsDev())
                     {
                         cc.State = 500;
                         await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
