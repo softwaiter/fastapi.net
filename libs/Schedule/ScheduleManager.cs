@@ -9,12 +9,15 @@ namespace CodeM.FastApi.Schedule
 {
     public class ScheduleManager
     {
+        private static string sEnvName;
         private static List<ScheduleSetting> sSettings;
 
         private static IScheduler sScheduler;
 
         public static void Load(string file)
         {
+            sEnvName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
             List < ScheduleSetting > settings = ScheduleParser.Parse(file);
             sSettings = settings;
         }
@@ -33,31 +36,40 @@ namespace CodeM.FastApi.Schedule
             {
                 if (!setting.Disable)
                 {
-                    object jobInst = IocUtils.GetSingleObject(setting.Class);
-                    Type _typ = jobInst.GetType();
-
-                    IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
-
-                    ITrigger trigger;
-                    if (!string.IsNullOrWhiteSpace(setting.Interval))
+                    bool allowed = true;
+                    if (!string.IsNullOrWhiteSpace(setting.Environment))
                     {
-                        trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
+                        allowed = setting.Environment.ToLower().Contains(sEnvName.ToLower());
+                    }
+
+                    if (allowed)
+                    {
+                        object jobInst = IocUtils.GetSingleObject(setting.Class);
+                        Type _typ = jobInst.GetType();
+
+                        IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
+
+                        ITrigger trigger;
+                        if (!string.IsNullOrWhiteSpace(setting.Interval))
                         {
-
-                            TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
-                            builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
-                            if (setting.Repeat > 0)
+                            trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
                             {
-                                builder = builder.WithRepeatCount(setting.Repeat);
-                            }
-                        }).Build();
-                    }
-                    else
-                    {
-                        trigger = TriggerBuilder.Create().WithCronSchedule(setting.Cron).Build();
-                    }
 
-                    sScheduler.ScheduleJob(job, trigger);
+                                TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
+                                builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
+                                if (setting.Repeat > 0)
+                                {
+                                    builder = builder.WithRepeatCount(setting.Repeat);
+                                }
+                            }).Build();
+                        }
+                        else
+                        {
+                            trigger = TriggerBuilder.Create().WithCronSchedule(setting.Cron).Build();
+                        }
+
+                        sScheduler.ScheduleJob(job, trigger);
+                    }
                 }
             });
         }
