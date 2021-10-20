@@ -3,6 +3,7 @@ using CodeM.Common.Tools;
 using CodeM.Common.Tools.Xml;
 using Quartz;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -12,6 +13,7 @@ namespace CodeM.FastApi.Schedule
     {
         public static List<ScheduleSetting> Parse(string file)
         {
+            Hashtable ids = new Hashtable();
             List<ScheduleSetting> result = new List<ScheduleSetting>();
 
             Regex reInt = new Regex("^[1-9][0-9]*$");
@@ -31,6 +33,11 @@ namespace CodeM.FastApi.Schedule
                         if (string.IsNullOrWhiteSpace(idStr))
                         {
                             throw new Exception("id属性不能为空。 " + file + " - Line " + nodeInfo.Line);
+                        }
+
+                        if (ids.ContainsKey(idStr.Trim()))
+                        {
+                            throw new Exception("id重复。 " + file + " - Line " + nodeInfo.Line);
                         }
 
                         string intervalStr = nodeInfo.GetAttribute("interval");
@@ -118,6 +125,8 @@ namespace CodeM.FastApi.Schedule
                         setting.Disable = disable;
                         setting.Environment = envStr != null ? envStr.ToLower() : null;
                         result.Add(setting);
+
+                        ids.Add(idStr.Trim(), 1);
                     }
                 }
                 return true;
