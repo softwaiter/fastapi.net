@@ -14,7 +14,13 @@ namespace CodeM.FastApi.Schedule
 
         private static IScheduler sScheduler;
 
-        public static void Load(string file)
+        public ScheduleManager(string file)
+        {
+            Load(file);
+            BuildScheduler();
+        }
+
+        private void Load(string file)
         {
             sEnvName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
@@ -22,119 +28,151 @@ namespace CodeM.FastApi.Schedule
             sSettings = settings;
         }
 
-        private static void CheckSettingData()
+        private void BuildScheduler()
         {
-            if (sSettings == null)
-            {
-                throw new Exception("请先加载任务配置数据。");
-            }
+            //创建计划任务抽象工厂
+            ISchedulerFactory factory = new StdSchedulerFactory();
+            // 创建计划任务
+            sScheduler = factory.GetScheduler().GetAwaiter().GetResult();
+
+            AttachJobs();
         }
 
-        private static void RunAllJobs()
+        private void AttachJobs()
         {
             sSettings.ForEach(setting =>
             {
-                if (!setting.Disable)
-                {
-                    bool allowed = true;
-                    if (!string.IsNullOrWhiteSpace(setting.Environment))
-                    {
-                        allowed = setting.Environment.ToLower().Contains(sEnvName.ToLower());
-                    }
-
-                    if (allowed)
-                    {
-                        object jobInst = IocUtils.GetSingleObject(setting.Class);
-                        Type _typ = jobInst.GetType();
-
-                        IJobDetail job = JobBuilder.Create(_typ).WithIdentity(setting.Id).Build();
-
-                        ITrigger trigger;
-                        if (!string.IsNullOrWhiteSpace(setting.Interval))
-                        {
-                            trigger = TriggerBuilder.Create().WithDailyTimeIntervalSchedule(builder =>
-                            {
-
-                                TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
-                                builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
-                                if (setting.Repeat > 0)
-                                {
-                                    builder = builder.WithRepeatCount(setting.Repeat);
-                                }
-                            }).Build();
-                        }
-                        else
-                        {
-                            trigger = TriggerBuilder.Create().WithCronSchedule(setting.Cron).Build();
-                        }
-
-                        sScheduler.ScheduleJob(job, trigger);
-                    }
-                }
+                AttachJob(setting);
             });
         }
 
-        public static bool StartAll()
+        private bool IsMatchEnvironment(string env)
         {
-            CheckSettingData();
-
-            if (sScheduler == null)
+            if (!string.IsNullOrWhiteSpace(env))
             {
-                //创建计划任务抽象工厂
-                ISchedulerFactory factory = new StdSchedulerFactory();
-                // 创建计划任务
-                sScheduler = factory.GetScheduler().GetAwaiter().GetResult();
+                return env.ToLower().Contains(sEnvName.ToLower());
+            }
+            return true;
+        }
 
-                RunAllJobs();
+        private bool AttachJob(ScheduleSetting setting, bool ignoreDisable = false)
+        {
+            if (IsMatchEnvironment(setting.Environment))
+            {
+                object jobInst = IocUtils.GetSingleObject(setting.Class);
+                Type _typ = jobInst.GetType();
 
+                IJobDetail job = JobBuilder.Create(_typ)
+                    .WithIdentity(JobKey.Create(setting.Id))
+                    .Build();
+
+                ITrigger trigger;
+                if (!string.IsNullOrWhiteSpace(setting.Interval))
+                {
+                    trigger = TriggerBuilder.Create()
+                        .WithIdentity(new TriggerKey(setting.Id))
+                        .WithDailyTimeIntervalSchedule(builder =>
+                        {
+                            TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
+                            builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
+                            if (setting.Repeat > 0)
+                            {
+                                builder = builder.WithRepeatCount(setting.Repeat);
+                            }
+                        })
+                        .Build();
+                }
+                else
+                {
+                    trigger = TriggerBuilder.Create()
+                        .WithIdentity(new TriggerKey(setting.Id))
+                        .WithCronSchedule(setting.Cron)
+                        .Build();
+                }
+
+                if (!setting.Disable || ignoreDisable)
+                {
+                    sScheduler.ScheduleJob(job, trigger);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private ScheduleSetting GetScheduleSetting(string jobId)
+        {
+            return sSettings.Find(setting =>
+            {
+                return string.Compare(setting.Id, jobId, true) == 0;
+            });
+        }
+
+        public bool Run()
+        {
+            if (!IsShutdown() && !IsRunning())
+            {
                 sScheduler.Start();
-
                 return true;
             }
-
             return false;
         }
 
-        public static bool PauseAll()
+        public bool Shutdown()
         {
-            CheckSettingData();
-
-            if (sScheduler != null && sScheduler.IsStarted)
-            {
-                sScheduler.PauseAll();
-                return true;
-            }
-
-            return false;
-        }
-
-        public static bool ResumeAll()
-        {
-            CheckSettingData();
-
-            if (sScheduler != null && !sScheduler.IsStarted)
-            {
-                sScheduler.ResumeAll();
-                return true;
-            }
-
-            return false;
-        }
-
-        public static bool StopAll()
-        {
-            CheckSettingData();
-
-            if (sScheduler != null && !sScheduler.IsShutdown)
+            if (!IsShutdown())
             {
                 sScheduler.Shutdown();
-                sScheduler.Clear();
-                sScheduler = null;
-
                 return true;
             }
-
             return false;
+        }
+
+        public bool IsRunning()
+        {
+            return sScheduler.IsStarted &&
+                !sScheduler.InStandbyMode &&
+                !sScheduler.IsShutdown;
+        }
+
+        public bool IsShutdown()
+        {
+            return sScheduler.IsShutdown;
+        }
+
+        public bool ResumeAll()
+        {
+            if (!IsShutdown() && sScheduler.InStandbyMode)
+            {
+                sScheduler.Start();
+                return true;
+            }
+            return false;
+        }
+
+        public bool PauseAll()
+        {
+            if (!IsShutdown() && !sScheduler.InStandbyMode)
+            {
+                sScheduler.Standby();
+                return true;
+            }
+            return false;
+        }
+
+        public bool StartJob(string jobId)
+        {
+            ScheduleSetting setting = GetScheduleSetting(jobId);
+            if (IsMatchEnvironment(setting.Environment))
+            {
+                return AttachJob(setting, true);
+            }
+            return false;
+        }
+
+        public bool StopJob(string jobId)
+        {
+            bool bRet = sScheduler.UnscheduleJob(new TriggerKey(jobId)).GetAwaiter().GetResult();
+            return bRet;
         }
     }
 }

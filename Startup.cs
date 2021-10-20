@@ -3,13 +3,13 @@ using CodeM.FastApi.Config;
 using CodeM.FastApi.Logger;
 using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
-using CodeM.FastApi.Schedule;
 using CodeM.FastApi.System.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -37,7 +37,9 @@ namespace CodeM.FastApi
             Json2Dynamic j2d = new Json2Dynamic().AddJsonFile(settingFile).AddJsonFile(envSettingFile);
             AppConfig.Settings = j2d.Parse();
 
-            Global.Init(AppConfig);
+            string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
+
+            Global.Init(AppConfig, scheduleFile);
         }
 
         internal ApplicationConfig AppConfig { get; set; } = new ApplicationConfig();
@@ -84,7 +86,7 @@ namespace CodeM.FastApi
             }
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime)
         {
             try
             {
@@ -112,9 +114,11 @@ namespace CodeM.FastApi
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
 
-                string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
-                ScheduleManager.Load(scheduleFile);
-                ScheduleManager.StartAll();
+                lifetime.ApplicationStopping.Register(() =>
+                {
+                    Global.Schedule().Shutdown();
+                });
+                Global.Schedule().Run();
             }
             catch (Exception exp)
             {
