@@ -14,12 +14,9 @@ namespace CodeM.FastApi.System.Utils
             sScheduleManager = new ScheduleManager(scheduleFile);
         }
 
-        public static ApplicationConfig AppConfig
+        public static ApplicationConfig Config()
         {
-            get
-            {
-                return sAppConfig;
-            }
+            return sAppConfig;
         }
 
         public static ScheduleManager Schedule()
