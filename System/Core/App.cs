@@ -1,9 +1,9 @@
 ﻿using CodeM.FastApi.Config;
 using CodeM.FastApi.Schedule;
 
-namespace CodeM.FastApi.System.Utils
+namespace CodeM.FastApi.System.Core
 {
-    public class Global
+    public class App
     {
         private static ApplicationConfig sAppConfig = null;
         private static ScheduleManager sScheduleManager = null;

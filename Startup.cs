@@ -3,7 +3,7 @@ using CodeM.FastApi.Config;
 using CodeM.FastApi.Logger;
 using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
-using CodeM.FastApi.System.Utils;
+using CodeM.FastApi.System.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +39,7 @@ namespace CodeM.FastApi
 
             string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
 
-            Global.Init(AppConfig, scheduleFile);
+            App.Init(AppConfig, scheduleFile);
         }
 
         internal ApplicationConfig AppConfig { get; set; } = new ApplicationConfig();
@@ -116,9 +116,9 @@ namespace CodeM.FastApi
 
                 lifetime.ApplicationStopping.Register(() =>
                 {
-                    Global.Schedule().Shutdown();
+                    App.Schedule().Shutdown();
                 });
-                Global.Schedule().Run();
+                App.Schedule().Run();
             }
             catch (Exception exp)
             {
