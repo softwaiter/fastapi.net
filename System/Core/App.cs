@@ -8,18 +8,29 @@ namespace CodeM.FastApi.System.Core
         private static ApplicationConfig sAppConfig = null;
         private static ScheduleManager sScheduleManager = null;
 
+        private static App sSingleInst = new App();
+
         public static void Init(ApplicationConfig cfg, string scheduleFile)
         {
             sAppConfig = cfg;
             sScheduleManager = new ScheduleManager(scheduleFile);
         }
 
-        public static ApplicationConfig Config()
+        private App()
+        {
+        }
+
+        public static App Create()
+        {
+            return sSingleInst;
+        }
+
+        public ApplicationConfig Config()
         {
             return sAppConfig;
         }
 
-        public static ScheduleManager Schedule()
+        public ScheduleManager Schedule()
         {
             return sScheduleManager;
         }

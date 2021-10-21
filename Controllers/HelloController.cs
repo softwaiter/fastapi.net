@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Controllers
 {
-    public class Hello
+    public class HelloController : BaseController
     {
 
         public async Task Handle(ControllerContext cc)

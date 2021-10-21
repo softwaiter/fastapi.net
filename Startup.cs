@@ -116,9 +116,9 @@ namespace CodeM.FastApi
 
                 lifetime.ApplicationStopping.Register(() =>
                 {
-                    App.Schedule().Shutdown();
+                    App.Create().Schedule().Shutdown();
                 });
-                App.Schedule().Run();
+                App.Create().Schedule().Run();
             }
             catch (Exception exp)
             {
