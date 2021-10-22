@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Config", "lib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Common", "libs\Common\CodeM.FastApi.Common.csproj", "{FEB3F9DE-B5A6-406B-83F9-AA6ADB5F1E29}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Logger", "libs\Logger\CodeM.FastApi.Logger.csproj", "{7C4C8975-7A29-461C-87DA-59E58AF1EAD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Log", "libs\Logger\CodeM.FastApi.Log.csproj", "{7C4C8975-7A29-461C-87DA-59E58AF1EAD3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeM.FastApi.Middlewares", "libs\Middlewares\CodeM.FastApi.Middlewares.csproj", "{1F84A8D2-60FF-4481-B788-8CBB14F7D6DB}"
 EndProject

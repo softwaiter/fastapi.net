@@ -46,7 +46,7 @@
 
     <ItemGroup>
         <ProjectReference Include="libs\DbUpgrade\CodeM.FastApi.DbUpgrade.csproj" />
-        <ProjectReference Include="libs\Logger\CodeM.FastApi.Logger.csproj" />
+        <ProjectReference Include="libs\Logger\CodeM.FastApi.Log.csproj" />
         <ProjectReference Include="libs\Middlewares\CodeM.FastApi.Middlewares.csproj" />
         <ProjectReference Include="libs\Router\CodeM.FastApi.Router.csproj" />
         <ProjectReference Include="libs\Schedule\CodeM.FastApi.Schedule.csproj" />

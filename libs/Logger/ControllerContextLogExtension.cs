@@ -1,4 +1,4 @@
-﻿using CodeM.FastApi.Logger;
+﻿using CodeM.FastApi.Log;
 using System;
 
 namespace CodeM.FastApi.Context
@@ -8,44 +8,44 @@ namespace CodeM.FastApi.Context
 
         public static void Trace(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Trace(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Trace(callerName, message, args);
         }
 
         public static void Debug(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Debug(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Debug(callerName, message, args);
         }
 
         public static void Info(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Info(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Info(callerName, message, args);
         }
 
         public static void Warn(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Warn(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Warn(callerName, message, args);
         }
 
         public static void Warn(this ControllerContext cc, Exception exp)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Warn(callerName, exp);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Warn(callerName, exp);
         }
 
         public static void Error(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Error(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Error(callerName, message, args);
         }
 
         public static void Error(this ControllerContext cc, Exception exp)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Error(callerName, exp);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Error(callerName, exp);
         }
 
         /// <summary>
@@ -55,14 +55,14 @@ namespace CodeM.FastApi.Context
         /// <param name="args"></param>
         public static void Fatal(this ControllerContext cc, string message, params object[] args)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Fatal(callerName, message, args);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Fatal(callerName, message, args);
         }
 
         public static void Fatal(this ControllerContext cc, Exception exp)
         {
-            string callerName = LogUtils.GetCallerName(1);
-            LogUtils.Fatal(callerName, exp);
+            string callerName = Logger.GetCallerName(1);
+            Logger.Create().Fatal(callerName, exp);
         }
 
     }

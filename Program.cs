@@ -1,7 +1,7 @@
 using CodeM.Common.Orm;
 using CodeM.FastApi.DbUpgrade;
-using CodeM.FastApi.Logger;
-using CodeM.FastApi.Logger.File;
+using CodeM.FastApi.Log;
+using CodeM.FastApi.Log.File;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,9 +23,9 @@ namespace CodeM.FastApi
             }
             catch (Exception exp)
             {
-                if (LogUtils.Inited)
+                if (Logger.Inited)
                 {
-                    LogUtils.Fatal(exp);
+                    Logger.Create().Fatal(exp);
                     Thread.Sleep(1000);
                 }
                 
@@ -46,7 +46,7 @@ namespace CodeM.FastApi
                     logging.AddFile();
 
                     ILoggerFactory factory = logging.Services.BuildServiceProvider().GetService<ILoggerFactory>();
-                    LogUtils.Init(factory);
+                    Logger.Init(factory);
 
                     InitApp(hostingContext);
                 })

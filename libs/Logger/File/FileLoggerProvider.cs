@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace CodeM.FastApi.Logger.File
+namespace CodeM.FastApi.Log.File
 {
     [ProviderAlias("File")]
     public class FileLoggerProvider : ILoggerProvider, IDisposable

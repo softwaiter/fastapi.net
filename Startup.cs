@@ -1,6 +1,6 @@
 using CodeM.Common.Tools.Json;
 using CodeM.FastApi.Config;
-using CodeM.FastApi.Logger;
+using CodeM.FastApi.Log;
 using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
 using CodeM.FastApi.System.Core;
@@ -122,7 +122,7 @@ namespace CodeM.FastApi
             }
             catch (Exception exp)
             {
-                LogUtils.Fatal(exp);
+                Logger.Create().Fatal(exp);
                 Thread.Sleep(1000);
 
                 Process.GetCurrentProcess().Kill();

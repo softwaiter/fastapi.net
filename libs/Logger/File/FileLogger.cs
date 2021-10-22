@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 
-namespace CodeM.FastApi.Logger.File
+namespace CodeM.FastApi.Log.File
 {
     public class FileLogger : ILogger, IDisposable
     {

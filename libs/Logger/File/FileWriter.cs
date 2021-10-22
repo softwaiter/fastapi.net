@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace CodeM.FastApi.Logger.File
+namespace CodeM.FastApi.Log.File
 {
     /// <summary>
     /// 日志文件分割类型

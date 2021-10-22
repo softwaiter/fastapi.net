@@ -1,4 +1,4 @@
-﻿using CodeM.FastApi.Logger.File;
+﻿using CodeM.FastApi.Log.File;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

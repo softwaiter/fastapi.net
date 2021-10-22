@@ -1,4 +1,5 @@
 ﻿using CodeM.FastApi.Config;
+using CodeM.FastApi.Log;
 using CodeM.FastApi.Schedule;
 
 namespace CodeM.FastApi.System.Core
@@ -33,6 +34,11 @@ namespace CodeM.FastApi.System.Core
         public ScheduleManager Schedule()
         {
             return sScheduleManager;
+        }
+
+        public Logger Log()
+        {
+            return Logger.Create();
         }
     }
 }
