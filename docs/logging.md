@@ -177,15 +177,15 @@ public async Task Handle(ControllerContext cc)
 
 
 
-在没有ControllerContext上下文对象的地方，可以直接使用LogUtils的静态方法进行打印：
+在没有ControllerContext上下文对象的地方，可以直接使用App全局对象进行打印：
 
 ```c#
-using CodeM.FastApi.Logger;
+using CodeM.FastApi.System.Core;
 
 public void GetUser(string userid)
 {
     // do something
-    LogUtils.Debug("查询指定用户信息。");
+    App.GetInstance().Log().Debug("查询指定用户信息。");
 }
 ```
 
