@@ -1,8 +1,8 @@
 using CodeM.Common.Orm;
 using CodeM.FastApi.DbUpgrade;
 using CodeM.FastApi.Log;
-using CodeM.FastApi.Log.File;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,7 +43,10 @@ namespace CodeM.FastApi
                         logging.AddDebug();
                         logging.AddConsole();
                     }
-                    logging.AddFile();
+
+                    IConfigurationSection options = hostingContext.Configuration
+                        .GetSection("Logging").GetSection("File").GetSection("Options");
+                    logging.AddFile(options);
 
                     ILoggerFactory factory = logging.Services.BuildServiceProvider().GetService<ILoggerFactory>();
                     Logger.Init(factory);
@@ -57,9 +60,6 @@ namespace CodeM.FastApi
 
         private static void InitApp(HostBuilderContext hostingContext)
         {
-            //日志文件写入器初始化
-            FileWriter.InitConfig(hostingContext.Configuration);
-
             //ORM模型库初始化
             OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
             OrmUtils.Load();

@@ -1,12 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace CodeM.FastApi.Log.File
 {
     public class FileLogger : ILogger, IDisposable
     {
-        public FileLogger(string categoryName)
+        private FileWriter mFileWriter;
+
+        public FileLogger(IConfigurationSection options, string categoryName)
         {
+            mFileWriter = new FileWriter(options);
             this.CategoryName = categoryName;
         }
 
@@ -51,7 +55,7 @@ namespace CodeM.FastApi.Log.File
                 result += ("      " + exception).Replace(Environment.NewLine, Environment.NewLine + "      ");
             }
 
-            FileWriter.Write(result);
+            mFileWriter.Write(result);
         }
         private string GetLogLevelString(LogLevel logLevel)
         {
