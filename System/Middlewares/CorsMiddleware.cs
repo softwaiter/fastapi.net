@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CodeM.FastApi.Middlewares
+namespace CodeM.FastApi.System.Middlewares
 {
     public class CorsMiddleware
     {

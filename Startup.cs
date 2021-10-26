@@ -1,9 +1,9 @@
 using CodeM.Common.Tools.Json;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Log;
-using CodeM.FastApi.Middlewares;
 using CodeM.FastApi.Router;
 using CodeM.FastApi.System.Core;
+using CodeM.FastApi.System.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
