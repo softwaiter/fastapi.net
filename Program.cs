@@ -25,7 +25,7 @@ namespace CodeM.FastApi
             {
                 if (Logger.Inited)
                 {
-                    Logger.Create().Fatal(exp);
+                    Logger.GetInstance().Fatal(exp);
                     Thread.Sleep(1000);
                 }
                 

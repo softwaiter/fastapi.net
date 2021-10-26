@@ -21,7 +21,7 @@ namespace CodeM.FastApi.System.Core
         {
         }
 
-        public static App Create()
+        public static App GetInstance()
         {
             return sSingleInst;
         }
@@ -38,7 +38,7 @@ namespace CodeM.FastApi.System.Core
 
         public Logger Log()
         {
-            return Logger.Create();
+            return Logger.GetInstance();
         }
     }
 }

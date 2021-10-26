@@ -8,7 +8,7 @@ namespace CodeM.FastApi.Controllers
         {
             get
             {
-                return App.Create();
+                return App.GetInstance();
             }
         }
     }

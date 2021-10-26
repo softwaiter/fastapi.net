@@ -116,13 +116,13 @@ namespace CodeM.FastApi
 
                 lifetime.ApplicationStopping.Register(() =>
                 {
-                    App.Create().Schedule().Shutdown();
+                    App.GetInstance().Schedule().Shutdown();
                 });
-                App.Create().Schedule().Run();
+                App.GetInstance().Schedule().Run();
             }
             catch (Exception exp)
             {
-                Logger.Create().Fatal(exp);
+                Logger.GetInstance().Fatal(exp);
                 Thread.Sleep(1000);
 
                 Process.GetCurrentProcess().Kill();
