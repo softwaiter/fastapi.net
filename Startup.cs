@@ -26,6 +26,7 @@ namespace CodeM.FastApi
 
         private void Init(IWebHostEnvironment env)
         {
+            Logger.GetInstance().Info("解析框架配置文件......");
             IConfigurationBuilder builder = new ConfigurationBuilder()
                         .SetBasePath(env.ContentRootPath)
                         .AddJsonFile("appsettings.json", true, true)
@@ -39,6 +40,7 @@ namespace CodeM.FastApi
 
             string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
 
+            Logger.GetInstance().Info("加载定时任务配置文件......");
             App.Init(AppConfig, scheduleFile);
         }
 
@@ -46,6 +48,8 @@ namespace CodeM.FastApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            Logger.GetInstance().Info("初始化框架配置信息......");
+
             if (AppConfig.Compression.Enable)
             {
                 services.AddResponseCompression();
@@ -110,10 +114,12 @@ namespace CodeM.FastApi
                     app.UseMiddleware<CorsMiddleware>(AppConfig);
                 }
 
+                Logger.GetInstance().Info("挂载API路由接口......");
                 string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
 
+                Logger.GetInstance().Info("启动定时任务......");
                 lifetime.ApplicationStopping.Register(() =>
                 {
                     App.GetInstance().Schedule().Shutdown();

@@ -19,6 +19,18 @@ namespace CodeM.FastApi
         {
             try
             {
+                string frameworkName = " _____      ___   _____   _____       ___   _____   _       __   _   _____   _____  \n" +
+                                       "|  ___|    /   | /  ___/ |_   _|     /   | |  _  \\ | |     |  \\ | | | ____| |_   _| \n" +
+                                       "| |__     / /| | | |___    | |      / /| | | |_| | | |     |   \\| | | |__     | |   \n" +
+                                       "|  __|   / /_| | \\___  \\   | |     / /_| | |  ___/ | |     | |\\   | |  __|    | |   \n" +
+                                       "| |     / /  | |  ___| |   | |    / /  | | | |     | |  _  | | \\  | | |___    | |   \n" +
+                                       "|_|    /_/   |_| /_____/   |_|   /_/   |_| |_|     |_| |_| |_|  \\_| |_____|   |_|   \n" +
+                                       "                                                                                    \n" +
+                                       "===================================================================================\n";
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(frameworkName);
+                Console.ForegroundColor = ConsoleColor.Black;
+
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception exp)
@@ -62,12 +74,14 @@ namespace CodeM.FastApi
         {
             //ORM模型库初始化
             OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
+            Logger.GetInstance().Info("加载ORM模型定义文件：" + OrmUtils.ModelPath);
             OrmUtils.Load();
             OrmUtils.TryCreateTables();
 
             //ORM版本控制
             UpgradeManager.EnableVersionControl();
             UpgradeManager.Load(Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models", ".upgrade.xml"));
+            Logger.GetInstance().Info("执行ORM模型的升级逻辑......");
             UpgradeManager.Upgrade();
         }
 
