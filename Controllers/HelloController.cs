@@ -8,7 +8,9 @@ namespace CodeM.FastApi.Controllers
 
         public async Task Handle(ControllerContext cc)
         {
-            await cc.JsonAsync("Hello World.");
+            dynamic helloService = Service("Hello");
+            string hi = helloService.GetHi();
+            await cc.JsonAsync(hi);
         }
 
     }
