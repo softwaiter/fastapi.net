@@ -26,10 +26,9 @@ namespace CodeM.FastApi
                                        "| |     / /  | |  ___| |   | |    / /  | | | |     | |  _  | | \\  | | |___    | |   \n" +
                                        "|_|    /_/   |_| /_____/   |_|   /_/   |_| |_|     |_| |_| |_|  \\_| |_____|   |_|   \n" +
                                        "                                                                                    \n" +
-                                       "===================================================================================\n";
+                                       "===================================================================================";
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine(frameworkName);
-                Console.ForegroundColor = ConsoleColor.Black;
 
                 CreateHostBuilder(args).Build().Run();
             }
@@ -49,6 +48,10 @@ namespace CodeM.FastApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging((hostingContext, logging) =>
                 {
+                    Console.WriteLine("开始启动......");
+                    Console.WriteLine(string.Format("发现内容目录：{0}",
+                        hostingContext.HostingEnvironment.ContentRootPath));
+
                     logging.ClearProviders();
                     if (hostingContext.HostingEnvironment.IsDevelopment())
                     {
@@ -62,29 +65,11 @@ namespace CodeM.FastApi
 
                     ILoggerFactory factory = logging.Services.BuildServiceProvider().GetService<ILoggerFactory>();
                     Logger.Init(factory);
-
-                    InitApp(hostingContext);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        private static void InitApp(HostBuilderContext hostingContext)
-        {
-            //ORM模型库初始化
-            OrmUtils.ModelPath = Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models");
-            Logger.GetInstance().Info("加载ORM模型定义文件：" + OrmUtils.ModelPath);
-            OrmUtils.Load();
-            OrmUtils.TryCreateTables();
-
-            //ORM版本控制
-            UpgradeManager.EnableVersionControl();
-            UpgradeManager.Load(Path.Combine(hostingContext.HostingEnvironment.ContentRootPath, "models", ".upgrade.xml"));
-            Logger.GetInstance().Info("执行ORM模型的升级逻辑......");
-            UpgradeManager.Upgrade();
-        }
-
     }
 
 }

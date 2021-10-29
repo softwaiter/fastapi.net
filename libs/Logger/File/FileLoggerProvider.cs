@@ -8,8 +8,9 @@ namespace CodeM.FastApi.Log.File
     [ProviderAlias("File")]
     public class FileLoggerProvider : ILoggerProvider, IDisposable
     {
+        private static ConcurrentDictionary<string, ILogger> mLoggers = new ConcurrentDictionary<string, ILogger>();
+
         private IConfigurationSection mOptions;
-        private ConcurrentDictionary<string, ILogger> mLoggers = new ConcurrentDictionary<string, ILogger>();
 
         public FileLoggerProvider(IConfigurationSection options)
         {
@@ -26,8 +27,6 @@ namespace CodeM.FastApi.Log.File
 
         public void Dispose()
         {
-            mLoggers.Clear();
-            mLoggers = null;
         }
     }
 }

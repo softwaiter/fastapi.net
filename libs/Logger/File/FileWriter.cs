@@ -23,88 +23,101 @@ namespace CodeM.FastApi.Log.File
         /// <summary>
         /// 日志文件名称
         /// </summary>
-        public string FileName { get; set; } = string.Concat("logs", Path.DirectorySeparatorChar, "fastapi.log");
+        public static string FileName { get; set; } = string.Concat("logs", Path.DirectorySeparatorChar, "fastapi.log");
 
-        private string FilePath { get; set; }
-        private string FileShortName { get; set; }
-        private string FileExtension { get; set; }
-        private string FileFullName { get; set; }
+        private static string FilePath { get; set; }
+        private static string FileShortName { get; set; }
+        private static string FileExtension { get; set; }
+        private static string FileFullName { get; set; }
 
-        public Encoding FileEncoding { get; set; } = Encoding.UTF8;
+        public static Encoding FileEncoding { get; set; } = Encoding.UTF8;
 
         /// <summary>
         /// 日志方式分割类型
         /// </summary>
-        public SplitType SplitType { get; set; } = SplitType.None;
+        public static SplitType SplitType { get; set; } = SplitType.None;
 
         /// <summary>
         /// 日志最大备份文件数（），默认保留10个最近的日志文件；如果设置为0，则保留所有日志文件（注意空间占用问题）
         /// </summary>
-        public int MaxFileBackups { get; set; } = 10;
+        public static int MaxFileBackups { get; set; } = 10;
 
         /// <summary>
         /// 日志文件最大容量，单位byte，默认2M
         /// </summary>
-        public int MaxFileSize { get; set; } = 2 * 1024 * 1024;
+        public static int MaxFileSize { get; set; } = 2 * 1024 * 1024;
 
-        private ConcurrentQueue<string> sLogs = new ConcurrentQueue<string>();
+        private static ConcurrentQueue<string> sLogs = new ConcurrentQueue<string>();
 
-        public FileWriter(IConfigurationSection options)
+        private static bool sInited = false;
+
+        public static void Init(IConfigurationSection options)
         {
             if (options != null)
             {
-                string fileName = options.GetValue<string>("FileName", null);
-                if (!string.IsNullOrEmpty(fileName))
+                if (!sInited)
                 {
-                    FileName = fileName;
-                }
-
-                string splitType = options.GetValue<string>("SplitType", null);
-                if (!string.IsNullOrEmpty(splitType))
-                {
-                    SplitType stResult;
-                    if (Enum.TryParse<SplitType>(splitType, out stResult))
+                    string fileName = options.GetValue<string>("FileName", null);
+                    if (!string.IsNullOrEmpty(fileName))
                     {
-                        SplitType = stResult;
+                        FileName = fileName;
                     }
-                }
 
-                int? maxFileSize = options.GetValue<int?>("MaxFileSize", null);
-                if (maxFileSize != null)
-                {
-                    MaxFileSize = (int)maxFileSize;
-                }
+                    string splitType = options.GetValue<string>("SplitType", null);
+                    if (!string.IsNullOrEmpty(splitType))
+                    {
+                        SplitType stResult;
+                        if (Enum.TryParse<SplitType>(splitType, out stResult))
+                        {
+                            SplitType = stResult;
+                        }
+                    }
 
-                int? maxFileBackups = options.GetValue<int?>("MaxFileBackups", null);
-                if (maxFileBackups != null)
-                {
-                    MaxFileBackups = (int)maxFileBackups;
-                }
+                    int? maxFileSize = options.GetValue<int?>("MaxFileSize", null);
+                    if (maxFileSize != null)
+                    {
+                        MaxFileSize = (int)maxFileSize;
+                    }
 
-                string encoding = options.GetValue<string>("Encoding", null);
-                if (!string.IsNullOrEmpty(encoding))
-                {
-                    FileEncoding = Encoding.GetEncoding(encoding);
+                    int? maxFileBackups = options.GetValue<int?>("MaxFileBackups", null);
+                    if (maxFileBackups != null)
+                    {
+                        MaxFileBackups = (int)maxFileBackups;
+                    }
+
+                    string encoding = options.GetValue<string>("Encoding", null);
+                    if (!string.IsNullOrEmpty(encoding))
+                    {
+                        FileEncoding = Encoding.GetEncoding(encoding);
+                    }
+
+                    sInited = true;
                 }
             }
         }
 
-        private void Init()
+        private static bool InitFileInfo()
         {
-            FileFullName = Path.Combine(Environment.CurrentDirectory, FileName);
-
-            FileInfo fi = new FileInfo(FileFullName);
-            if (!fi.Directory.Exists)
+            if (sInited)
             {
-                fi.Directory.Create();
-            }
+                FileFullName = Path.Combine(Environment.CurrentDirectory, FileName);
 
-            FilePath = fi.Directory.FullName;
-            FileShortName = fi.Name;
-            FileExtension = fi.Extension;
+                FileInfo fi = new FileInfo(FileFullName);
+                if (!fi.Directory.Exists)
+                {
+                    fi.Directory.Create();
+                }
+
+                FilePath = fi.Directory.FullName;
+                FileShortName = fi.Name;
+                FileExtension = fi.Extension;
+
+                return true;
+            }
+            return false;
         }
 
-        private void SplitLogFile()
+        private static void SplitLogFile()
         {
             if (!System.IO.File.Exists(FileFullName))
             {
@@ -179,7 +192,7 @@ namespace CodeM.FastApi.Log.File
         /// 新的分割文件产生时，将已有文件顺序向前覆盖，淘汰最早的一个文件，SplitType=Size时启用
         /// </summary>
         /// <param name="fileIndex"></param>
-        private void MoveSplitFileByOrderIfNeed(int fileIndex)
+        private static void MoveSplitFileByOrderIfNeed(int fileIndex)
         {
             if (fileIndex > 1)
             {
@@ -198,58 +211,47 @@ namespace CodeM.FastApi.Log.File
             }
         }
 
-        private bool isAbort = false;
-        private Thread sWriteThread = new Thread((object start) =>
+        private static Thread sWriteThread = new Thread(() =>
         {
-            FileWriter w = (FileWriter)start;
-            w.Init();
-
-            string log;
-            StringBuilder sbBuff = new StringBuilder();
-            while (true)
+            if (InitFileInfo())
             {
-                w.SplitLogFile();
-
-                while (w.sLogs.TryDequeue(out log))
+                string log;
+                StringBuilder sbBuff = new StringBuilder();
+                while (true)
                 {
-                    if (!string.IsNullOrEmpty(log))
+                    SplitLogFile();
+
+                    while (sLogs.TryDequeue(out log))
                     {
-                        sbBuff.AppendLine(log);
-                        if (sbBuff.Length > 10240)
+                        if (!string.IsNullOrEmpty(log))
                         {
-                            break;
+                            sbBuff.AppendLine(log);
+                            if (sbBuff.Length > 10240)
+                            {
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (sbBuff.Length > 0 || w.isAbort)
-                {
-                    System.IO.File.AppendAllText(w.FileFullName, sbBuff.ToString(), w.FileEncoding);
-                    sbBuff.Length = 0;
-                }
+                    if (sbBuff.Length > 0)
+                    {
+                        System.IO.File.AppendAllText(FileFullName, sbBuff.ToString(), FileEncoding);
+                        sbBuff.Length = 0;
+                    }
 
-                if (w.isAbort)
-                {
-                    break;
+                    Thread.Sleep(1000);
                 }
-
-                Thread.Sleep(1000);
             }
         });
 
-        public void Write(string log)
+        public static void Write(string log)
         {
             if (!sWriteThread.IsAlive)
             {
                 sWriteThread.IsBackground = true;
-                sWriteThread.Start(this);
+                sWriteThread.Start();
             }
             sLogs.Enqueue(log);
-        }
-
-        public void Dispose()
-        {
-            isAbort = true;
         }
     }
 }

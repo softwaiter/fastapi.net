@@ -6,11 +6,9 @@ namespace CodeM.FastApi.Log.File
 {
     public class FileLogger : ILogger, IDisposable
     {
-        private FileWriter mFileWriter;
-
         public FileLogger(IConfigurationSection options, string categoryName)
         {
-            mFileWriter = new FileWriter(options);
+            FileWriter.Init(options);
             this.CategoryName = categoryName;
         }
 
@@ -55,7 +53,7 @@ namespace CodeM.FastApi.Log.File
                 result += ("      " + exception).Replace(Environment.NewLine, Environment.NewLine + "      ");
             }
 
-            mFileWriter.Write(result);
+            FileWriter.Write(result);
         }
         private string GetLogLevelString(LogLevel logLevel)
         {

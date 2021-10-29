@@ -50,7 +50,7 @@ namespace CodeM.FastApi.Log
         { 
             get 
             {
-                return sFactory != null;
+                return sFactory != null && sLogger != null;
             } 
         }
 
