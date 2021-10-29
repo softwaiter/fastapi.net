@@ -24,8 +24,11 @@ namespace CodeM.FastApi
     {
         public Startup(IWebHostEnvironment env)
         {
+            this.Environment = env;
             Init(env);
         }
+
+        private IWebHostEnvironment Environment { get; set; }
 
         private void Init(IWebHostEnvironment env)
         {
@@ -86,6 +89,9 @@ namespace CodeM.FastApi
                     options.MinimumSameSitePolicy = SameSiteMode.None;
                 });
             }
+
+            string scheduleFile = Path.Combine(this.Environment.ContentRootPath, "schedule.xml");
+            App.Init(this.Environment, AppConfig, scheduleFile);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
@@ -112,9 +118,6 @@ namespace CodeM.FastApi
                 {
                     app.UseMiddleware<CorsMiddleware>(AppConfig);
                 }
-
-                string scheduleFile = Path.Combine(env.ContentRootPath, "schedule.xml");
-                App.Init(env, AppConfig, scheduleFile);
 
                 Console.WriteLine("挂载API路由接口......");
                 string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
