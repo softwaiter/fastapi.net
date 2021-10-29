@@ -1,5 +1,6 @@
 ﻿using CodeM.Common.Ioc;
 using CodeM.Common.Orm;
+using CodeM.FastApi.Cache;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.DbUpgrade;
 using CodeM.FastApi.Log;
@@ -89,6 +90,11 @@ namespace CodeM.FastApi.System.Core
         public ScheduleManager Schedule()
         {
             return sScheduleManager;
+        }
+
+        public ICache Cache(string cacheName = null)
+        {
+            return CacheManager.Cache(cacheName);
         }
 
         public Logger Log()

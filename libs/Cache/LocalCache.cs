@@ -147,7 +147,6 @@ namespace CodeM.FastApi.Cache
             });
         }
 
-
         public int? GetInt32(string key)
         {
             return mLocalCache.Get<Int32>(key);
