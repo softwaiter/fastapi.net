@@ -124,7 +124,7 @@ namespace CodeM.FastApi
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
 
-                Console.WriteLine("启动定时任务......");
+                Console.WriteLine("启动定时任务调度程序......");
                 lifetime.ApplicationStarted.Register(() =>
                 {
                     string listenAddress = string.Empty;
