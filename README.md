@@ -1,9 +1,9 @@
 <div align="center">
 <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <p align="center"><img width="303" src="http://face.app100.info/fastapi.net.png" /></p>
+    <p align="center"><img width="256" src="http://face.app100.info/fastapi.net.png" /></p>
     <h1 style="width: 100%; text-align: center;">fastapi.net</h1>
     <p>
-        全面、快速、智能、跨平台的API开发框架。
+        全面、快速、智能、轻量级、跨平台的API开发框架。
     </p>
 </article>
 </div>
@@ -20,6 +20,8 @@
 -  :vertical_traffic_light:  内置跨域、限流等安全配置，XSS等安全操作库
 - :clock3: 像写普通代码一样实现定时任务，框架内配置，灵活调度
 - :100: 其他更多特性，等你发现哦
+
+
 
 
 
