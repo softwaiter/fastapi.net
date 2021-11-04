@@ -41,7 +41,7 @@ namespace CodeM.FastApi
 
             string settingFile = Path.Combine(env.ContentRootPath, "appsettings.json");
             string envSettingFile = Path.Combine(env.ContentRootPath, string.Concat("appsettings.", env.EnvironmentName, ".json"));
-            Json2Dynamic j2d = new Json2Dynamic().AddJsonFile(settingFile).AddJsonFile(envSettingFile);
+            Json2DynamicParser j2d = new Json2DynamicParser().AddJsonFile(settingFile).AddJsonFile(envSettingFile);
             AppConfig.Settings = j2d.Parse();
         }
 

@@ -167,7 +167,7 @@ namespace CodeM.FastApi.Context
                     {
                         if (!string.IsNullOrEmpty(PostContent))
                         {
-                            mPostJson = new Json2Dynamic().Parse(PostContent);
+                            mPostJson = new Json2DynamicParser().Parse(PostContent);
                         }
                     }
                 }
