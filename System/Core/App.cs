@@ -26,6 +26,7 @@ namespace CodeM.FastApi.System.Core
         {
             sEnv = env;
             InitOrm(env.ContentRootPath);
+            CacheLoader.Load(cfg);
 
             sAppConfig = cfg;
 

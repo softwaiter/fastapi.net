@@ -8,10 +8,10 @@ namespace CodeM.FastApi.Cache
     {
         private MemoryCache mLocalCache;
 
-        public LocalCache()
+        public LocalCache(dynamic options)
         {
-            MemoryCacheOptions options = new MemoryCacheOptions();
-            mLocalCache = new MemoryCache(options);
+            MemoryCacheOptions mco = new MemoryCacheOptions();
+            mLocalCache = new MemoryCache(mco);
         }
 
         private MemoryCacheEntryOptions CreateCacheOptions(long seconds, ExpirationType type = ExpirationType.RelativeToNow)
