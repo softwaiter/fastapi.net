@@ -27,6 +27,7 @@
 
 - [运行环境](docs/env.md)
 - [配置](docs/config.md)
+- [中间件](docs/middleware.md)
 - [会话(Session)](docs/session.md)
 - [路由(Router)](docs/router.md)
 - [定时任务](docs/schedule.md)
