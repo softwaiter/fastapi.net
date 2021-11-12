@@ -49,6 +49,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
+                    bool breaked = false;
                     Stack<string> _responseMiddlewares = new Stack<string>();
 
                     List<string> middlewares = new List<string>();
@@ -57,19 +58,22 @@ namespace CodeM.FastApi.Router
                     foreach (string middleware in middlewares)
                     {
                         string middlewareMethod = string.Concat(middleware, ".Request");
-                        mMethodInvoker.Invoke(middlewareMethod, cc,
+                        object r = mMethodInvoker.Invoke(middlewareMethod, cc,
                             int.MaxValue, mAppConfig.Router.MaxIdlePerRouter,
                             mAppConfig.Router.MaxInvokePerInstance, true);
 
                         _responseMiddlewares.Push(middleware);
 
-                        if (cc.RequestBreaked)
+                        if (r != null &&
+                            r.GetType() == typeof(bool) &&
+                            (bool)r == false)
                         {
+                            breaked = true;
                             break;
                         }
                     }
 
-                    if (!cc.RequestBreaked)
+                    if (!breaked)
                     {
                         await ControllerDelegate(cc, item, args);
                     }

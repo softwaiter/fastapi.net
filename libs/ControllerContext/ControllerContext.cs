@@ -218,22 +218,5 @@ namespace CodeM.FastApi.Context
             }
         }
 
-        /// <summary>
-        /// 控制中间件是否中止向下运行，即刻返回
-        /// </summary>
-        private bool mRequestBreaked = false;
-        public void BreakRequest()
-        {
-            mRequestBreaked = true;
-        }
-
-        public bool RequestBreaked
-        {
-            get
-            {
-                return mRequestBreaked;
-            }
-        }
-
     }
 }

@@ -169,7 +169,7 @@ namespace CodeM.FastApi.Router
             int pos = handlerFullName.LastIndexOf(".");
             string handlerMethod = handlerFullName.Substring(pos + 1);
 
-            object result = null;
+            dynamic result = null;
 
             object handlerInst = _GetHandler(handlerFullName, maxConcurrent);
             if (handlerInst != null)
@@ -188,17 +188,32 @@ namespace CodeM.FastApi.Router
                         BindingFlags.Instance | BindingFlags.InvokeMethod,
                         null, handlerInst, new object[] { cc });
 
-                    if (Utils.IsDev())
+                    if (result != null)
                     {
                         Type _resultTyp = result.GetType();
                         if (_resultTyp.IsGenericType)
                         {
                             if (_resultTyp.GetGenericTypeDefinition() == typeof(Task<>))
                             {
-                                Task _taskResult = (Task)result;
-                                if (_taskResult.Exception != null)
+                                if (result.Exception != null)
                                 {
-                                    throw _taskResult.Exception;
+                                    if (Utils.IsDev())
+                                    {
+                                        throw result.Exception;
+                                    }
+                                }
+                                else
+                                {
+                                    Type[] _typs = _resultTyp.GetGenericArguments();
+                                    if (_typs.Length == 1 && 
+                                        string.Compare(_typs[0].Name, "VoidTaskResult", true) != 0)
+                                    {
+                                        result = result.Result;
+                                    }
+                                    else
+                                    {
+                                        result = null;
+                                    }
                                 }
                             }
                         }
