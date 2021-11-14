@@ -1,4 +1,4 @@
-﻿using CodeM.Common.Tools.Json;
+﻿using CodeM.Common.Tools;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context.Params;
 using CodeM.FastApi.Context.Wrappers;
@@ -167,7 +167,7 @@ namespace CodeM.FastApi.Context
                     {
                         if (!string.IsNullOrEmpty(PostContent))
                         {
-                            mPostJson = new Json2DynamicParser().Parse(PostContent);
+                            mPostJson = Xmtool.Json.ConfigParser().Parse(PostContent);
                         }
                     }
                 }

@@ -1,5 +1,4 @@
 ﻿using CodeM.Common.Tools;
-using CodeM.Common.Tools.Xml;
 using System;
 
 namespace CodeM.FastApi.DbUpgrade
@@ -9,7 +8,7 @@ namespace CodeM.FastApi.DbUpgrade
         public static void Load(string filename)
         {
             int currentVersion = 0;
-            XmlUtils.Iterate(filename, (nodeInfo) =>
+            Xmtool.Xml().Iterate(filename, (nodeInfo) =>
             {
                 if (!nodeInfo.IsEndNode)
                 {
@@ -25,7 +24,7 @@ namespace CodeM.FastApi.DbUpgrade
                             throw new Exception("id属性不能为空。 " + filename + " - Line " + nodeInfo.Line);
                         }
 
-                        if (!RegexUtils.IsPositiveInteger(idStr))
+                        if (!Xmtool.Regex().IsPositiveInteger(idStr))
                         {
                             throw new Exception("id属性必须是有效正整数。 " + filename + " - Line " + nodeInfo.Line);
                         }

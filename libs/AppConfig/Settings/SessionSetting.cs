@@ -44,7 +44,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    DateTimeUtils.CheckStringTimeSpan(value);
+                    Xmtool.DateTime().CheckStringTimeSpan(value);
                     mMaxAge = value;
                 }
             }
@@ -55,7 +55,7 @@ namespace CodeM.FastApi.Config.Settings
                 {
                     if (!string.IsNullOrWhiteSpace(mMaxAge))
                     {
-                        return DateTimeUtils.GetTimeSpanFromString(mMaxAge);
+                        return Xmtool.DateTime().GetTimeSpanFromString(mMaxAge);
                     }
                     return null;
                 }
@@ -187,7 +187,7 @@ namespace CodeM.FastApi.Config.Settings
             }
             set
             {
-                DateTimeUtils.CheckStringTimeSpan(mTimeout);
+                Xmtool.DateTime().CheckStringTimeSpan(mTimeout);
                 mTimeout = value;
             }
         }
@@ -196,7 +196,7 @@ namespace CodeM.FastApi.Config.Settings
         {
             get
             {
-                TimeSpan? ts = DateTimeUtils.GetTimeSpanFromString(mTimeout, false);
+                TimeSpan? ts = Xmtool.DateTime().GetTimeSpanFromString(mTimeout, false);
                 return ts != null ? ts.Value : new TimeSpan();
             }
         }

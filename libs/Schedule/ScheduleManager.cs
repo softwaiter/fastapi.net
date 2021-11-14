@@ -73,7 +73,7 @@ namespace CodeM.FastApi.Schedule
                         .WithIdentity(new TriggerKey(setting.Id))
                         .WithDailyTimeIntervalSchedule(builder =>
                         {
-                            TimeSpan ts = DateTimeUtils.GetTimeSpanFromString(setting.Interval).Value;
+                            TimeSpan ts = Xmtool.DateTime().GetTimeSpanFromString(setting.Interval).Value;
                             builder = builder.WithIntervalInSeconds((int)ts.TotalSeconds);
                             if (setting.Repeat > 0)
                             {

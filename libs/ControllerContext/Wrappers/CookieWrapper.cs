@@ -1,4 +1,4 @@
-﻿using CodeM.Common.Tools.Security;
+﻿using CodeM.Common.Tools;
 using Microsoft.AspNetCore.Http;
 
 namespace CodeM.FastApi.Context.Wrappers
@@ -26,7 +26,7 @@ namespace CodeM.FastApi.Context.Wrappers
                         string[] keyItems = mKeys.Split(",");
                         if (keyItems.Length > 0)
                         {
-                            value = CryptoUtils.AESEncode(value, keyItems[0].Trim());
+                            value = Xmtool.Crypto().AESEncode(value, keyItems[0].Trim());
                         }
                     }
                     mContext.Response.Cookies.Append(key, value, options);
@@ -56,7 +56,7 @@ namespace CodeM.FastApi.Context.Wrappers
                             {
                                 try
                                 {
-                                    value = CryptoUtils.AESDecode(value, keyItem);
+                                    value = Xmtool.Crypto().AESDecode(value, keyItem);
                                     break;
                                 }
                                 catch

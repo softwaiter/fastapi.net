@@ -1,4 +1,4 @@
-using CodeM.Common.Tools.Json;
+using CodeM.Common.Tools;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Log;
 using CodeM.FastApi.Router;
@@ -41,8 +41,10 @@ namespace CodeM.FastApi
 
             string settingFile = Path.Combine(env.ContentRootPath, "appsettings.json");
             string envSettingFile = Path.Combine(env.ContentRootPath, string.Concat("appsettings.", env.EnvironmentName, ".json"));
-            Json2DynamicParser j2d = new Json2DynamicParser().AddJsonFile(settingFile).AddJsonFile(envSettingFile);
-            AppConfig.Settings = j2d.Parse();
+            AppConfig.Settings = Xmtool.Json.ConfigParser()
+                .AddJsonFile(settingFile)
+                .AddJsonFile(envSettingFile)
+                .Parse();
         }
 
         internal ApplicationConfig AppConfig { get; set; } = new ApplicationConfig();

@@ -19,7 +19,7 @@ namespace CodeM.FastApi.Schedule
             Regex reInt = new Regex("^[1-9][0-9]*$");
             Regex reBool = new Regex("^(true|false)$", RegexOptions.IgnoreCase);
 
-            XmlUtils.Iterate(file, (XmlNodeInfo nodeInfo) =>
+            Xmtool.Xml().Iterate(file, (XmlNodeInfo nodeInfo) =>
             {
                 if (!nodeInfo.IsEndNode)
                 {
@@ -53,7 +53,7 @@ namespace CodeM.FastApi.Schedule
                         {
                             try
                             {
-                                DateTimeUtils.CheckStringTimeSpan(intervalStr.Trim());
+                                Xmtool.DateTime().CheckStringTimeSpan(intervalStr.Trim());
                             }
                             catch (Exception exp)
                             {

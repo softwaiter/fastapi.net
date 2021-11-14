@@ -1,4 +1,5 @@
 ﻿using CodeM.Common.Orm;
+using CodeM.Common.Tools;
 using CodeM.Common.Tools.Xml;
 using CodeM.FastApi.Config;
 using System;
@@ -97,7 +98,7 @@ namespace CodeM.FastApi.Router
             Regex reInt2 = new Regex("^[0-9]$");
             Regex reAction = new Regex("^[C|U|R|L|D]+$", RegexOptions.IgnoreCase);
 
-            XmlUtils.Iterate(file, (XmlNodeInfo nodeInfo) =>
+            Xmtool.Xml().Iterate(file, (XmlNodeInfo nodeInfo) =>
             {
                 if (!nodeInfo.IsEndNode)
                 {
