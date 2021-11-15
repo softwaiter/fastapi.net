@@ -1,4 +1,5 @@
 ﻿using CodeM.Common.Tools;
+using CodeM.Common.Tools.Json;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context.Params;
 using CodeM.FastApi.Context.Wrappers;
@@ -215,6 +216,15 @@ namespace CodeM.FastApi.Context
                 }
 
                 return result;
+            }
+        }
+
+        private DynamicObjectExt mData = new DynamicObjectExt();
+        public dynamic Data
+        {
+            get
+            {
+                return mData;
             }
         }
 
