@@ -219,12 +219,23 @@ namespace CodeM.FastApi.Context
             }
         }
 
-        private DynamicObjectExt mData = new DynamicObjectExt();
+        private static string sDataItemKey = "_$_userdata_$_";
+        private object mLock = new object();
         public dynamic Data
         {
             get
             {
-                return mData;
+                if (!mContext.Items.ContainsKey(sDataItemKey))
+                {
+                    lock (mLock)
+                    {
+                        if (!mContext.Items.ContainsKey(sDataItemKey))
+                        {
+                            mContext.Items[sDataItemKey] = new DynamicObjectExt();
+                        }
+                    }
+                }
+                return mContext.Items[sDataItemKey];
             }
         }
 
