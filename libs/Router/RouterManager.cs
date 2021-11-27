@@ -370,7 +370,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|@!=|!=|~=|\\^=|@=|>|<|=", RegexOptions.IgnoreCase);
+        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
 
         private void BuildWhereFilter(IFilter filter, string op, string name, string value)
         {
@@ -407,10 +407,10 @@ namespace CodeM.FastApi.Router
                 case "^!=":
                     filter.NotIn(name, value.Split(","));
                     break;
-                case "@=":
+                case "=$":
                     filter.IsNull(name);
                     break;
-                case "@!=":
+                case "!=$":
                     filter.IsNotNull(name);
                     break;
             }
