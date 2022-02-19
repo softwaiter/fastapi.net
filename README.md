@@ -1,6 +1,6 @@
 <div align="center">
 <article style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <p align="center"><img width="256" src="http://face.app100.info/fastapi.net.png" /></p>
+    <p align="center"><img width="256" src="http://res.dayuan.tech/images/fastapi.net.png" /></p>
     <h1 style="width: 100%; text-align: center;">fastapi.net</h1>
     <p>
         全面、快速、智能、轻量级、跨平台的API开发框架。
