@@ -370,7 +370,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
+        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|\\*=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
 
         private void BuildWhereFilter(IFilter filter, string op, string name, string value)
         {
@@ -385,6 +385,14 @@ namespace CodeM.FastApi.Router
                 case "<>":
                 case "!=":
                     filter.NotEquals(name, value);
+                    break;
+                case "*=":
+                    string[] items = value.Split(',');
+                    if (items.Length != 2)
+                    {
+                        throw new Exception("Between参数无效。");
+                    }
+                    filter.Between(name, items[0].Trim(), items[1].Trim());
                     break;
                 case ">":
                     filter.Gt(name, value);
