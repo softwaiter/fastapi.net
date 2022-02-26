@@ -4,7 +4,7 @@
 
 中间件是有顺序的，HTTP请求到来时，会依据中间件的注册顺序依次通过；返回处理结果时，会按照注册的相反顺序依次通过。整个流程如下图所示：
 
-![]( http://face.app100.info/middleware.png )
+![]( http://res.dayuan.tech/images/middleware.png )
 
 
 
