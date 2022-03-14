@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Cache
 {
-    public class RedisCache : ICache
+    public class RedisCache : CacheBase, ICache
     {
         private Microsoft.Extensions.Caching.Redis.RedisCache mRedisCache;
 
@@ -98,6 +98,7 @@ namespace CodeM.FastApi.Cache
                 {
                     rcp.InstanceName = options.InstanceName;
                 }
+
                 mRedisCache = new Microsoft.Extensions.Caching.Redis.RedisCache(rcp);
                 try
                 {
@@ -133,61 +134,61 @@ namespace CodeM.FastApi.Cache
             return options;
         }
 
-        public void Set(string key, byte[] value)
+        public override void Set(string key, byte[] value)
         {
             mRedisCache.Set(key, value);
         }
 
-        public void Set(string key, byte[] value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override void Set(string key, byte[] value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             mRedisCache.Set(key, value, options);
         }
 
-        public async Task SetAsync(string key, byte[] value)
+        public override async Task SetAsync(string key, byte[] value)
         {
             await mRedisCache.SetAsync(key, value);
         }
 
-        public async Task SetAsync(string key, byte[] value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override async Task SetAsync(string key, byte[] value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             await mRedisCache.SetAsync(key, value, options);
         }
 
-        public byte[] Get(string key)
+        public override byte[] Get(string key)
         {
             return mRedisCache.Get(key);
         }
 
-        public async Task<byte[]> GetAsync(string key)
+        public override async Task<byte[]> GetAsync(string key)
         {
             return await mRedisCache.GetAsync(key);
         }
 
-        public void SetBoolean(string key, bool value)
+        public override void SetBoolean(string key, bool value)
         {
             mRedisCache.SetString(key, value.ToString());
         }
 
-        public void SetBoolean(string key, bool value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override void SetBoolean(string key, bool value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             mRedisCache.SetString(key, value.ToString(), options);
         }
 
-        public async Task SetBooleanAsync(string key, bool value)
+        public override async Task SetBooleanAsync(string key, bool value)
         {
             await mRedisCache.SetStringAsync(key, value.ToString());
         }
 
-        public async Task SetBooleanAsync(string key, bool value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override async Task SetBooleanAsync(string key, bool value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             await mRedisCache.SetStringAsync(key, value.ToString(), options);
         }
 
-        public bool GetBoolean(string key)
+        public override bool GetBoolean(string key)
         {
             bool bRet;
             string value = mRedisCache.GetString(key);
@@ -198,7 +199,7 @@ namespace CodeM.FastApi.Cache
             return false;   
         }
 
-        public async Task<bool> GetBooleanAsync(string key)
+        public override async Task<bool> GetBooleanAsync(string key)
         {
             bool bRet;
             string value = await mRedisCache.GetStringAsync(key);
@@ -209,29 +210,29 @@ namespace CodeM.FastApi.Cache
             return false;
         }
 
-        public void SetInt32(string key, int value)
+        public override void SetInt32(string key, int value)
         {
             mRedisCache.SetString(key, value.ToString());
         }
 
-        public void SetInt32(string key, int value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override void SetInt32(string key, int value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             mRedisCache.SetString(key, value.ToString(), options);
         }
 
-        public async Task SetInt32Async(string key, int value)
+        public override async Task SetInt32Async(string key, int value)
         {
             await mRedisCache.SetStringAsync(key, value.ToString());
         }
 
-        public async Task SetInt32Async(string key, int value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override async Task SetInt32Async(string key, int value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             await mRedisCache.SetStringAsync(key, value.ToString(), options);
         }
 
-        public int? GetInt32(string key)
+        public override int? GetInt32(string key)
         {
             string value = mRedisCache.GetString(key);
             if (!string.IsNullOrWhiteSpace(value))
@@ -245,7 +246,7 @@ namespace CodeM.FastApi.Cache
             return null;
         }
 
-        public async Task<int?> GetInt32Async(string key)
+        public override async Task<int?> GetInt32Async(string key)
         {
             string value = await mRedisCache.GetStringAsync(key);
             if (!string.IsNullOrWhiteSpace(value))
@@ -259,49 +260,163 @@ namespace CodeM.FastApi.Cache
             return null;
         }
 
-        public void SetString(string key, string value)
+        public override void SetInt64(string key, long value)
+        {
+            mRedisCache.SetString(key, value.ToString());
+        }
+
+        public override async Task SetInt64Async(string key, long value)
+        {
+            await mRedisCache.SetStringAsync(key, value.ToString());
+        }
+
+        public override void SetInt64(string key, long value, long seconds, ExpirationType type)
+        {
+            DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
+            mRedisCache.SetString(key, value.ToString(), options);
+        }
+
+        public override async Task SetInt64Async(string key, long value, long seconds, ExpirationType type)
+        {
+            DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
+            await mRedisCache.SetStringAsync(key, value.ToString(), options);
+        }
+
+        public override long? GetInt64(string key)
+        {
+            string value = mRedisCache.GetString(key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                long lRet;
+                if (long.TryParse(value, out lRet))
+                {
+                    return lRet;
+                }
+            }
+            return null;
+        }
+
+        public override async Task<long?> GetInt64Async(string key)
+        {
+            string value = await mRedisCache.GetStringAsync(key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                long lRet;
+                if (long.TryParse(value, out lRet))
+                {
+                    return lRet;
+                }
+            }
+            return null;
+        }
+
+        public override void SetDouble(string key, double value)
+        {
+            mRedisCache.SetString(key, value.ToString());
+        }
+
+        public override async Task SetDoubleAsync(string key, double value)
+        {
+            await mRedisCache.SetStringAsync(key, value.ToString());
+        }
+
+        public override void SetDouble(string key, double value, long seconds, ExpirationType type)
+        {
+            DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
+            mRedisCache.SetString(key, value.ToString(), options);
+        }
+
+        public override async Task SetDoubleAsync(string key, double value, long seconds, ExpirationType type)
+        {
+            DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
+            await mRedisCache.SetStringAsync(key, value.ToString(), options);
+        }
+
+        public override double? GetDouble(string key)
+        {
+            string value = mRedisCache.GetString(key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                double dRet;
+                if (double.TryParse(value, out dRet))
+                {
+                    return dRet;
+                }
+            }
+            return null;
+        }
+
+        public override async Task<double?> GetDoubleAsync(string key)
+        {
+            string value = await mRedisCache.GetStringAsync(key);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                double dRet;
+                if (double.TryParse(value, out dRet))
+                {
+                    return dRet;
+                }
+            }
+            return null;
+        }
+
+        public override void SetString(string key, string value)
         {
             mRedisCache.SetString(key, value);
         }
 
-        public void SetString(string key, string value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override void SetString(string key, string value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             mRedisCache.SetString(key, value, options);
         }
 
-        public async Task SetStringAsync(string key, string value)
+        public override async Task SetStringAsync(string key, string value)
         {
             await mRedisCache.SetStringAsync(key, value);
         }
 
-        public async Task SetStringAsync(string key, string value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
+        public override async Task SetStringAsync(string key, string value, long seconds, ExpirationType type = ExpirationType.RelativeToNow)
         {
             DistributedCacheEntryOptions options = CreateCacheOptions(seconds, type);
             await mRedisCache.SetStringAsync(key, value, options);
         }
 
-        public string GetString(string key)
+        public override string GetString(string key)
         {
             return mRedisCache.GetString(key);
         }
 
-        public async Task<string> GetStringAsync(string key)
+        public override async Task<string> GetStringAsync(string key)
         {
             return await mRedisCache.GetStringAsync(key);
         }
 
-        public bool TryGetValue(object key, out object result)
+        public override bool ContainsKey(string key)
         {
-            throw new System.NotImplementedException();
+            byte[] value = mRedisCache.Get(key);
+            return value != null;
         }
 
-        public void Remove(string key)
+        public override bool TryGetValue<T>(string key, out T result)
+        {
+            result = default(T);
+            if (ContainsKey(key.ToString()))
+            {
+                string value = mRedisCache.GetString(key);
+                object typValue = Convert.ChangeType(value, typeof(T));
+                result = (T)typValue;
+                return true;
+            }
+            return false;
+        }
+
+        public override void Remove(string key)
         {
             mRedisCache.Remove(key);
         }
 
-        public async Task RemoveAsync(string key)
+        public override async Task RemoveAsync(string key)
         {
             await mRedisCache.RemoveAsync(key);
         }

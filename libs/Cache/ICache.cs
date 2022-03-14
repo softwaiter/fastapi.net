@@ -28,6 +28,30 @@ namespace CodeM.FastApi.Cache
 
         Task<int?> GetInt32Async(string key);
 
+        void SetInt64(string key, long value);
+
+        Task SetInt64Async(string key, long value);
+
+        void SetInt64(string key, long value, long seconds, ExpirationType type = ExpirationType.RelativeToNow);
+
+        Task SetInt64Async(string key, long value, long seconds, ExpirationType type = ExpirationType.RelativeToNow);
+
+        long? GetInt64(string key);
+
+        Task<long?> GetInt64Async(string key);
+
+        void SetDouble(string key, double value);
+
+        Task SetDoubleAsync(string key, double value);
+
+        void SetDouble(string key, double value, long seconds, ExpirationType type = ExpirationType.RelativeToNow);
+
+        Task SetDoubleAsync(string key, double value, long seconds, ExpirationType type = ExpirationType.RelativeToNow);
+
+        double? GetDouble(string key);
+
+        Task<double?> GetDoubleAsync(string key);
+
         void SetBoolean(string key, bool value);
 
         Task SetBooleanAsync(string key, bool value);
@@ -52,10 +76,24 @@ namespace CodeM.FastApi.Cache
 
         Task<byte[]> GetAsync(string key);
 
-        bool TryGetValue(object key, out object result);
+        bool ContainsKey(string key);
+
+        bool TryGetValue<T>(string key, out T result);
 
         void Remove(string key);
 
         Task RemoveAsync(string key);
+
+        void MultiSet(string key, params object[] values);
+
+        void MultiSet2(string key, long seconds, ExpirationType type, params object[] values);
+
+        dynamic MultiGet(string key, params string[] names);
+
+        Task MultiSetAsync(string key, params object[] values);
+
+        Task MultiSet2Async(string key, long seconds, ExpirationType type = ExpirationType.RelativeToNow, params object[] values);
+
+        Task<dynamic> MultiGetAsync(string key, params string[] names);
     }
 }
