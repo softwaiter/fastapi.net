@@ -1,5 +1,3 @@
-using CodeM.Common.Orm;
-using CodeM.FastApi.DbUpgrade;
 using CodeM.FastApi.Log;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -8,17 +6,35 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 
 namespace CodeM.FastApi
 {
     public class Program
     {
+        private static string mEnv = null;
+        private static string mPort = null;
+
         public static void Main(string[] args)
         {
             try
             {
+                foreach (string arg in args)
+                {
+                    string[] paramValues = arg.Split("=");
+                    if (paramValues.Length == 2)
+                    {
+                        if ("env".Equals(paramValues[0].Trim(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            mEnv = paramValues[1].Trim();
+                        }
+                        else if ("port".Equals(paramValues[0].Trim(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            mPort = paramValues[1].Trim();
+                        }
+                    }
+                }
+
                 string frameworkName = " _____      ___   _____   _____       ___   _____   _       __   _   _____   _____  \n" +
                                        "|  ___|    /   | /  ___/ |_   _|     /   | |  _  \\ | |     |  \\ | | | ____| |_   _| \n" +
                                        "| |__     / /| | | |___    | |      / /| | | |_| | | |     |   \\| | | |__     | |   \n" +
@@ -39,8 +55,12 @@ namespace CodeM.FastApi
                     Logger.GetInstance().Fatal(exp);
                     Thread.Sleep(1000);
                 }
-                
+
                 Process.GetCurrentProcess().Kill();
+            }
+            finally
+            {
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
@@ -68,6 +88,16 @@ namespace CodeM.FastApi
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    if (!string.IsNullOrWhiteSpace(mEnv))
+                    {
+                        webBuilder = webBuilder.UseEnvironment(mEnv);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(mPort))
+                    {
+                        webBuilder = webBuilder.UseUrls(string.Concat("http://localhost:", mPort));
+                    }
+
                     webBuilder.UseStartup<Startup>();
                 });
     }

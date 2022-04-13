@@ -10,15 +10,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Remove=".git\**" />
         <Compile Remove="libs\**" />
         <Compile Remove="logs\**" />
         <Compile Remove="Properties\PublishProfiles\**" />
+        <Content Remove=".git\**" />
         <Content Remove="libs\**" />
         <Content Remove="logs\**" />
         <Content Remove="Properties\PublishProfiles\**" />
+        <EmbeddedResource Remove=".git\**" />
         <EmbeddedResource Remove="libs\**" />
         <EmbeddedResource Remove="logs\**" />
         <EmbeddedResource Remove="Properties\PublishProfiles\**" />
+        <None Remove=".git\**" />
         <None Remove="libs\**" />
         <None Remove="logs\**" />
         <None Remove="Properties\PublishProfiles\**" />
@@ -28,8 +32,11 @@
         <Content Include=".\**\*.xml" CopyToPublishDirectory="PreserveNewest" />
         <Content Remove="bin\**"></Content>
         <Content Remove="obj\**"></Content>
+        <EntityDeploy Remove=".git\**" />
         <EntityDeploy Remove="logs\**" />
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
+        <Content Remove=".\.git\ms-persist.xml" />
+        <None Remove=".gitignore" />
         <None Remove="fastapi.db" />
         <None Remove="models\.upgrade.xml" />
         <None Remove="models\organization.model.xml" />
