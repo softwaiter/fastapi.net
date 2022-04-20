@@ -19,7 +19,7 @@
 
 ## 编写中间件
 
-编写中间件没有严格的规范，只需要遵守简单的规则；HTPP请求进入时的拦截方法必须命名为Requset，返回时的拦截方法必须命名为Response；方法有一个唯一参数，类型为[ControllerContext]()。
+编写中间件没有严格的规范，只需要遵守简单的规则；HTPP请求进入时的拦截方法必须命名为Requset，返回时的拦截方法必须命名为Response；方法有一个唯一参数，类型为[ControllerContext](objects.md)。
 
 先看一个简单示例：
 
