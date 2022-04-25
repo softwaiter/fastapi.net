@@ -21,7 +21,7 @@ namespace CodeM.FastApi.Context.Params
                     StringValues result;
                     if (mData.TryGetValue(key, out result))
                     {
-                        return string.Join(",", result);
+                        return result[0];
                     }
                 }
                 return null;
@@ -42,12 +42,38 @@ namespace CodeM.FastApi.Context.Params
                         StringValues result;
                         if (mData.TryGetValue(key, out result))
                         {
-                            return string.Join(",", result);
+                            return result[0];
                         }
                     }
                 }
                 return null;
             }
+        }
+
+        public StringValues AllValues(string key)
+        {
+            StringValues result = new StringValues();
+            if (mData != null)
+            {
+                mData.TryGetValue(key, out result);
+            }
+            return result;
+        }
+
+        public StringValues AllValues(int index)
+        {
+            StringValues result = new StringValues();
+            if (mData != null)
+            {
+                if (index >= 0 && index < mData.Keys.Count)
+                {
+                    string[] keys = new string[mData.Keys.Count];
+                    mData.Keys.CopyTo(keys, 0);
+                    string key = keys[index];
+                    mData.TryGetValue(key, out result);
+                }
+            }
+            return result;
         }
 
         public bool ContainsKey(string key)
