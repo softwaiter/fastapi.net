@@ -95,7 +95,7 @@ namespace CodeM.FastApi
 
                     if (!string.IsNullOrWhiteSpace(mPort))
                     {
-                        webBuilder = webBuilder.UseUrls(string.Concat("http://localhost:", mPort));
+                        webBuilder = webBuilder.UseUrls(string.Concat("http://*:", mPort));
                     }
 
                     webBuilder.UseStartup<Startup>();
