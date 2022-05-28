@@ -88,6 +88,6 @@ export ASPNETCORE_ENVIRONMENT=development
 
 ## 自定义环境
 
-常规开发流程可能不仅仅只有以上几种环境，Egg 支持自定义环境来适应自己的开发流程。 
+常规开发流程可能不仅仅只有以上几种环境，fastapi.net 支持自定义环境来适应自己的开发流程。 
 
-比如，要为开发流程增加集成测试环境 SIT。将 `ASPNETCORE_ENVIRONMENT` 设置成 `sit`，启动时会加载 `appsettings.sit.json`，此时，使用环境判断方法`Utils.IsEnv("sit")`将返回`true`。
+比如，要为开发流程增加集成测试环境 TEST。将 `ASPNETCORE_ENVIRONMENT` 设置成 `test`，启动时会加载 `appsettings.test.json`，此时，使用环境判断方法`Utils.IsEnv("test")`将返回`true`。

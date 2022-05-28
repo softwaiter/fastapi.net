@@ -55,8 +55,8 @@ namespace CodeM.FastApi.Controller
 * handler - 指定路由具体执行业务逻辑的代码实现，需要填写完整代码路径，即命名空间+类名+方法名（可选）。
 * resource - 框架支持restful风格的路由定义，通过指定一个类，快速定义一组CRUD路由，需要指定类全名称（可选）。
 * model - 框架内置ORM能力，通过指定一个 model定义，快速定义一组针对指定model的CRUD路由（可选）。
-* action - 配合model定义路由的接口行为，取值范围CURLD，对应增、改、删、列表、详情，可自由组合，默认CURLD。
-* batchAction - 配合model定义路由的接口批操作行为，取值范围CUR，对应批量增、批量改、批量删，可自由组合，默认空。
+* <a id="link_action">action</a> - 配合model定义路由的接口行为，取值范围CURLD，对应增、改、删、列表、详情，可自由组合，默认CURLD。
+* <a id="link_batchAction">batchAction</a> - 配合model定义路由的接口批操作行为，取值范围CUR，对应批量增、批量改、批量删，可自由组合，默认空。
 * middlewares - 路由定义支持中间件设置，通过设置中间件可以在具体业务逻辑执行前或者执行后进行额外的处理（可选）。
 * maxConcurrent - 路由请求最大并发数，超过最大数，直接返回状态繁忙，默认100（可选）。
 * maxIdle - 指定路由空闲状态时，存活的最大实例数，默认10（可选）。
@@ -172,12 +172,21 @@ namespace CodeM.FastApi.Controller
 | PUT    | /user/{id} | 修改用户详情 | --                                                           |
 | PUT    | /user      | 批量修改用户 | model主键：要删除的model模型的主键值，多个主键值可分别设置；如：?id=1&id=2&id=3 |
 
-配置action属性，可以定义生成哪些路由，假如只需要用户模型User的列表查询接口，可进行如下定义：
+通过配置[action](#link_action)属性，可以定义路由支持的单个对象操作能力，假如只需要用户模型User的列表查询能力，可进行如下定义：
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>
 <routers>
     <router path="/user" model="User" action="L"></router>
+</routers>
+```
+
+通过配置[batchAction](#link_batchAction)属性，可以定义路由支持的批量操作能力，假如只需要用户模型User的批量删除能力，可以进行如下定义：
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<routers>
+    <router path="/user" model="User" batchAction="R"></router>
 </routers>
 ```
 
