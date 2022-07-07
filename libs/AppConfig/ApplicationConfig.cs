@@ -17,6 +17,8 @@ namespace CodeM.FastApi.Config
 
         public SessionSetting Session { get; set; } = new SessionSetting();
 
+        public FileUploadSetting FileUpload { get; set; } = new FileUploadSetting();
+
         public dynamic Settings { get; set; } = null;
 
     }

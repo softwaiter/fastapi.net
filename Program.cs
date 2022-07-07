@@ -98,7 +98,10 @@ namespace CodeM.FastApi
                         webBuilder = webBuilder.UseUrls(string.Concat("http://*:", mPort));
                     }
 
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>().UseKestrel(options =>
+                    {
+                        options.Limits.MaxRequestBodySize = null;
+                    });
                 });
     }
 
