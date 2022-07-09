@@ -47,5 +47,15 @@ namespace CodeM.FastApi.Context.Wrappers
         {
             return GetInt32(key) == 1;
         }
+
+        public void Clear()
+        {
+            mContext.Session.Clear();
+        }
+
+        public void Remove(string key)
+        { 
+            mContext.Session.Remove(key);
+        }
     }
 }
