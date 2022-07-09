@@ -26,7 +26,7 @@
 # :memo:文档
 
 - [运行环境](docs/env.md)
-- [Config 配置](docs/config.md)
+- [配置(Config)](docs/config.md)
 - [中间件](docs/middleware.md)
 - [会话(Session)](docs/session.md)
 - [路由(Router)](docs/router.md)
