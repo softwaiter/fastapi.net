@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -56,7 +57,11 @@ namespace CodeM.FastApi
 
             if (AppConfig.Compression.Enable)
             {
-                services.AddResponseCompression();
+                services.AddResponseCompression(options =>
+                {
+                    options.EnableForHttps = true;
+                    options.Providers.Add<GzipCompressionProvider>();
+                });
             }
 
             if (AppConfig.Session.Enable)
