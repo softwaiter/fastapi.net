@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodeM.Common.Orm" Version="1.8.1" />
-    <PackageReference Include="CodeM.Common.Tools" Version="1.6.5" />
+    <PackageReference Include="CodeM.Common.Tools" Version="1.6.8" />
   </ItemGroup>
 
 </Project>
