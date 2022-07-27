@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeM.Common.Tools" Version="1.6.8" />
+    <PackageReference Include="CodeM.Common.Tools" Version="1.6.9" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
   </ItemGroup>
 

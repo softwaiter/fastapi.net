@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CodeM.Common.Ioc" Version="1.1.1" />
-    <PackageReference Include="CodeM.Common.Tools" Version="1.6.8" />
+    <PackageReference Include="CodeM.Common.Tools" Version="1.6.9" />
     <PackageReference Include="Quartz" Version="3.3.3" />
   </ItemGroup>
 
