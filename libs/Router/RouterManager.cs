@@ -1,5 +1,6 @@
 ﻿using CodeM.Common.Ioc;
 using CodeM.Common.Orm;
+using CodeM.Common.Tools.Json;
 using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
@@ -283,7 +284,7 @@ namespace CodeM.FastApi.Router
                         for (int i = 0; i < Math.Min(100, cc.PostJson._items.Count); i++)
                         {
                             dynamic postItem = cc.PostJson._items[i];
-                            dynamic obj = m.NewObject();
+                            dynamic obj = new DynamicObjectExt();
                             for (int j = 0; j < count; j++)
                             {
                                 Property p = m.GetProperty(j);
@@ -325,7 +326,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        dynamic obj = m.NewObject();
+                        dynamic obj = new DynamicObjectExt();
                         int count = m.PropertyCount;
                         for (int i = 0; i < count; i++)
                         {
@@ -797,7 +798,7 @@ namespace CodeM.FastApi.Router
                     }
 
                     int count = m.PropertyCount;
-                    dynamic obj = m.NewObject();
+                    dynamic obj = new DynamicObjectExt();
                     for (int i = 0; i < count; i++)
                     {
                         Property p = m.GetProperty(i);
@@ -863,7 +864,7 @@ namespace CodeM.FastApi.Router
                         throw new Exception("无效的参数。");
                     }
 
-                    dynamic obj = m.NewObject();
+                    dynamic obj = new DynamicObjectExt();
 
                     for (int i = 0; i < m.PrimaryKeyCount; i++)
                     {
