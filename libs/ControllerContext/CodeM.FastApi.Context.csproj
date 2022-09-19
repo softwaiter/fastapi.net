@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeM.Common.Tools" Version="1.6.9" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
+    <PackageReference Include="Xmtool" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>

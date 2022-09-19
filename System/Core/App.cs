@@ -37,10 +37,10 @@ namespace CodeM.FastApi.System.Core
         private static void InitOrm(string contentRootPath)
         {
             //ORM模型库初始化
-            OrmUtils.ModelPath = Path.Combine(contentRootPath, "models");
-            Console.WriteLine("加载ORM模型定义文件：" + OrmUtils.ModelPath);
-            OrmUtils.Load();
-            OrmUtils.TryCreateTables();
+            Derd.ModelPath = Path.Combine(contentRootPath, "models");
+            Console.WriteLine("加载ORM模型定义文件：" + Derd.ModelPath);
+            Derd.Load();
+            Derd.TryCreateTables();
 
             //ORM版本控制
             UpgradeManager.EnableVersionControl();
@@ -109,11 +109,11 @@ namespace CodeM.FastApi.System.Core
             string serviceFullName = sThirdDot.Replace(appFullName, string.Concat(".Services.", serviceName, "Service"));
             if (singleton)
             {
-                return IocUtils.GetSingleObject(serviceFullName);
+                return Wukong.GetSingleObject(serviceFullName);
             }
             else
             {
-                return IocUtils.GetObject(serviceFullName);
+                return Wukong.GetObject(serviceFullName);
             }
         }
     }

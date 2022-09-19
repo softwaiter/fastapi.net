@@ -15,11 +15,11 @@ namespace CodeM.FastApi.Controllers
             serviceFullName = sSuffixControler.Replace(serviceFullName, "Service");
             if (singleton)
             {
-                return IocUtils.GetSingleObject(serviceFullName);
+                return Wukong.GetSingleObject(serviceFullName);
             }
             else
             {
-                return IocUtils.GetObject(serviceFullName);
+                return Wukong.GetObject(serviceFullName);
             }
         }
 

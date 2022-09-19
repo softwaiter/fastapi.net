@@ -1,5 +1,5 @@
 ﻿using CodeM.Common.Ioc;
-using CodeM.Common.Tools.Json;
+using CodeM.Common.Tools.DynamicObject;
 using CodeM.FastApi.Cache;
 using CodeM.FastApi.Config;
 using System;
@@ -31,7 +31,7 @@ namespace CodeM.FastApi.System.Core
 
                         string cacheClassName = string.Concat("CodeM.FastApi.Cache.", cacheItem.Type, "Cache");
                         dynamic options = cacheItem["Options"];
-                        ICache cacheInst = IocUtils.GetObject<ICache>(cacheClassName, new object[] { options });
+                        ICache cacheInst = Wukong.GetObject<ICache>(cacheClassName, new object[] { options });
                         CacheManager.Add(key, cacheInst, isDefault);
                     }
                 }

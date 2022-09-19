@@ -12,15 +12,15 @@ namespace CodeM.FastApi.DbUpgrade
 
         public static void EnableVersionControl()
         {
-            if (OrmUtils.GetVersion() < 0)
+            if (Derd.GetVersion() < 0)
             {
-                OrmUtils.EnableVersionControl();
+                Derd.EnableVersionControl();
             }
         }
 
         public static void Upgrade()
         {
-            int currentVersion = OrmUtils.GetVersion();
+            int currentVersion = Derd.GetVersion();
             if (currentVersion < 0)
             {
                 throw new Exception("版本控制未开启，请先使用EnableVersionControl方法开启版本控制。");
@@ -30,21 +30,21 @@ namespace CodeM.FastApi.DbUpgrade
             {
                 if (upgradeVersion.Version > currentVersion)
                 {
-                    int trans = OrmUtils.GetTransaction();
+                    int trans = Derd.GetTransaction();
                     try
                     {
                         upgradeVersion.Enum(sqlCmd =>
                         {
-                            OrmUtils.ExecSql(sqlCmd, trans);
+                            Derd.ExecSql(sqlCmd, trans);
                         });
-                        OrmUtils.SetVersion(upgradeVersion.Version, trans);
-                        OrmUtils.CommitTransaction(trans);
+                        Derd.SetVersion(upgradeVersion.Version, trans);
+                        Derd.CommitTransaction(trans);
 
                         currentVersion = upgradeVersion.Version;
                     }
                     catch (Exception exp)
                     {
-                        OrmUtils.RollbackTransaction(trans);
+                        Derd.RollbackTransaction(trans);
                         throw exp;
                     }
                 }

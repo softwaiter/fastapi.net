@@ -1,5 +1,6 @@
 ﻿using CodeM.Common.Ioc;
 using CodeM.Common.Tools;
+using CodeM.FastApi.Common;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -9,7 +10,6 @@ namespace CodeM.FastApi.Schedule
 {
     public class ScheduleManager
     {
-        private static string sEnvName;
         private static List<ScheduleSetting> sSettings;
 
         private static IScheduler sScheduler;
@@ -22,8 +22,6 @@ namespace CodeM.FastApi.Schedule
 
         private void Load(string file)
         {
-            sEnvName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-
             List < ScheduleSetting > settings = ScheduleParser.Parse(file);
             sSettings = settings;
         }
@@ -50,7 +48,8 @@ namespace CodeM.FastApi.Schedule
         {
             if (!string.IsNullOrWhiteSpace(env))
             {
-                return env.ToLower().Contains(sEnvName.ToLower());
+                string sCurEnv = FastApiUtils.GetEnvironmentName();
+                return env.ToLower().Contains(sCurEnv.ToLower());
             }
             return true;
         }
@@ -59,7 +58,7 @@ namespace CodeM.FastApi.Schedule
         {
             if (IsMatchEnvironment(setting.Environment))
             {
-                object jobInst = IocUtils.GetSingleObject(setting.Class);
+                object jobInst = Wukong.GetSingleObject(setting.Class);
                 Type _typ = jobInst.GetType();
 
                 IJobDetail job = JobBuilder.Create(_typ)

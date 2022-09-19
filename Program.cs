@@ -1,3 +1,4 @@
+using CodeM.FastApi.Common;
 using CodeM.FastApi.Log;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -102,6 +103,8 @@ namespace CodeM.FastApi
                     {
                         options.Limits.MaxRequestBodySize = null;
                     });
+
+                    FastApiUtils.SetEnvironmentName(webBuilder.GetSetting("ENVIRONMENT"));
                 });
     }
 

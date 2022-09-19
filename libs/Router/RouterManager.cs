@@ -1,6 +1,6 @@
 ﻿using CodeM.Common.Ioc;
 using CodeM.Common.Orm;
-using CodeM.Common.Tools.Json;
+using CodeM.Common.Tools.DynamicObject;
 using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
@@ -90,7 +90,7 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    if (Utils.IsDev())
+                    if (FastApiUtils.IsDev())
                     {
                         cc.State = 500;
                         await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
@@ -166,7 +166,7 @@ namespace CodeM.FastApi.Router
         #region Resource Router
         private void _MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
-            object resouceInst = IocUtils.GetObject(item.Resource);
+            object resouceInst = Wukong.GetObject(item.Resource);
             if (resouceInst == null)
             {
                 throw new Exception(string.Concat("Instantiation exception(", item.Resource, ")"));
@@ -183,7 +183,7 @@ namespace CodeM.FastApi.Router
             }
 
             //增
-            if (Utils.IsMethodExists(resouceInst, "Create"))
+            if (FastApiUtils.IsMethodExists(resouceInst, "Create"))
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
@@ -195,7 +195,7 @@ namespace CodeM.FastApi.Router
             }
 
             //删
-            if (Utils.IsMethodExists(resouceInst, "Delete"))
+            if (FastApiUtils.IsMethodExists(resouceInst, "Delete"))
             {
                 builder.MapDelete(individualPath, async (context) =>
                 {
@@ -207,7 +207,7 @@ namespace CodeM.FastApi.Router
             }
 
             //改
-            if (Utils.IsMethodExists(resouceInst, "Update"))
+            if (FastApiUtils.IsMethodExists(resouceInst, "Update"))
             {
                 builder.MapPut(individualPath, async (context) =>
                 {
@@ -219,7 +219,7 @@ namespace CodeM.FastApi.Router
             }
 
             //查（列表）
-            if (Utils.IsMethodExists(resouceInst, "List"))
+            if (FastApiUtils.IsMethodExists(resouceInst, "List"))
             {
                 builder.MapGet(item.Path, async (context) =>
                 {
@@ -231,7 +231,7 @@ namespace CodeM.FastApi.Router
             }
 
             //查（个体）
-            if (Utils.IsMethodExists(resouceInst, "Detail"))
+            if (FastApiUtils.IsMethodExists(resouceInst, "Detail"))
             {
                 builder.MapGet(individualPath, async (context) =>
                 {
@@ -273,7 +273,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     if (cc.PostJson != null && cc.PostJson.Has("_items") &&
                         cc.PostJson._items is List<dynamic> &&
@@ -316,11 +316,11 @@ namespace CodeM.FastApi.Router
                             {
                                 m.SetValues(newObjs[i]).Save(transCode, true);
                             }
-                            OrmUtils.CommitTransaction(transCode);
+                            Derd.CommitTransaction(transCode);
                         }
                         catch (Exception exp)
                         {
-                            OrmUtils.RollbackTransaction(transCode);
+                            Derd.RollbackTransaction(transCode);
                             throw exp;
                         }
                     }
@@ -564,7 +564,7 @@ namespace CodeM.FastApi.Router
                     string where = cc.QueryParams.Get("where", null);
                     IFilter filter = ParseQueryWhereCondition(where);
 
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     long total = -1;
                     
@@ -637,7 +637,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     string id = cc.RouteParams["id"];
                     string[] ids = id.Split("|");
@@ -689,7 +689,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     for (int i = 0; i < m.PrimaryKeyCount; i++)
                     {
@@ -733,7 +733,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     string id = cc.RouteParams["id"];
                     string[] ids = id.Split("|");
@@ -784,7 +784,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     for (int i = 0; i < m.PrimaryKeyCount; i++)
                     {
@@ -855,7 +855,7 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
-                    Model m = OrmUtils.Model(item.Model);
+                    Model m = Derd.Model(item.Model);
 
                     string id = cc.RouteParams["id"];
                     string[] ids = id.Split("|");

@@ -187,7 +187,7 @@ namespace CodeM.FastApi.Router
                             }
                             item.Model = model.Trim().ToLower();
 
-                            if (!OrmUtils.IsDefind(item.Model))
+                            if (!Derd.IsDefind(item.Model))
                             {
                                 throw new Exception("指定model未定义。" + file + " - Line " + nodeInfo.Line);
                             }

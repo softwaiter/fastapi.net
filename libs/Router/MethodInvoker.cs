@@ -108,7 +108,7 @@ namespace CodeM.FastApi.Router
             {
                 try
                 {
-                    result = IocUtils.GetObject<object>(handlerClass);
+                    result = Wukong.GetObject<object>(handlerClass);
                     if (result == null)
                     {
                         throw new Exception();
@@ -178,7 +178,7 @@ namespace CodeM.FastApi.Router
                 {
                     Type handlerType = handlerInst.GetType();
 
-                    if (ignoreMethodNotExists && !Utils.IsMethodExists(handlerType, handlerMethod))
+                    if (ignoreMethodNotExists && !FastApiUtils.IsMethodExists(handlerType, handlerMethod))
                     {
                         return null;
                     }
@@ -197,7 +197,7 @@ namespace CodeM.FastApi.Router
                             {
                                 if (result.Exception != null)
                                 {
-                                    if (Utils.IsDev())
+                                    if (FastApiUtils.IsDev())
                                     {
                                         throw result.Exception;
                                     }

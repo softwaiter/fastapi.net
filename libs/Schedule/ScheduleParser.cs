@@ -90,7 +90,7 @@ namespace CodeM.FastApi.Schedule
                         }
                         else
                         {
-                            object jobInst = IocUtils.GetSingleObject(classStr.Trim());
+                            object jobInst = Wukong.GetSingleObject(classStr.Trim());
                             if (!(jobInst is IJob))
                             {
                                 throw new Exception("class指定类型必须实现IJob接口。 " + file + " - Line " + nodeInfo.Line);

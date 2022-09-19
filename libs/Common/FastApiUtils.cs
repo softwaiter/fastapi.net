@@ -5,15 +5,30 @@ using System.Reflection;
 
 namespace CodeM.FastApi.Common
 {
-    public static class Utils
+    public static class FastApiUtils
     {
+        private static string sEnvironmentName = null;
+        public static void SetEnvironmentName(string envName)
+        { 
+            sEnvironmentName = envName;
+        }
+
+        public static string GetEnvironmentName()
+        {
+            if (string.IsNullOrWhiteSpace(sEnvironmentName))
+            {
+                return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            }
+            return sEnvironmentName;
+        }
+
         private static bool sIsDevelopmentChecked = false;
         private static bool sIsDevelopment = false;
         public static bool IsDev()
         {
             if (!sIsDevelopmentChecked)
             {
-                string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                string env = GetEnvironmentName();
                 sIsDevelopment = "Development".Equals(env, StringComparison.OrdinalIgnoreCase);
                 sIsDevelopmentChecked = true;
             }
@@ -26,7 +41,7 @@ namespace CodeM.FastApi.Common
         {
             if (!sIsProductionChecked)
             {
-                string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                string env = GetEnvironmentName();
                 sIsProduction = "Production".Equals(env, StringComparison.OrdinalIgnoreCase);
                 sIsProductionChecked = true;
             }
@@ -37,7 +52,7 @@ namespace CodeM.FastApi.Common
         public static bool IsEnv(string envName)
         {
             bool bRet = false;
-            string env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string env = GetEnvironmentName();
             string key = env != null ? env.ToLower() : "";
             if (!sEnvs.TryGetValue(key, out bRet))
             {
