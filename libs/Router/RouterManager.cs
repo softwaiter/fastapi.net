@@ -112,11 +112,47 @@ namespace CodeM.FastApi.Router
             }
         }
 
+        private string ProcessApiVersion(ControllerContext cc,
+            string handlerFullName)
+        {
+            if (cc.Config.VersionControl.Enable)
+            {
+                string version = cc.Headers.Get(cc.Config.VersionControl.Param, null);
+                if (string.IsNullOrWhiteSpace(version))
+                {
+                    version = cc.QueryParams.Get(cc.Config.VersionControl.Param, null);
+                }
+                if (string.IsNullOrWhiteSpace(version))
+                {
+                    version = cc.Config.VersionControl.Default;
+                }
+
+                version = version.Trim();
+                if (!version.Equals(cc.Config.VersionControl.Default, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (cc.Config.VersionControl.AllowedVersions != null &&
+                        cc.Config.VersionControl.AllowedVersions.Length > 0)
+                    {
+                        if (!Array.Exists<string>(cc.Config.VersionControl.AllowedVersions, 
+                            item => version.Equals(item, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            version = "";
+                        }
+                    }
+                    if (!string.IsNullOrWhiteSpace(version))
+                    {
+                        handlerFullName += string.Concat("_", version);
+                    }
+                }
+            }
+            return handlerFullName;
+        }
 
         private async Task _DefaultRouterHandlerAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
-            mMethodInvoker.Invoke(args[0] + "", cc,
+            string handlerFullName = ProcessApiVersion(cc, "" + args[0]);
+            mMethodInvoker.Invoke(handlerFullName, cc,
                 item.MaxConcurrent, item.MaxIdle, item.MaxInvokePerInstance);
             await Task.CompletedTask;
         }

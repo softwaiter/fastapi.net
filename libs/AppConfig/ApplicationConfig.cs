@@ -19,6 +19,8 @@ namespace CodeM.FastApi.Config
 
         public FileUploadSetting FileUpload { get; set; } = new FileUploadSetting();
 
+        public VersionControlSetting VersionControl { get; set; } = new VersionControlSetting();
+
         public dynamic Settings { get; set; } = null;
 
     }
