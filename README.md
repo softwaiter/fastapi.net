@@ -25,13 +25,14 @@
 
 # :memo:文档
 
+- [目录结构](docs/structure.md)
 - [运行环境](docs/env.md)
 - [配置(Config)](docs/config.md)
-- [中间件](docs/middleware.md)
+- [中间件(Middleware)](docs/middleware.md)
 - [会话(Session)](docs/session.md)
 - [路由(Router)](docs/router.md)
 - [控制器(Controller)](docs/controller.md)
-- [数据库模型(ORM)](https://github.com/softwaiter/netcoreORM/blob/master/README.md)
+- [数据库操作(ORM)](https://github.com/softwaiter/netcoreORM/blob/master/README.md)
 - [定时任务](docs/schedule.md)
 - [日志](docs/logging.md)
 - [常用工具库](https://github.com/softwaiter/netcoreTools/blob/master/README.md)
@@ -39,3 +40,4 @@
 # 🎈 协议
 
 fastapi.net 使用 [MIT 协议](https://github.com/softwaiter/fastapi.net/blob/master/LICENSE)
+

@@ -33,12 +33,13 @@ fastapi.net-project
 
 如上，由框架约定的目录，用户可根据实际业务需要自定义内容：
 
-- `router.xml` - 用于配置URL路由规则，具体参见[路由（Router）](router.md)。
+- `router.xml` - 用于配置URL路由规则，具体参见[路由(Router)](router.md)。
 - `schedule.xml` - 用于配置定时任务及其调度规则，可选，具体参见[定时任务](schedule.md)。
-- `appsettings.json`、`appsettings.*.json` - 框架配置文件，具体参见[Config 配置](config.md)。
-- `Controlles/**` - 控制器实现类，解析用户输入，返回相应处理结果，具体参见[控制器（Controller）](controller.md)。
-- `Services/**` - 用于放置业务逻辑实现类，可选，建议使用，具体参见[服务（Service）](service.md)。
-- `models/.connection.xml` - 数据库连接配置文件，具体参见[数据库操作](database.md)。
-- `models/.upgrade.xml` - 数据库版本升级文件，具体参见[数据库操作](database.md)。
-- `models/*.model.xml` - 数据实体模型定义文件，具体参见[数据库操作](database.md)。
+- `appsettings.json`、`appsettings.*.json` - 框架配置文件，具体参见[配置(Config)](config.md)。
+- `Controlles/**` - 控制器实现类，解析用户输入，返回相应处理结果，具体参见[控制器(Controller)](controller.md)。
+- `Services/**` - 用于放置业务逻辑实现类，可选，建议使用，具体参见[服务(Service)](service.md)。
+- `models/.connection.xml` - 数据库连接配置文件，具体参见[数据库操作(ORM)](database.md)。
+- `models/.upgrade.xml` - 数据库版本升级文件，具体参见[数据库操作(ORM)](database.md)。
+- `models/*.model.xml` - 数据实体模型定义文件，具体参见[数据库操作(ORM)](database.md)。
 - `Schedules/**` - 用于放置定时任务实现类，可选，具体参见[定时任务](schedule.md)。
+
