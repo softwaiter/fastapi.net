@@ -54,7 +54,7 @@ namespace CodeM.FastApi.Log
             } 
         }
 
-        public static Logger GetInstance()
+        public static Logger Instance()
         {
             return sLogger;
         }

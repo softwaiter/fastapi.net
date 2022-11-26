@@ -153,9 +153,9 @@ env： 仅在指定的环境下才启动该定时任务，多个环境逗号分�
 实际开发中，可以通过App全局对象获取系统的定时任务管理实例。
 ```c#
 //启动Id为demo的定时任务
-App.GetInstance().Schedule().StartJob("demo");
+Application.Instance().Schedule().StartJob("demo");
 
 //停止Id为demo的定时任务
-App.GetInstance().Schedule().StopJob("demo");
+Application.Instance().Schedule().StopJob("demo");
 ```
 

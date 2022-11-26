@@ -104,7 +104,7 @@ namespace CodeM.FastApi
             });
 
             string scheduleFile = Path.Combine(this.Environment.ContentRootPath, "schedule.xml");
-            App.Init(this.Environment, AppConfig, scheduleFile);
+            Application.Init(this.Environment, AppConfig, scheduleFile);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
@@ -149,7 +149,7 @@ namespace CodeM.FastApi
                         {
                             listenAddress = e.Current.Trim();
                         }
-                        App.GetInstance().Address = listenAddress;
+                        Application.Instance().Address = listenAddress;
                     }
 
                     Console.WriteLine(string.Format("启动成功，监听地址：[{0}]，环境变量：[{1}]",
@@ -159,15 +159,15 @@ namespace CodeM.FastApi
                 });
                 lifetime.ApplicationStopping.Register(() =>
                 {
-                    App.GetInstance().Schedule().Shutdown();
+                    Application.Instance().Schedule().Shutdown();
                 });
-                App.GetInstance().Schedule().Run();
+                Application.Instance().Schedule().Run();
             }
             catch (Exception exp)
             {
                 Console.ForegroundColor = ConsoleColor.White;
 
-                Logger.GetInstance().Fatal(exp);
+                Logger.Instance().Fatal(exp);
                 Thread.Sleep(1000);
 
                 Process.GetCurrentProcess().Kill();

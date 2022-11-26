@@ -185,7 +185,7 @@ using CodeM.FastApi.System.Core;
 public void GetUser(string userid)
 {
     // do something
-    App.GetInstance().Log().Debug("查询指定用户信息。");
+    Application.Instance().Log().Debug("查询指定用户信息。");
 }
 ```
 

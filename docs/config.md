@@ -1,6 +1,6 @@
 # Config 配置
 
-框架提供了强大且可扩展的配置功能，支持根据运行环境维护不同的配置；运行时，框架会自动合并默认配置和运行环境的配置，合并后的配置可直接从 `App.GetInstance().Config()` 获取。 
+框架提供了强大且可扩展的配置功能，支持根据运行环境维护不同的配置；运行时，框架会自动合并默认配置和运行环境的配置，合并后的配置可直接从 `Application.Instance().Config()` 获取。 
 
 ## 多环境配置
 
@@ -96,7 +96,7 @@ appsettings.Production.json
 此种方式允许用户在任何位置进行使用，不受代码位置显示。
 
 ```c#
-if (App.GetInstance().Compression.Enable)	//判断框架是否开启了结果压缩机制
+if (Application.Instance().Compression.Enable)	//判断框架是否开启了结果压缩机制
 {
     //TODO
 }
@@ -121,7 +121,7 @@ public async Task GetList(ControllerContext cc)
 框架的配置都有对应的配置属性进行读取，对于用户自定义的配置，全部放在Settings动态对象中，用户可以通过该对象进行获取，事实上，框架的配置属性也全部定义在该对象内。
 
 ```c#
-if (App.GetInstance().Settings.Compression.Enable)
+if (Application.Instance().Settings.Compression.Enable)
 {
 	//TODO
 }
@@ -142,6 +142,6 @@ if (App.GetInstance().Settings.Compression.Enable)
 读取方式：
 
 ```c#
-string wechatSecret = App.GetInstance().Settings.WechatSecret;
+string wechatSecret = Application.Instance().Settings.WechatSecret;
 ```
 

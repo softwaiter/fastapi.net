@@ -53,7 +53,7 @@ namespace CodeM.FastApi
             {
                 if (Logger.Inited)
                 {
-                    Logger.GetInstance().Fatal(exp);
+                    Logger.Instance().Fatal(exp);
                     Thread.Sleep(1000);
                 }
 

@@ -25,14 +25,14 @@ namespace CodeM.FastApi.Controllers
 
         public dynamic Service(string serviceName, bool singleton = true)
         {
-            return App.GetInstance().Service(serviceName, singleton);
+            return Application.Instance().Service(serviceName, singleton);
         }
 
-        public App App
+        public Application App
         {
             get
             {
-                return App.GetInstance();
+                return Application.Instance();
             }
         }
     }

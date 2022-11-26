@@ -12,14 +12,14 @@ using System.Text.RegularExpressions;
 
 namespace CodeM.FastApi.System.Core
 {
-    public class App
+    public class Application
     {
         private static IWebHostEnvironment sEnv = null;
         private static ApplicationConfig sAppConfig = null;
         private static ScheduleManager sScheduleManager = null;
         private static Regex sThirdDot = new Regex("\\.[^\\.]*\\.[^\\.]*\\.[^\\.]*$");
 
-        private static App sSingleInst = new App();
+        private static Application sSingleInst = new Application();
 
         public static void Init(IWebHostEnvironment env, 
             ApplicationConfig cfg, string scheduleFile)
@@ -49,11 +49,11 @@ namespace CodeM.FastApi.System.Core
             UpgradeManager.Upgrade();
         }
 
-        private App()
+        private Application()
         {
         }
 
-        public static App GetInstance()
+        public static Application Instance()
         {
             return sSingleInst;
         }
@@ -100,7 +100,7 @@ namespace CodeM.FastApi.System.Core
 
         public Logger Log()
         {
-            return Logger.GetInstance();
+            return Logger.Instance();
         }
 
         public dynamic Service(string serviceName, bool singleton = true)
