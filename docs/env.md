@@ -5,7 +5,7 @@
 
 ## 指定运行环境
 
-框架常用的指定运行环境的方法有两种：
+框架常用的指定运行环境的方法有3种：
 
 1. 在开发调试过程中，可以在`launchSettings.json`中进行如下配置：
 
@@ -24,7 +24,7 @@
                "commandName": "IISExpress",
                "launchBrowser": true,
                "environmentVariables": {
-                   "ASPNETCORE_ENVIRONMENT": "Development"
+                   "ASPNETCORE_ENVIRONMENT": "Development"	// 指定使用开发环境
                }
            },
            "fastapi": {
@@ -32,7 +32,7 @@
                "launchBrowser": true,
                "applicationUrl": "http://localhost:5000",
                "environmentVariables": {
-                   "ASPNETCORE_ENVIRONMENT": "Development"
+                   "ASPNETCORE_ENVIRONMENT": "Development"	// 指定使用开发环境配置
                }
            }
        }
@@ -42,16 +42,17 @@
 2. 通过`ASPNETCORE_ENVIRONMENT`环境变量指定运行环境更加方便，比如在生产环境所在的服务器中可以执行如下命令：
 
    ```shell
-   //Windows服务器
+   //Windows服务器，指定使用开发环境配置
    setx ASPNETCORE_ENVIRONMENT "Development"
    ```
    ```shell
-//MacOS/Linux服务器
+//MacOS/Linux服务器，指定使用开发环境配置
 export ASPNETCORE_ENVIRONMENT=development
    ```
 3. 通过命令行运行时指定`env`参数：
    ```shell
-dotnet fastapi.dll env=Development
+//指定使用开发环境配置
+   dotnet fastapi.dll env=Development
    ```
 
 
@@ -86,12 +87,12 @@ dotnet fastapi.dll env=Development
 
 ## 运行环境相关配置
 
- 不同的运行环境会对应不同的配置，具体请阅读 [Config 配置](config.md)。 
+不同的运行环境会对应不同的配置，具体请阅读 [配置(Config)](config.md)。 
 
 
 
 ## 自定义环境
 
-常规开发流程可能不仅仅只有以上几种环境，fastapi.net 支持自定义环境来适应自己的开发流程。 
+常规开发流程可能不仅仅只有以上几种运行环境，fastapi.net 支持自定义环境来适应自己的开发流程。 
 
 比如，要为开发流程增加集成测试环境 TEST。将 `ASPNETCORE_ENVIRONMENT` 设置成 `test`，启动时会加载 `appsettings.test.json`，此时，使用环境判断方法`FastApiUtils.IsEnv("test")`将返回`true`。
