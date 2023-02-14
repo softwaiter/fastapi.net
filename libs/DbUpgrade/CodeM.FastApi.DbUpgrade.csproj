@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Derd" Version="2.2.1" />
+    <PackageReference Include="Derd" Version="2.2.2" />
     <PackageReference Include="Xmtool" Version="2.0.5" />
   </ItemGroup>
 
