@@ -409,8 +409,14 @@ namespace CodeM.FastApi.Router
 
         private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|\\*=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
 
-        private void BuildWhereFilter(IFilter filter, string op, string name, string value)
+        private void BuildWhereFilter(Model m, IFilter filter, string op, string name, string value)
         {
+            if (!m.HasProperty(name) && !m.HasProperty(value))
+            {
+                filter.And(String.Concat(name, op, value));
+                return;
+            }
+
             switch (op)
             {
                 case ">=":
@@ -461,7 +467,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private IFilter ParseQueryWhereCondition(string where)
+        private IFilter ParseQueryWhereCondition(Model m, string where)
         {
             IFilter result = new SubFilter();
 
@@ -478,20 +484,20 @@ namespace CodeM.FastApi.Router
                 MatchCollection mc = mReOP.Matches(where);
                 for (int i = 0; i < mc.Count; i++)
                 {
-                    Match m = mc[i];
+                    Match match = mc[i];
 
-                    string curOP = m.Value.Trim();
+                    string curOP = match.Value.Trim();
                     if ("AND".Equals(curOP, StringComparison.OrdinalIgnoreCase))
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset).Trim();
+                            exprValue = where.Substring(offset, match.Index - offset).Trim();
 
-                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            BuildWhereFilter(m, current, aop, exprName, exprValue);
                             exprName = null;
                         }
 
-                        offset = m.Index + m.Length;
+                        offset = match.Index + match.Length;
 
                         if (bracket == 0 && current.Parent != null)
                         {
@@ -506,13 +512,13 @@ namespace CodeM.FastApi.Router
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset).Trim();
+                            exprValue = where.Substring(offset, match.Index - offset).Trim();
 
-                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            BuildWhereFilter(m, current, aop, exprName, exprValue);
                             exprName = null;
                         }
 
-                        offset = m.Index + m.Length;
+                        offset = match.Index + match.Length;
 
                         if (bracket == 0 && current.Parent != null)
                         {
@@ -534,20 +540,20 @@ namespace CodeM.FastApi.Router
                         }
 
                         bracket++;
-                        offset = m.Index + m.Length;
+                        offset = match.Index + match.Length;
                     }
                     else if (")".Equals(curOP))
                     {
                         if (exprName != null)
                         {
-                            exprValue = where.Substring(offset, m.Index - offset).Trim();
+                            exprValue = where.Substring(offset, match.Index - offset).Trim();
 
-                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            BuildWhereFilter(m, current, aop, exprName, exprValue);
                             exprName = null;
                         }
 
                         bracket--;
-                        offset = m.Index + m.Length;
+                        offset = match.Index + match.Length;
 
                         if (current.Parent != null)
                         {
@@ -556,15 +562,15 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        exprName = where.Substring(offset, m.Index - offset).Trim();
+                        exprName = where.Substring(offset, match.Index - offset).Trim();
                         aop = curOP;
-                        offset = m.Index + m.Length;
+                        offset = match.Index + match.Length;
 
                         if (i == mc.Count - 1)
                         {
                             exprValue = where.Substring(offset).Trim();
 
-                            BuildWhereFilter(current, aop, exprName, exprValue);
+                            BuildWhereFilter(m, current, aop, exprName, exprValue);
                             exprName = null;
                         }
                     }
@@ -590,6 +596,8 @@ namespace CodeM.FastApi.Router
 
                 try
                 {
+                    Model m = Derd.Model(item.Model);
+
                     int pagesize = 50;
                     int.TryParse(cc.QueryParams.Get("pagesize", "50"), out pagesize);
                     pagesize = Math.Min(pagesize, 200); //安全考虑，最大每页数据不能超过200条
@@ -598,9 +606,7 @@ namespace CodeM.FastApi.Router
                     int.TryParse(cc.QueryParams.Get("pageindex", "1"), out pageindex);
 
                     string where = cc.QueryParams.Get("where", null);
-                    IFilter filter = ParseQueryWhereCondition(where);
-
-                    Model m = Derd.Model(item.Model);
+                    IFilter filter = ParseQueryWhereCondition(m, where);
 
                     long total = -1;
                     
