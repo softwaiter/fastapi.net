@@ -1,11 +1,11 @@
 ﻿using CodeM.Common.Tools;
 using CodeM.Common.Tools.DynamicObject;
+using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context.Params;
 using CodeM.FastApi.Context.Wrappers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Primitives;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -48,9 +48,12 @@ namespace CodeM.FastApi.Context
         {
             get
             {
-                if (Config.Session.Enable && mSession == null)
+                if (mSession == null)
                 {
-                    mSession = new SessionWrapper(mContext);
+                    if (Config.Session.Enable)
+                    {
+                        mSession = new SessionWrapper(mContext);
+                    }
                 }
                 return mSession;
             }
@@ -97,7 +100,7 @@ namespace CodeM.FastApi.Context
         }
 
         public RouteParams RouteParams
-{
+        {
             get
             {
                 if (mRouteParams == null && mContext != null)
@@ -197,24 +200,7 @@ namespace CodeM.FastApi.Context
         {
             get
             {
-                string result = null;
-
-                StringValues forwards = mContext.Request.Headers["X-Forwarded-For"];
-                if (forwards.Count > 0)
-                {
-                    result = forwards[0];
-                }
-
-                if (string.IsNullOrEmpty(result))
-                {
-                    result = mContext.Connection.RemoteIpAddress.ToString();
-                }
-
-                if (result.StartsWith("::ffff:"))
-                {
-                    result = result.Substring(7);
-                }
-
+                string result = WebUtils.GetClientIp(mContext.Request);
                 return result;
             }
         }

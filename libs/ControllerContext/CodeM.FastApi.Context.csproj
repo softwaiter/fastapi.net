@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppConfig\CodeM.FastApi.Config.csproj" />
+    <ProjectReference Include="..\Common\CodeM.FastApi.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

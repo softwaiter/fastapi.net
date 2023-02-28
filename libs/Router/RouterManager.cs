@@ -296,6 +296,37 @@ namespace CodeM.FastApi.Router
             return null;
         }
 
+        private async Task _HandleDuplicateException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
+        {
+            List<dynamic> hints = new List<dynamic>();
+
+            Model m = Derd.Model(modelName);
+            for (int i = m.PropertyCount - 1; i >= 0; i--)
+            {
+                Property p = m.GetProperty(i);
+                if (exp.Message.Contains(p.Field))
+                {
+                    string value = string.Empty;
+                    if (modelObj != null && modelObj.Has(p.Name))
+                    {
+                        value = modelObj.GetValue(p.Name);
+                    }
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        string item = !string.IsNullOrWhiteSpace(p.Label) ? p.Label : p.Name;
+                        await cc.JsonAsync(-1, null, item + " “" + value + "” 已存在！");
+                    }
+                    else
+                    {
+                        string item = !string.IsNullOrWhiteSpace(p.Label) ? p.Label : p.Name;
+                        await cc.JsonAsync(-1, null, item + "内容已存在！");
+                    }
+                    return;
+                }
+            }
+            await cc.JsonAsync(-1, null, "数据内容存在重复项，请修改后重试。");
+        }
+
         private async Task _CreateModelAsync(ControllerContext cc, 
             RouterConfig.RouterItem item, params object[] args)
         {
@@ -307,10 +338,11 @@ namespace CodeM.FastApi.Router
                     return itemValue + 1;
                 });
 
+                dynamic catchObj = null;
                 try
                 {
+                    bool bRet = true;
                     Model m = Derd.Model(item.Model);
-
                     if (cc.PostJson != null && cc.PostJson.Has("_items") &&
                         cc.PostJson._items is List<dynamic> &&
                         item.ModelBatchAction.Contains("C"))
@@ -350,7 +382,12 @@ namespace CodeM.FastApi.Router
                         {
                             for (int i = 0; i < newObjs.Count; i++)
                             {
-                                m.SetValues(newObjs[i]).Save(transCode, true);
+                                catchObj = newObjs[i];
+                                bRet = m.SetValues(newObjs[i], true).Save(transCode);
+                                if (!bRet)
+                                {
+                                    break;
+                                }
                             }
                             Derd.CommitTransaction(transCode);
                         }
@@ -376,17 +413,31 @@ namespace CodeM.FastApi.Router
                                 }
                             }
                         }
-                        m.SetValues(obj).Save(true);
+
+                        catchObj = obj;
+                        bRet = m.SetValues(obj, true).Save();
                     }
 
-                    await cc.JsonAsync();
+                    if (bRet)
+                    {
+                        await cc.JsonAsync();
+                    }
+                    else
+                    {
+                        await cc.JsonAsync(-1, null, "保存数据失败，请检查后重试。");
+                    }
                 }
                 catch (Exception exp)
                 {
-                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                    if (exp is FastApiException ||
+                        exp is PropertyValidationException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -623,7 +674,7 @@ namespace CodeM.FastApi.Router
                         m.GetValue(source.Split(","));
                     }
 
-                    string sort = cc.QueryParams.Get("sort", null);
+                    string sort = cc.QueryParams.AllValues("sort");
                     if (!string.IsNullOrEmpty(sort))
                     {
                         string[] subSorts = sort.Split(",");
@@ -694,6 +745,13 @@ namespace CodeM.FastApi.Router
                         m.Equals(p.Name, ids[i]);
                     }
 
+                    string where = cc.QueryParams.Get("where", null);
+                    if (!string.IsNullOrWhiteSpace(where))
+                    {
+                        IFilter filter = ParseQueryWhereCondition(m, where);
+                        m.And(filter);
+                    }
+
                     object detailObj = null;
 
                     List<dynamic> result = m.Top(1).Query();
@@ -736,7 +794,7 @@ namespace CodeM.FastApi.Router
                     for (int i = 0; i < m.PrimaryKeyCount; i++)
                     {
                         Property p = m.GetPrimaryKey(i);
-                        string values = cc.QueryParams.Get(p.Name, null);
+                        string values = cc.QueryParams.AllValues(p.Name);
                         if (values != null)
                         {
                             object[] items = values.Split(",");
@@ -744,9 +802,14 @@ namespace CodeM.FastApi.Router
                         }
                     }
 
-                    m.Delete();
-
-                    await cc.JsonAsync();
+                    if (m.Delete())
+                    {
+                        await cc.JsonAsync();
+                    }
+                    else
+                    {
+                        await cc.JsonAsync(-1, null, "删除数据失败，请检查后重试。");
+                    }
                 }
                 finally
                 {
@@ -796,7 +859,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        await cc.JsonAsync(-1, null, "指定模型数据不存在。");
+                        await cc.JsonAsync(-1, null, "数据删除失败，请检查后重试。");
                     }
                 }
                 finally
@@ -824,6 +887,7 @@ namespace CodeM.FastApi.Router
                     return itemValue + 1;
                 });
 
+                dynamic catchObj = null;
                 try
                 {
                     Model m = Derd.Model(item.Model);
@@ -831,7 +895,7 @@ namespace CodeM.FastApi.Router
                     for (int i = 0; i < m.PrimaryKeyCount; i++)
                     {
                         Property p = m.GetPrimaryKey(i);
-                        string values = cc.QueryParams.Get(p.Name, null);
+                        string values = cc.QueryParams.AllValues(p.Name);
                         if (values != null)
                         {
                             object[] items = values.Split(",");
@@ -854,16 +918,28 @@ namespace CodeM.FastApi.Router
                         }
                     }
 
-                    m.SetValues(obj).Update();
+                    catchObj = obj;
 
-                    await cc.JsonAsync();
+                    if (m.SetValues(obj).Update())
+                    {
+                        await cc.JsonAsync();
+                    }
+                    else
+                    {
+                        await cc.JsonAsync(-1, null, "更新数据失败，请检查后重试。");
+                    }
                 }
                 catch (Exception exp)
                 {
-                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                    if (exp is FastApiException || 
+                        exp is PropertyValidationException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -895,6 +971,7 @@ namespace CodeM.FastApi.Router
                     return itemValue + 1;
                 });
 
+                dynamic catchObj = null;
                 try
                 {
                     Model m = Derd.Model(item.Model);
@@ -928,16 +1005,28 @@ namespace CodeM.FastApi.Router
                         }
                     }
 
-                    m.SetValues(obj).Update();
+                    catchObj = obj;
 
-                    await cc.JsonAsync();
+                    if (m.SetValues(obj, true).Update())
+                    {
+                        await cc.JsonAsync();
+                    }
+                    else
+                    {
+                        await cc.JsonAsync(-1, null, "更新数据失败，请检查后重试。");
+                    }
                 }
                 catch (Exception exp)
                 {
-                    if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
+                    if (exp is FastApiException || 
+                        exp is PropertyValidationException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await cc.JsonAsync(-1, null, "提交数据主键冲突，请修改后重试。");
+                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -1053,6 +1142,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
+        Regex reParamRoute = new Regex("\\{[^/]*?\\}");
         public void MountRouters(IApplicationBuilder app)
         {
             RouteBuilder builder = new RouteBuilder(app);
@@ -1067,6 +1157,17 @@ namespace CodeM.FastApi.Router
                 else if (left.Path.Length < right.Path.Length)
                 {
                     return 1;
+                }
+                else
+                {
+                    if (reParamRoute.IsMatch(left.Path))
+                    {
+                        return 1;
+                    }
+                    else if (reParamRoute.IsMatch(right.Path))
+                    {
+                        return -1;
+                    }
                 }
                 return 0;
             });

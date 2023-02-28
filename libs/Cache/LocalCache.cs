@@ -148,7 +148,7 @@ namespace CodeM.FastApi.Cache
 
         public override int? GetInt32(string key)
         {
-            return mLocalCache.Get<Int32>(key);
+            return mLocalCache.Get<int?>(key);
         }
 
         public override async Task<int?> GetInt32Async(string key)
@@ -188,7 +188,7 @@ namespace CodeM.FastApi.Cache
 
         public override long? GetInt64(string key)
         {
-            return mLocalCache.Get<Int64>(key);
+            return mLocalCache.Get<long?>(key);
         }
 
         public override async Task<long?> GetInt64Async(string key)
@@ -228,7 +228,7 @@ namespace CodeM.FastApi.Cache
 
         public override double? GetDouble(string key)
         {
-            return mLocalCache.Get<double>(key);
+            return mLocalCache.Get<double?>(key);
         }
 
         public override async Task<double?> GetDoubleAsync(string key)

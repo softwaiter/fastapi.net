@@ -36,6 +36,10 @@ namespace CodeM.FastApi.DbUpgrade
                     {
                         UpgradeData.AddVersionCommand(currentVersion, nodeInfo.Text.Trim());
                     }
+                    else if (nodeInfo.Path == "/versions/version/sql/@cdata")
+                    {
+                        UpgradeData.AddVersionCommand(currentVersion, nodeInfo.CData.Trim());
+                    }
                 }
                 return true;
             });

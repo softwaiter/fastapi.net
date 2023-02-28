@@ -211,47 +211,85 @@ namespace CodeM.FastApi.Log.File
             }
         }
 
-        private static Thread sWriteThread = new Thread(() =>
+        private static void WriteHandler()
         {
             if (InitFileInfo())
             {
                 string log;
                 StringBuilder sbBuff = new StringBuilder();
+                int emptyLoop = 0;
                 while (true)
                 {
-                    SplitLogFile();
-
-                    while (sLogs.TryDequeue(out log))
+                    if (sLogs.Count > 0)
                     {
-                        if (!string.IsNullOrEmpty(log))
+                        emptyLoop = 0;
+
+                        try
                         {
-                            sbBuff.AppendLine(log);
-                            if (sbBuff.Length > 10240)
+                            SplitLogFile();
+
+                            while (sLogs.TryDequeue(out log))
                             {
-                                break;
+                                if (!string.IsNullOrEmpty(log))
+                                {
+                                    sbBuff.AppendLine(log);
+                                    if (sbBuff.Length > 10240)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        catch
+                        { 
+                        }
+                        finally
+                        {
+                            if (sbBuff.Length > 0)
+                            {
+                                System.IO.File.AppendAllText(FileFullName, sbBuff.ToString(), FileEncoding);
+                                sbBuff.Length = 0;
                             }
                         }
                     }
-
-                    if (sbBuff.Length > 0)
+                    else
                     {
-                        System.IO.File.AppendAllText(FileFullName, sbBuff.ToString(), FileEncoding);
-                        sbBuff.Length = 0;
+                        emptyLoop++;
+                        if (emptyLoop >= 60)
+                        {
+                            break;
+                        }
                     }
 
                     Thread.Sleep(1000);
                 }
             }
-        });
+        }
+
+        private static Thread sWriteThread;
+        private static object sThreadStartLock = new object();
 
         public static void Write(string log)
         {
-            if (!sWriteThread.IsAlive)
-            {
-                sWriteThread.IsBackground = true;
-                sWriteThread.Start();
-            }
             sLogs.Enqueue(log);
+
+            if (sWriteThread == null || !sWriteThread.IsAlive)
+            {
+                lock (sThreadStartLock)
+                {
+                    if (sWriteThread == null || !sWriteThread.IsAlive)
+                    {
+                        if (sWriteThread == null ||
+                            sWriteThread.ThreadState == ThreadState.Stopped ||
+                            sWriteThread.ThreadState == ThreadState.Aborted)
+                        {
+                            sWriteThread = new Thread(WriteHandler);
+                        }
+                        sWriteThread.IsBackground = true;
+                        sWriteThread.Start();
+                    }
+                }
+            }
         }
     }
 }

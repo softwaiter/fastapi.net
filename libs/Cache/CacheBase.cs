@@ -1,4 +1,5 @@
-﻿using CodeM.Common.Tools.DynamicObject;
+﻿using CodeM.Common.Tools;
+using CodeM.Common.Tools.DynamicObject;
 using System;
 using System.Threading.Tasks;
 
@@ -74,7 +75,7 @@ namespace CodeM.FastApi.Cache
                                 double? value = GetDouble(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, value.Value);
+                                    obj.SetValueByPath(name, value.Value);
                                 }
                             }
                             else if (type.Value == 7)
@@ -82,7 +83,7 @@ namespace CodeM.FastApi.Cache
                                 double? value = GetDouble(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, (decimal)value.Value);
+                                    obj.SetValueByPath(name, (decimal)value.Value);
                                 }
                             }
                             else if (type.Value == 6)
@@ -90,25 +91,25 @@ namespace CodeM.FastApi.Cache
                                 double? value = GetDouble(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, (float)value.Value);
+                                    obj.SetValueByPath(name, (float)value.Value);
                                 }
                             }
                             else if (type.Value == 5)
                             {
                                 string value = GetString(valueKey);
-                                obj.TrySetValue(name, DateTime.Parse(value));
+                                obj.SetValueByPath(name, DateTime.Parse(value));
                             }
                             else if (type.Value == 4)
                             {
                                 bool vaule = GetBoolean(valueKey);
-                                obj.TrySetValue(name, vaule);
+                                obj.SetValueByPath(name, vaule);
                             }
                             else if (type.Value == 3)
                             {
                                 long? value = GetInt64(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, value.Value);
+                                    obj.SetValueByPath(name, value.Value);
                                 }
                             }
                             else if (type.Value == 2)
@@ -116,7 +117,7 @@ namespace CodeM.FastApi.Cache
                                 int? value = GetInt32(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, value.Value);
+                                    obj.SetValueByPath(name, value.Value);
                                 }
                             }
                             else if (type.Value == 1)
@@ -124,13 +125,21 @@ namespace CodeM.FastApi.Cache
                                 int? value = GetInt32(valueKey);
                                 if (value != null && value.HasValue)
                                 {
-                                    obj.TrySetValue(name, (Int16)value.Value);
+                                    obj.SetValueByPath(name, (Int16)value.Value);
                                 }
                             }
                             else
                             {
                                 string value = GetString(valueKey);
-                                obj.TrySetValue(name, value);
+                                if (value != null && value.StartsWith("data:json;"))
+                                {
+                                    dynamic jsonObj = Xmtool.Json.ConfigParser().Parse(value.Substring(10));
+                                    obj.SetValueByPath(name, jsonObj);
+                                }
+                                else
+                                {
+                                    obj.SetValueByPath(name, value);
+                                }
                             }
                         }
                     }
@@ -201,6 +210,11 @@ namespace CodeM.FastApi.Cache
                     SetInt32(typeKey, 1);
                     SetInt32(valueKey, (Int16)value);
                 }
+                else if (_typ == typeof(DynamicObjectExt))
+                {
+                    SetInt32(typeKey, 0);
+                    SetString(valueKey, string.Concat("data:json;", value));
+                }
                 else
                 {
                     SetInt32(typeKey, 0);
@@ -238,7 +252,7 @@ namespace CodeM.FastApi.Cache
                     SetInt32(typeKey, 6);
                     SetDouble(valueKey, (double)value, seconds, type);
                 }
-                if (_typ == typeof(DateTime))
+                else if (_typ == typeof(DateTime))
                 {
                     SetInt32(typeKey, 5);
                     SetString(valueKey, ((DateTime)value).ToString("yyyy-MM-dd hh:mm:ss"), seconds, type);
@@ -263,6 +277,11 @@ namespace CodeM.FastApi.Cache
                     SetInt32(typeKey, 1, seconds, type);
                     SetInt32(valueKey, (Int16)value, seconds, type);
                 }
+                else if (_typ == typeof(DynamicObjectExt))
+                {
+                    SetInt32(typeKey, 0, seconds, type);
+                    SetString(valueKey, string.Concat("data:json;", value), seconds, type);
+                }
                 else
                 {
                     SetInt32(typeKey, 0, seconds, type);
@@ -283,7 +302,7 @@ namespace CodeM.FastApi.Cache
         {
             await Task.Run(() =>
             {
-                MultiSet(key, seconds, type, values);
+                MultiSet2(key, seconds, type, values);
             });
         }
 

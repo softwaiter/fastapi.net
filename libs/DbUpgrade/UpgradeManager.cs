@@ -1,5 +1,6 @@
 ﻿using CodeM.Common.Orm;
 using System;
+using System.Collections.Generic;
 
 namespace CodeM.FastApi.DbUpgrade
 {

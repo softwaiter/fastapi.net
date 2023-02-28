@@ -21,7 +21,7 @@ namespace CodeM.FastApi.Context.Wrappers
             {
                 if (options != null)
                 {
-                    if (options.Encrypt)
+                    if (options.Encrypt && !string.IsNullOrWhiteSpace(mKeys))
                     {
                         string[] keyItems = mKeys.Split(",");
                         if (keyItems.Length > 0)
@@ -49,14 +49,14 @@ namespace CodeM.FastApi.Context.Wrappers
                 {
                     if (options != null)
                     {
-                        if (options.Encrypt)
+                        if (options.Encrypt && !string.IsNullOrWhiteSpace(mKeys))
                         {
                             string[] keyItems = mKeys.Split(",");
                             foreach (string keyItem in keyItems)
                             {
                                 try
                                 {
-                                    value = Xmtool.Crypto().AESDecode(value, keyItem);
+                                    value = Xmtool.Crypto().AESDecode(value, keyItem.Trim());
                                     break;
                                 }
                                 catch
