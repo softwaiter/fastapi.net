@@ -531,6 +531,7 @@ namespace CodeM.FastApi.Router
                 string aop = null;
                 int bracket = 0;
                 string prevOP = null;
+                Stack<IFilter> bracketEntryPoints = new Stack<IFilter>();
 
                 MatchCollection mc = mReOP.Matches(where);
                 for (int i = 0; i < mc.Count; i++)
@@ -582,13 +583,7 @@ namespace CodeM.FastApi.Router
                     }
                     else if ("(".Equals(curOP))
                     {
-                        if (!("AND".Equals(prevOP) &&
-                            "OR".Equals(prevOP)))
-                        {
-                            SubFilter andFilter = new SubFilter();
-                            current.And(andFilter);
-                            current = andFilter;
-                        }
+                        bracketEntryPoints.Push(current);
 
                         bracket++;
                         offset = match.Index + match.Length;
@@ -606,10 +601,7 @@ namespace CodeM.FastApi.Router
                         bracket--;
                         offset = match.Index + match.Length;
 
-                        if (current.Parent != null)
-                        {
-                            current = current.Parent;
-                        }
+                        current = bracketEntryPoints.Pop();
                     }
                     else
                     {
