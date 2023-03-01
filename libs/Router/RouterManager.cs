@@ -585,6 +585,10 @@ namespace CodeM.FastApi.Router
                     {
                         bracketEntryPoints.Push(current);
 
+                        SubFilter andFilter = new SubFilter();
+                        current.And(andFilter);
+                        current = andFilter;
+
                         bracket++;
                         offset = match.Index + match.Length;
                     }
