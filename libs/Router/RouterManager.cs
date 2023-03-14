@@ -4,6 +4,7 @@ using CodeM.Common.Tools.DynamicObject;
 using CodeM.FastApi.Common;
 using CodeM.FastApi.Config;
 using CodeM.FastApi.Context;
+using CodeM.FastApi.Log;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -90,14 +91,15 @@ namespace CodeM.FastApi.Router
                 }
                 catch (Exception exp)
                 {
-                    if (FastApiUtils.IsDev())
+                    if (FastApiUtils.IsProd())
                     {
-                        cc.State = 500;
-                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
+                        Logger.Instance().Error(exp);
+                        await cc.JsonAsync(-1, null, "服务异常，请按F5刷新重试。");
                     }
                     else
                     {
-                        throw exp;
+                        cc.State = 500;
+                        await cc.Response.WriteAsync(exp.ToString(), Encoding.UTF8);
                     }
                 }
                 finally
@@ -699,6 +701,17 @@ namespace CodeM.FastApi.Router
                         total
                     });
                 }
+                catch (Exception exp)
+                {
+                    if (exp is FastApiException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
+                }
                 finally
                 {
                     mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
@@ -758,6 +771,17 @@ namespace CodeM.FastApi.Router
 
                     await cc.JsonAsync(detailObj);
                 }
+                catch (Exception exp)
+                {
+                    if (exp is FastApiException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else
+                    {
+                        throw exp;
+                    }
+                }
                 finally
                 {
                     mModelRouterConcurrents.AddOrUpdate(key, 1, (itemKey, itemValue) =>
@@ -805,6 +829,17 @@ namespace CodeM.FastApi.Router
                     else
                     {
                         await cc.JsonAsync(-1, null, "删除数据失败，请检查后重试。");
+                    }
+                }
+                catch (Exception exp)
+                {
+                    if (exp is FastApiException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else
+                    {
+                        throw exp;
                     }
                 }
                 finally
@@ -856,6 +891,17 @@ namespace CodeM.FastApi.Router
                     else
                     {
                         await cc.JsonAsync(-1, null, "数据删除失败，请检查后重试。");
+                    }
+                }
+                catch (Exception exp)
+                {
+                    if (exp is FastApiException)
+                    {
+                        await cc.JsonAsync(-1, null, exp.Message);
+                    }
+                    else
+                    {
+                        throw exp;
                     }
                 }
                 finally

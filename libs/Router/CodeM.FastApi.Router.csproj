@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\CodeM.FastApi.Common.csproj" />
     <ProjectReference Include="..\JsonResponseWriter\CodeM.FastApi.Context.JsonResponse.csproj" />
+    <ProjectReference Include="..\Logger\CodeM.FastApi.Log.csproj" />
   </ItemGroup>
 
   <ItemGroup>
