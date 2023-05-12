@@ -761,6 +761,12 @@ namespace CodeM.FastApi.Router
                         m.And(filter);
                     }
 
+                    string source = cc.QueryParams.Get("source", null);
+                    if (!string.IsNullOrWhiteSpace(source))
+                    {
+                        m.GetValue(source.Split(","));
+                    }
+
                     object detailObj = null;
 
                     List<dynamic> result = m.Top(1).Query();
