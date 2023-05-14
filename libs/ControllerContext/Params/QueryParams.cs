@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using System;
 
 namespace CodeM.FastApi.Context.Params
 {
@@ -94,6 +95,17 @@ namespace CodeM.FastApi.Context.Params
             return defaultValue;
         }
 
+        public T Get<T>(string key, T defaultValue)
+        {
+            object value = Get(key, null);
+            if (value != null)
+            {
+                object typValue = Convert.ChangeType(value, typeof(T));
+                return (T)typValue;
+            }
+            return defaultValue;
+        }
+
         public string Get(int index, string defaultValue)
         {
             if (mData != null)
@@ -102,6 +114,17 @@ namespace CodeM.FastApi.Context.Params
                 {
                     return this[index];
                 }
+            }
+            return defaultValue;
+        }
+
+        public T Get<T>(int index, T defaultValue)
+        { 
+            object value = Get(index, null);
+            if (value != null)
+            {
+                object typValue = Convert.ChangeType(value, typeof(T));
+                return (T)typValue;
             }
             return defaultValue;
         }
