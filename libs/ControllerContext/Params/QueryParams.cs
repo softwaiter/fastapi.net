@@ -95,13 +95,23 @@ namespace CodeM.FastApi.Context.Params
             return defaultValue;
         }
 
-        public T Get<T>(string key, T defaultValue)
+        public T Get<T>(string key, T defaultValue, bool throwError = false)
         {
             object value = Get(key, null);
             if (value != null)
             {
-                object typValue = Convert.ChangeType(value, typeof(T));
-                return (T)typValue;
+                try
+                {
+                    object typValue = Convert.ChangeType(value, typeof(T));
+                    return (T)typValue;
+                }
+                catch (Exception ex)
+                {
+                    if (throwError)
+                    {
+                        throw ex;
+                    }
+                }
             }
             return defaultValue;
         }
@@ -118,13 +128,23 @@ namespace CodeM.FastApi.Context.Params
             return defaultValue;
         }
 
-        public T Get<T>(int index, T defaultValue)
+        public T Get<T>(int index, T defaultValue, bool throwError = false)
         { 
             object value = Get(index, null);
             if (value != null)
             {
-                object typValue = Convert.ChangeType(value, typeof(T));
-                return (T)typValue;
+                try
+                {
+                    object typValue = Convert.ChangeType(value, typeof(T));
+                    return (T)typValue;
+                }
+                catch (Exception ex)
+                {
+                    if (throwError)
+                    {
+                        throw ex;
+                    }
+                }
             }
             return defaultValue;
         }
