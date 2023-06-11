@@ -522,7 +522,7 @@ namespace CodeM.FastApi.Router
 
         private IFilter ParseQueryWhereCondition(Model m, string where)
         {
-            IFilter result = new SubFilter(m);
+            IFilter result = new SubFilter();
 
             if (!string.IsNullOrEmpty(where))
             {
@@ -558,7 +558,7 @@ namespace CodeM.FastApi.Router
                             current = current.Parent;
                         }
 
-                        SubFilter andFilter = new SubFilter(m);
+                        SubFilter andFilter = new SubFilter();
                         current.And(andFilter);
                         current = andFilter;
                     }
@@ -579,7 +579,7 @@ namespace CodeM.FastApi.Router
                             current = current.Parent;
                         }
 
-                        SubFilter orFilter = new SubFilter(m);
+                        SubFilter orFilter = new SubFilter();
                         current.Or(orFilter);
                         current = orFilter;
                     }
@@ -587,7 +587,7 @@ namespace CodeM.FastApi.Router
                     {
                         bracketEntryPoints.Push(current);
 
-                        SubFilter andFilter = new SubFilter(m);
+                        SubFilter andFilter = new SubFilter();
                         current.And(andFilter);
                         current = andFilter;
 
