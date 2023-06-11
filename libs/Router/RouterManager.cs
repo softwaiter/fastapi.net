@@ -522,7 +522,7 @@ namespace CodeM.FastApi.Router
 
         private IFilter ParseQueryWhereCondition(Model m, string where)
         {
-            IFilter result = new SubFilter();
+            IFilter result = new SubFilter(m);
 
             if (!string.IsNullOrEmpty(where))
             {
@@ -558,7 +558,7 @@ namespace CodeM.FastApi.Router
                             current = current.Parent;
                         }
 
-                        SubFilter andFilter = new SubFilter();
+                        SubFilter andFilter = new SubFilter(m);
                         current.And(andFilter);
                         current = andFilter;
                     }
@@ -579,7 +579,7 @@ namespace CodeM.FastApi.Router
                             current = current.Parent;
                         }
 
-                        SubFilter orFilter = new SubFilter();
+                        SubFilter orFilter = new SubFilter(m);
                         current.Or(orFilter);
                         current = orFilter;
                     }
@@ -587,7 +587,7 @@ namespace CodeM.FastApi.Router
                     {
                         bracketEntryPoints.Push(current);
 
-                        SubFilter andFilter = new SubFilter();
+                        SubFilter andFilter = new SubFilter(m);
                         current.And(andFilter);
                         current = andFilter;
 
@@ -669,7 +669,7 @@ namespace CodeM.FastApi.Router
                     string source = cc.QueryParams.Get("source", null);
                     if (!string.IsNullOrWhiteSpace(source))
                     {
-                        m.GetValue(source.Split(","));
+                        m.GetValues(source.Split(","));
                     }
 
                     string sort = cc.QueryParams.AllValues("sort");
@@ -764,7 +764,7 @@ namespace CodeM.FastApi.Router
                     string source = cc.QueryParams.Get("source", null);
                     if (!string.IsNullOrWhiteSpace(source))
                     {
-                        m.GetValue(source.Split(","));
+                        m.GetValues(source.Split(","));
                     }
 
                     object detailObj = null;
