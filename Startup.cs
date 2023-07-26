@@ -34,7 +34,7 @@ namespace CodeM.FastApi
 
         private void Init(IWebHostEnvironment env)
         {
-            Console.WriteLine("½âÎö¿ò¼ÜÈ«¾ÖÅäÖÃÎÄ¼ş......");
+            Console.WriteLine("è§£ææ¡†æ¶å…¨å±€é…ç½®æ–‡ä»¶......");
             IConfigurationBuilder builder = new ConfigurationBuilder()
                         .SetBasePath(env.ContentRootPath)
                         .AddJsonFile("appsettings.json", true, true)
@@ -53,7 +53,7 @@ namespace CodeM.FastApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            Console.WriteLine("³õÊ¼»¯¿ò¼ÜÅäÖÃĞÅÏ¢......");
+            Console.WriteLine("åˆå§‹åŒ–æ¡†æ¶é…ç½®ä¿¡æ¯......");
 
             if (AppConfig.Compression.Enable)
             {
@@ -132,12 +132,12 @@ namespace CodeM.FastApi
                     app.UseMiddleware<CorsMiddleware>(AppConfig);
                 }
 
-                Console.WriteLine("¹ÒÔØAPIÂ·ÓÉ½Ó¿Ú......");
+                Console.WriteLine("æŒ‚è½½APIè·¯ç”±æ¥å£......");
                 string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
 
-                Console.WriteLine("Æô¶¯¶¨Ê±ÈÎÎñµ÷¶È³ÌĞò......");
+                Console.WriteLine("å¯åŠ¨å®šæ—¶ä»»åŠ¡è°ƒåº¦ç¨‹åº......");
                 lifetime.ApplicationStarted.Register(() =>
                 {
                     string listenAddress = string.Empty;
@@ -152,7 +152,7 @@ namespace CodeM.FastApi
                         Application.Instance().Address = listenAddress;
                     }
 
-                    Console.WriteLine(string.Format("Æô¶¯³É¹¦£¬¼àÌıµØÖ·£º[{0}]£¬»·¾³±äÁ¿£º[{1}]",
+                    Console.WriteLine(string.Format("å¯åŠ¨æˆåŠŸï¼Œç›‘å¬åœ°å€ï¼š[{0}]ï¼Œç¯å¢ƒå˜é‡ï¼š[{1}]",
                         listenAddress, env.EnvironmentName));
                     Console.WriteLine("===================================================================================");
                     Console.ForegroundColor = ConsoleColor.White;
