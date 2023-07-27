@@ -38,17 +38,6 @@
         <Content Remove=".\.git\ms-persist.xml" />
         <None Remove=".gitignore" />
         <None Remove="fastapi.db" />
-        <None Remove="models\.upgrade.xml" />
-        <None Remove="models\organization.model.xml" />
-        <None Remove="schedule.xml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="models\.connection.xml" />
-      <Content Include="models\.upgrade.xml" />
-      <Content Include="models\organization.model.xml" />
-      <Content Include="models\user.model.xml" />
-      <Content Include="schedule.xml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -65,6 +54,24 @@
         <PackageReference Include="MySql.Data" Version="8.0.26" />
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
+
+	<ItemGroup>
+		<Content Update="models\**">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update=".\router.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Update=".\schedule.xml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
     <ProjectExtensions>
         <VisualStudio>

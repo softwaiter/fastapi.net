@@ -5,7 +5,6 @@ using CodeM.FastApi.Config;
 using CodeM.FastApi.DbUpgrade;
 using CodeM.FastApi.Log;
 using CodeM.FastApi.Schedule;
-using Microsoft.AspNetCore.Hosting;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -14,18 +13,15 @@ namespace CodeM.FastApi.System.Core
 {
     public class Application
     {
-        private static IWebHostEnvironment sEnv = null;
         private static ApplicationConfig sAppConfig = null;
         private static ScheduleManager sScheduleManager = null;
         private static Regex sThirdDot = new Regex("\\.[^\\.]*\\.[^\\.]*\\.[^\\.]*$");
 
         private static Application sSingleInst = new Application();
 
-        public static void Init(IWebHostEnvironment env, 
-            ApplicationConfig cfg, string scheduleFile)
+        public static void Init(ApplicationConfig cfg, string scheduleFile)
         {
-            sEnv = env;
-            InitOrm(env.ContentRootPath);
+            InitOrm(AppDomain.CurrentDomain.BaseDirectory);
             CacheLoader.Load(cfg);
 
             sAppConfig = cfg;
@@ -62,11 +58,7 @@ namespace CodeM.FastApi.System.Core
         {
             get
             {
-                if (sEnv != null)
-                {
-                    return sEnv.ContentRootPath;
-                }
-                return string.Empty;
+                return AppDomain.CurrentDomain.BaseDirectory;
             }
         }
 

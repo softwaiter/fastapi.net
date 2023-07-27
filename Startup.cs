@@ -26,23 +26,20 @@ namespace CodeM.FastApi
     {
         public Startup(IWebHostEnvironment env)
         {
-            this.Environment = env;
             Init(env);
         }
-
-        private IWebHostEnvironment Environment { get; set; }
 
         private void Init(IWebHostEnvironment env)
         {
             Console.WriteLine("解析框架全局配置文件......");
             IConfigurationBuilder builder = new ConfigurationBuilder()
-                        .SetBasePath(env.ContentRootPath)
+                        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                         .AddJsonFile("appsettings.json", true, true)
                         .AddJsonFile(string.Concat("appsettings.", env.EnvironmentName, ".json"), true, true);
             builder.Build().Bind(AppConfig);
 
-            string settingFile = Path.Combine(env.ContentRootPath, "appsettings.json");
-            string envSettingFile = Path.Combine(env.ContentRootPath, string.Concat("appsettings.", env.EnvironmentName, ".json"));
+            string settingFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+            string envSettingFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Concat("appsettings.", env.EnvironmentName, ".json"));
             AppConfig.Settings = Xmtool.Json.ConfigParser()
                 .AddJsonFile(settingFile)
                 .AddJsonFile(envSettingFile)
@@ -103,8 +100,8 @@ namespace CodeM.FastApi
                 options.MultipartBodyLengthLimit = AppConfig.FileUpload.MaxBodySize;
             });
 
-            string scheduleFile = Path.Combine(this.Environment.ContentRootPath, "schedule.xml");
-            Application.Init(this.Environment, AppConfig, scheduleFile);
+            string scheduleFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "schedule.xml");
+            Application.Init(AppConfig, scheduleFile);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env,
@@ -133,7 +130,7 @@ namespace CodeM.FastApi
                 }
 
                 Console.WriteLine("挂载API路由接口......");
-                string routerFile = Path.Combine(env.ContentRootPath, "router.xml");
+                string routerFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "router.xml");
                 RouterManager.Current.Init(AppConfig, routerFile);
                 RouterManager.Current.MountRouters(app);
 

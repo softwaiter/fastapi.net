@@ -71,7 +71,7 @@ namespace CodeM.FastApi
                 {
                     Console.WriteLine("开始启动......");
                     Console.WriteLine(string.Format("发现内容目录：{0}",
-                        hostingContext.HostingEnvironment.ContentRootPath));
+                        AppDomain.CurrentDomain.BaseDirectory));
 
                     logging.ClearProviders();
                     if (hostingContext.HostingEnvironment.IsDevelopment())
