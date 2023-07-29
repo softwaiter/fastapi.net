@@ -37,6 +37,7 @@
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <Content Remove=".\.git\ms-persist.xml" />
         <None Remove=".gitignore" />
+        <None Remove="build\dayuan.sh" />
         <None Remove="fastapi.db" />
     </ItemGroup>
 
@@ -73,10 +74,12 @@
 	  </Content>
 	</ItemGroup>
 
-    <ProjectExtensions>
-        <VisualStudio>
-            <UserProperties appsettings_1json__JsonSchema="" />
-        </VisualStudio>
-    </ProjectExtensions>
+	<Target Name="CopyBuildFiles2Output" AfterTargets="AfterBuild">
+		<Copy SourceFiles="build\fastapi.sh" DestinationFolder="$(OutDir)" />
+	</Target>
+
+	<Target Name="CopyBuildFiles2Publish" AfterTargets="Publish">
+		<Copy SourceFiles="build\fastapi.sh" DestinationFolder="$(PublishDir)" />
+	</Target>
 
 </Project>
