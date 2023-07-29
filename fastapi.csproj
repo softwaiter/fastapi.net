@@ -37,7 +37,6 @@
         <EntityDeploy Remove="Properties\PublishProfiles\**" />
         <Content Remove=".\.git\ms-persist.xml" />
         <None Remove=".gitignore" />
-        <None Remove="build\dayuan.sh" />
         <None Remove="fastapi.db" />
     </ItemGroup>
 
