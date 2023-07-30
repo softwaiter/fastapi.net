@@ -10,34 +10,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Remove=".git\**" />
-        <Compile Remove="libs\**" />
-        <Compile Remove="logs\**" />
-        <Compile Remove="Properties\PublishProfiles\**" />
-        <Content Remove=".git\**" />
-        <Content Remove="libs\**" />
-        <Content Remove="logs\**" />
-        <Content Remove="Properties\PublishProfiles\**" />
-        <EmbeddedResource Remove=".git\**" />
-        <EmbeddedResource Remove="libs\**" />
-        <EmbeddedResource Remove="logs\**" />
-        <EmbeddedResource Remove="Properties\PublishProfiles\**" />
-        <None Remove=".git\**" />
-        <None Remove="libs\**" />
-        <None Remove="logs\**" />
-        <None Remove="Properties\PublishProfiles\**" />
+        <Content Include=".\**\*.xml" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include=".\**\*.xml" CopyToPublishDirectory="PreserveNewest" />
-        <Content Remove="bin\**"></Content>
-        <Content Remove="obj\**"></Content>
-        <EntityDeploy Remove=".git\**" />
-        <EntityDeploy Remove="logs\**" />
-        <EntityDeploy Remove="Properties\PublishProfiles\**" />
-        <Content Remove=".\.git\ms-persist.xml" />
-        <None Remove=".gitignore" />
-        <None Remove="fastapi.db" />
+      <Compile Remove="bin\**" />
+      <Compile Remove="libs\**" />
+      <Compile Remove="obj\**" />
+      <Content Remove="bin\**" />
+      <Content Remove="libs\**" />
+      <Content Remove="obj\**" />
+      <EmbeddedResource Remove="bin\**" />
+      <EmbeddedResource Remove="libs\**" />
+      <EmbeddedResource Remove="obj\**" />
+      <EntityDeploy Remove="bin\**" />
+      <EntityDeploy Remove="libs\**" />
+      <EntityDeploy Remove="obj\**" />
+      <None Remove="bin\**" />
+      <None Remove="libs\**" />
+      <None Remove="obj\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove=".gitignore" />
+      <None Remove="fastapi.db" />
     </ItemGroup>
 
     <ItemGroup>
@@ -54,24 +50,6 @@
         <PackageReference Include="MySql.Data" Version="8.0.26" />
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
-
-	<ItemGroup>
-		<Content Update="models\**">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Update=".\router.xml">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Update=".\schedule.xml">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
 
 	<Target Name="CopyBuildFiles2Output" AfterTargets="AfterBuild">
 		<Copy SourceFiles="build\fastapi.sh" DestinationFolder="$(OutDir)" />
