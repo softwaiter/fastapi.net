@@ -1,48 +1,31 @@
 ﻿using CodeM.Common.Tools;
-using System;
+using System.Collections.Generic;
 
 namespace CodeM.FastApi.DbUpgrade
 {
     internal class UpgradeLoader
     {
-        public static void Load(string filename)
+        public static List<string> Load(string filename)
         {
-            int currentVersion = 0;
+            List<string> data = new List<string>();
+
             Xmtool.Xml().Iterate(filename, (nodeInfo) =>
             {
                 if (!nodeInfo.IsEndNode)
                 {
-                    if (nodeInfo.Path == "/versions/version")
+                    if (nodeInfo.Path == "/sqls/sql/@text")
                     {
-                        string idStr = nodeInfo.GetAttribute("id");
-                        if (idStr == null)
-                        {
-                            throw new Exception("缺少id属性。 " + filename + " - Line " + nodeInfo.Line);
-                        }
-                        else if (string.IsNullOrWhiteSpace(idStr))
-                        {
-                            throw new Exception("id属性不能为空。 " + filename + " - Line " + nodeInfo.Line);
-                        }
-
-                        if (!Xmtool.Regex().IsPositiveInteger(idStr))
-                        {
-                            throw new Exception("id属性必须是有效正整数。 " + filename + " - Line " + nodeInfo.Line);
-                        }
-
-                        currentVersion = int.Parse(idStr);
-                        UpgradeData.AddVersion(currentVersion);
+                        data.Add(nodeInfo.Text.Trim());
                     }
-                    else if (nodeInfo.Path == "/versions/version/sql/@text")
+                    else if (nodeInfo.Path == "/sqls/sql/@cdata")
                     {
-                        UpgradeData.AddVersionCommand(currentVersion, nodeInfo.Text.Trim());
-                    }
-                    else if (nodeInfo.Path == "/versions/version/sql/@cdata")
-                    {
-                        UpgradeData.AddVersionCommand(currentVersion, nodeInfo.CData.Trim());
+                        data.Add(nodeInfo.CData.Trim());
                     }
                 }
                 return true;
             });
+
+            return data;
         }
     }
 }

@@ -34,6 +34,13 @@
     <ItemGroup>
       <None Remove=".gitignore" />
       <None Remove="fastapi.db" />
+      <None Remove="models\.processor.xml" />
+      <None Remove="models\.upgrade.v1.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="models\.processor.xml" />
+      <Content Include="models\.upgrade.v1.xml" />
     </ItemGroup>
 
     <ItemGroup>

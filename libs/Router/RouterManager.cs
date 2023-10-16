@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -460,6 +461,73 @@ namespace CodeM.FastApi.Router
             }
         }
 
+        private static Type DbType2Type(DbType type)
+        {
+            if (type == DbType.String ||
+                type == DbType.AnsiString ||
+                type == DbType.AnsiStringFixedLength ||
+                type == DbType.StringFixedLength)
+            {
+                return typeof(string);
+            }
+            else if (type == DbType.Boolean)
+            {
+                return typeof(bool);
+            }
+            else if (type == DbType.Byte)
+            {
+                return typeof(byte);
+            }
+            else if (type == DbType.SByte)
+            {
+                return typeof(sbyte);
+            }
+            else if (type == DbType.Decimal)
+            {
+                return typeof(decimal);
+            }
+            else if (type == DbType.Double)
+            {
+                return typeof(double);
+            }
+            else if (type == DbType.Int16)
+            {
+                return typeof(Int16);
+            }
+            else if (type == DbType.Int32)
+            {
+                return typeof(Int32);
+            }
+            else if (type == DbType.Int64)
+            {
+                return typeof(Int64);
+            }
+            else if (type == DbType.Single)
+            {
+                return typeof(Single);
+            }
+            else if (type == DbType.UInt16)
+            {
+                return typeof(UInt16);
+            }
+            else if (type == DbType.UInt32)
+            {
+                return typeof(UInt32);
+            }
+            else if (type == DbType.UInt64)
+            {
+                return typeof(UInt64);
+            }
+            else if (type == DbType.Date ||
+                type == DbType.DateTime ||
+                type == DbType.DateTime2 ||
+                type == DbType.DateTimeOffset)
+            {
+                return typeof(DateTime);
+            }
+            return typeof(Object);
+        }
+
         private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|\\*=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
 
         private void BuildWhereFilter(Model m, IFilter filter, string op, string name, string value)
@@ -470,17 +538,47 @@ namespace CodeM.FastApi.Router
                 return;
             }
 
+            object exprKey = name;
+            object exprValue = value;
+            if (">=".Equals(op) ||
+                "<=".Equals(op) ||
+                "<>".Equals(op) ||
+                "<".Equals(op) ||
+                ">".Equals(op) ||
+                "=".Equals(op) ||
+                "!=".Equals(op))
+            {
+                if (m.HasProperty(name) && !m.HasProperty(value))
+                {
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        Property p = m.GetProperty(name);
+                        Type type = DbType2Type(p.FieldType);
+                        exprValue = Convert.ChangeType(value, type);
+                    }
+                }
+                else if (!m.HasProperty(name) && m.HasProperty(value))
+                {
+                    if (!string.IsNullOrWhiteSpace(name))
+                    {
+                        Property p = m.GetProperty(value);
+                        Type type = DbType2Type(p.FieldType);
+                        exprKey = Convert.ChangeType(name, type);
+                    }
+                }
+            }
+
             switch (op)
             {
                 case ">=":
-                    filter.Gte(name, value);
+                    filter.Gte(exprKey, exprValue);
                     break;
                 case "<=":
-                    filter.Lte(name, value);
+                    filter.Lte(exprKey, exprValue);
                     break;
                 case "<>":
                 case "!=":
-                    filter.NotEquals(name, value);
+                    filter.NotEquals(exprKey, exprValue);
                     break;
                 case "*=":
                     string[] items = value.Split(',');
@@ -488,34 +586,60 @@ namespace CodeM.FastApi.Router
                     {
                         throw new Exception("Between参数无效。");
                     }
-                    filter.Between(name, items[0].Trim(), items[1].Trim());
+
+                    Property p = m.GetProperty(name);
+                    Type type = DbType2Type(p.FieldType);
+                    object value1 = Convert.ChangeType(items[0], type);
+                    object value2 = Convert.ChangeType(items[1], type);
+
+                    filter.Between(exprKey, value1, value2);
                     break;
                 case ">":
-                    filter.Gt(name, value);
+                    filter.Gt(exprKey, exprValue);
                     break;
                 case "<":
-                    filter.Lt(name, value);
+                    filter.Lt(exprKey, exprValue);
                     break;
                 case "=":
-                    filter.Equals(name, value);
+                    filter.Equals(exprKey, exprValue);
                     break;
                 case "~=":
-                    filter.Like(name, value);
+                    filter.Like(exprKey, exprValue);
                     break;
                 case "~!=":
-                    filter.NotLike(name, value);
+                    filter.NotLike(exprKey, exprValue);
                     break;
                 case "^=":
-                    filter.In(name, value.Split(","));
+                    List<object> inParams = new List<object>();
+                    object[] inValues = value.Split(",");
+
+                    Property inProp = m.GetProperty(name);
+                    Type inType = DbType2Type(inProp.FieldType);
+                    foreach (object item in inValues)
+                    {
+                        inParams.Add(Convert.ChangeType(item, inType));
+                    }
+
+                    filter.In(exprKey, inParams.ToArray());
                     break;
                 case "^!=":
-                    filter.NotIn(name, value.Split(","));
+                    List<object> notinParams = new List<object>();
+                    object[] notinValues = value.Split(",");
+
+                    Property notinProp = m.GetProperty(name);
+                    Type notinType = DbType2Type(notinProp.FieldType);
+                    foreach (object item in notinValues)
+                    {
+                        notinParams.Add(Convert.ChangeType(item, notinType));
+                    }
+
+                    filter.NotIn(exprKey, notinParams.ToArray());
                     break;
                 case "=$":
-                    filter.IsNull(name);
+                    filter.IsNull(exprKey);
                     break;
                 case "!=$":
-                    filter.IsNotNull(name);
+                    filter.IsNotNull(exprKey);
                     break;
             }
         }

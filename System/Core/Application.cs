@@ -36,13 +36,17 @@ namespace CodeM.FastApi.System.Core
             Derd.ModelPath = Path.Combine(contentRootPath, "models");
             Console.WriteLine("加载ORM模型定义文件：" + Derd.ModelPath);
             Derd.Load();
-            Derd.TryCreateTables();
+
+            Exception exp;
+            if (!Derd.TryCreateTables(false, true, out exp))
+            {
+                throw exp;
+            }
 
             //ORM版本控制
             UpgradeManager.EnableVersionControl();
-            UpgradeManager.Load(Path.Combine(contentRootPath, "models", ".upgrade.xml"));
             Console.WriteLine("执行ORM模型升级操作......");
-            UpgradeManager.Upgrade();
+            UpgradeManager.Upgrade(Path.Combine(contentRootPath, "models"));
         }
 
         private Application()
