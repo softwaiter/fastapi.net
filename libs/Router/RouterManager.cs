@@ -538,7 +538,7 @@ namespace CodeM.FastApi.Router
                 return;
             }
 
-            object exprKey = name;
+            string exprKey = name;
             object exprValue = value;
             if (">=".Equals(op) ||
                 "<=".Equals(op) ||
@@ -548,22 +548,22 @@ namespace CodeM.FastApi.Router
                 "=".Equals(op) ||
                 "!=".Equals(op))
             {
-                if (m.HasProperty(name) && !m.HasProperty(value))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
-                    if (!string.IsNullOrWhiteSpace(value))
+                    if (value.StartsWith("@"))  // 表示表达式值是对象属性
                     {
+                        exprValue = Funcs.PROPERTY(value.Substring(1));
+                    }
+                    else
+                    {
+                        if (value.StartsWith("\\@"))    // 表达式值起始为@时采用\\转义写法，进行恢复处理
+                        {
+                            value = value.Substring(1);
+                        }
+
                         Property p = m.GetProperty(name);
                         Type type = DbType2Type(p.FieldType);
                         exprValue = Convert.ChangeType(value, type);
-                    }
-                }
-                else if (!m.HasProperty(name) && m.HasProperty(value))
-                {
-                    if (!string.IsNullOrWhiteSpace(name))
-                    {
-                        Property p = m.GetProperty(value);
-                        Type type = DbType2Type(p.FieldType);
-                        exprKey = Convert.ChangeType(name, type);
                     }
                 }
             }
