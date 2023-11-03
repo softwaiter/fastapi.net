@@ -286,14 +286,14 @@ namespace CodeM.FastApi.Router
 
         #region Model Router
 
-        private string _GetParamValue(ControllerContext cc, string name)
+        private object _GetParamValue(ControllerContext cc, string name)
         {
             if (cc.PostJson != null && cc.PostJson.Has(name))
             {
                 object result;
                 if (cc.PostJson.TryGetValue(name, out result))
                 {
-                    return result != null ? result.ToString() : null;
+                    return result != null ? result : null;
                 }
             }
             return null;
@@ -409,7 +409,7 @@ namespace CodeM.FastApi.Router
                             Property p = m.GetProperty(i);
                             if (!p.AutoIncrement)
                             {
-                                string v = _GetParamValue(cc, p.Name);
+                                object v = _GetParamValue(cc, p.Name);
                                 if (v != null)
                                 {
                                     obj.SetValue(p.Name, v);
@@ -1082,7 +1082,7 @@ namespace CodeM.FastApi.Router
                         Property p = m.GetProperty(i);
                         if (!p.AutoIncrement)
                         {
-                            string v = _GetParamValue(cc, p.Name);
+                            object v = _GetParamValue(cc, p.Name);
                             if (v != null)
                             {
                                 obj.SetValue(p.Name, v);
@@ -1169,7 +1169,7 @@ namespace CodeM.FastApi.Router
                         Property p = m.GetProperty(i);
                         if (!p.AutoIncrement)
                         {
-                            string v = _GetParamValue(cc, p.Name);
+                            object v = _GetParamValue(cc, p.Name);
                             if (v != null)
                             {
                                 obj.SetValue(p.Name, v);
@@ -1319,35 +1319,38 @@ namespace CodeM.FastApi.Router
         {
             RouteBuilder builder = new RouteBuilder(app);
 
-            //通过排序，将路由路径更长的放到前面
-            mRouterConfig.Items.Sort((left, right) => 
+            if (mRouterConfig.Items != null)
             {
-                if (left.Path.Length > right.Path.Length)
+                //通过排序，将路由路径更长的放到前面
+                mRouterConfig.Items.Sort((left, right) =>
                 {
-                    return -1;
-                }
-                else if (left.Path.Length < right.Path.Length)
-                {
-                    return 1;
-                }
-                else
-                {
-                    if (reParamRoute.IsMatch(left.Path))
-                    {
-                        return 1;
-                    }
-                    else if (reParamRoute.IsMatch(right.Path))
+                    if (left.Path.Length > right.Path.Length)
                     {
                         return -1;
                     }
-                }
-                return 0;
-            });
+                    else if (left.Path.Length < right.Path.Length)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        if (reParamRoute.IsMatch(left.Path))
+                        {
+                            return 1;
+                        }
+                        else if (reParamRoute.IsMatch(right.Path))
+                        {
+                            return -1;
+                        }
+                    }
+                    return 0;
+                });
 
-            mRouterConfig.Items.ForEach(item =>
-            {
-                this._MountRouters(item, builder);
-            });
+                mRouterConfig.Items.ForEach(item =>
+                {
+                    this._MountRouters(item, builder);
+                });
+            }
 
             IRouter router = builder.Build();
             app.UseRouter(router);
