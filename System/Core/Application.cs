@@ -99,17 +99,16 @@ namespace CodeM.FastApi.System.Core
             return Logger.Instance();
         }
 
-        public dynamic Service(string serviceName, bool singleton = true)
+        public T Service<T>(bool singleton = true)
         {
-            string appFullName = GetType().FullName;
-            string serviceFullName = sThirdDot.Replace(appFullName, string.Concat(".Services.", serviceName, "Service"));
+            string serviceFullName = typeof(T).FullName;
             if (singleton)
             {
-                return Wukong.GetSingleObject(serviceFullName);
+                return (T)Wukong.GetSingleObject(serviceFullName);
             }
             else
             {
-                return Wukong.GetObject(serviceFullName);
+                return (T)Wukong.GetObject(serviceFullName);
             }
         }
     }

@@ -4,9 +4,9 @@ namespace CodeM.FastApi.Services
 {
     public class BaseService
     {
-        public dynamic Service(string serviceName, bool singleton = true)
+        public T Service<T>(bool singleton = true)
         {
-            return Application.Instance().Service(serviceName, singleton);
+            return Application.Instance().Service<T>(singleton);
         }
 
         public Application App

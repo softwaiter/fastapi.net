@@ -1,31 +1,21 @@
 ﻿using CodeM.Common.Ioc;
 using CodeM.FastApi.System.Core;
-using System.Text.RegularExpressions;
 
 namespace CodeM.FastApi.Controllers
 {
     public class BaseController
     {
-        private static Regex sSuffixControler = new Regex("Controller$");
-
-        public dynamic Service(bool singleton = true)
+        public T Service<T>(bool singleton = true)
         {
-            string controllerFullName = GetType().FullName;
-            string serviceFullName = controllerFullName.Replace(".Controllers.", ".Services.");
-            serviceFullName = sSuffixControler.Replace(serviceFullName, "Service");
+            string serviceFullName = typeof(T).FullName;
             if (singleton)
             {
-                return Wukong.GetSingleObject(serviceFullName);
+                return (T)Wukong.GetSingleObject(serviceFullName);
             }
             else
             {
-                return Wukong.GetObject(serviceFullName);
+                return (T)Wukong.GetObject(serviceFullName);
             }
-        }
-
-        public dynamic Service(string serviceName, bool singleton = true)
-        {
-            return Application.Instance().Service(serviceName, singleton);
         }
 
         public Application App

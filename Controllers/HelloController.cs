@@ -1,4 +1,5 @@
 ﻿using CodeM.FastApi.Context;
+using CodeM.FastApi.Services;
 using System.Threading.Tasks;
 
 namespace CodeM.FastApi.Controllers
@@ -8,7 +9,7 @@ namespace CodeM.FastApi.Controllers
 
         public async Task Handle(ControllerContext cc)
         {
-            dynamic helloService = Service("Hello");
+            HelloService helloService = Service<HelloService>();
             string hi = helloService.GetHi();
             await cc.JsonAsync(hi);
         }
@@ -20,7 +21,7 @@ namespace CodeM.FastApi.Controllers
         /// <returns></returns>
         public async Task Handle_v2(ControllerContext cc)
         {
-            dynamic helloService = Service("Hello");
+            HelloService helloService = Service<HelloService>();
             string hi = helloService.GetHi();
             await cc.JsonAsync(hi + "这是v2版本返回的。");
         }
