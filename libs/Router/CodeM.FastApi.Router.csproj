@@ -14,12 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Derd" Version="2.7.9" />
+    <PackageReference Include="Derd" Version="2.7.10" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Wukong" Version="2.0.9" />
-    <PackageReference Include="Xmtool" Version="2.1.0" />
+    <PackageReference Include="Wukong" Version="2.0.10" />
+    <PackageReference Include="Xmtool" Version="2.1.1" />
   </ItemGroup>
 
 </Project>
