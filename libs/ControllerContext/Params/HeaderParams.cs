@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using System.Web;
 
 namespace CodeM.FastApi.Context.Params
 {
@@ -24,7 +23,7 @@ namespace CodeM.FastApi.Context.Params
                     if (mData.TryGetValue(key, out result))
                     {
                         string values = string.Join(",", result);
-                        return HttpUtility.UrlDecode(values);
+                        return values;
                     }
                 }
                 return null;
@@ -46,7 +45,7 @@ namespace CodeM.FastApi.Context.Params
                         if (mData.TryGetValue(key, out result))
                         {
                             string values = string.Join(",", result);
-                            return HttpUtility.UrlDecode(values);
+                            return values;
                         }
                     }
                 }
