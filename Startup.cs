@@ -129,6 +129,8 @@ namespace CodeM.FastApi
                     app.UseMiddleware<CorsMiddleware>(AppConfig);
                 }
 
+                app.UseMiddleware<ContextMiddleware>(AppConfig);
+
                 Console.WriteLine("挂载API路由接口......");
                 string routerFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "router.xml");
                 RouterManager.Current.Init(AppConfig, routerFile);
