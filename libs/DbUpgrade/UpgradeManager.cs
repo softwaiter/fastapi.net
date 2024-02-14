@@ -70,9 +70,7 @@ namespace CodeM.FastApi.DbUpgrade
                 throw new Exception("版本控制未开启，请先使用EnableVersionControl方法开启版本控制。");
             }
 
-            EnumerationOptions option = new EnumerationOptions();
-            option.RecurseSubdirectories = true;
-            IEnumerable<string> upgradeFiles = Directory.EnumerateFiles(modelPath, ".upgrade.v*.xml", option);
+            IEnumerable<string> upgradeFiles = Directory.EnumerateFiles(modelPath, ".upgrade.v*.xml", SearchOption.AllDirectories);
             IEnumerator<string> e = upgradeFiles.GetEnumerator();
 
             List<UpgradeInfo> sortedUpgradeData = new List<UpgradeInfo>();
