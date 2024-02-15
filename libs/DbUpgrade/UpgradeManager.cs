@@ -3,6 +3,7 @@ using CodeM.Common.Tools;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace CodeM.FastApi.DbUpgrade
 {
@@ -32,6 +33,68 @@ namespace CodeM.FastApi.DbUpgrade
             }
         }
 
+        private static string SpecialHandle(string modelPath, string command)
+        {
+            string datetimeNow = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            ConnectionSetting cs = Derd.GetConnectionSetting(modelPath);
+            if ("oracle".Equals(cs.Dialect, StringComparison.OrdinalIgnoreCase))
+            {
+                Regex re = new Regex("^\\s*INSERT\\s*INTO\\s*(\\w*)\\s*\\((.*)\\)\\s*VALUES\\s*\\(", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                Match match = re.Match(command);
+                if (match.Success)
+                {
+                    string prefix = command.Substring(0, match.Groups[1].Index);
+                    string table = command.Substring(match.Groups[1].Index, match.Groups[1].Length);
+                    string fields = command.Substring(match.Groups[2].Index, match.Groups[2].Length);
+                    string suffix = command.Substring(match.Groups[2].Index + match.Groups[2].Length);
+
+                    string newTable = string.Concat("\"", table, "\"");
+
+                    string[] fieldItems = fields.Replace(" ", "").Split(",");
+                    string newFields = string.Concat("\"", string.Join("\", \"", fieldItems), "\"");
+
+                    command = string.Concat(prefix, newTable, " (", newFields, suffix).Trim();
+                }
+
+                string orclDatetimeNow = string.Concat("TO_TIMESTAMP('", datetimeNow, "', 'yyyy-mm-dd HH24:mi:ss')");
+                command = command.Replace("{{$nowtime$}}", orclDatetimeNow);
+
+                command = command.Replace("'9999-12-31'", "TO_DATE('9999-12-31', 'yyyy-MM-dd')");
+
+                if (command.EndsWith(";"))
+                {
+                    command = command.Substring(0, command.Length - 1);
+                }
+            }
+            else if ("dm".Equals(cs.Dialect, StringComparison.OrdinalIgnoreCase))
+            {
+                Regex re = new Regex("^\\s*INSERT\\s*INTO\\s*(\\w*)\\s*\\((.*)\\)\\s*VALUES\\s*\\(", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                Match match = re.Match(command);
+                if (match.Success)
+                {
+                    string prefix = command.Substring(0, match.Groups[1].Index);
+                    string table = command.Substring(match.Groups[1].Index, match.Groups[1].Length);
+                    string fields = command.Substring(match.Groups[2].Index, match.Groups[2].Length);
+                    string suffix = command.Substring(match.Groups[2].Index + match.Groups[2].Length);
+
+                    string newTable = string.Concat("\"", table, "\"");
+
+                    string[] fieldItems = fields.Replace(" ", "").Split(",");
+                    string newFields = string.Concat("\"", string.Join("\", \"", fieldItems), "\"");
+
+                    command = string.Concat(prefix, newTable, " (", newFields, suffix).Trim();
+                }
+
+                command = command.Replace("{{$nowtime$}}", string.Concat("'", datetimeNow, "'"));
+            }
+            else
+            {
+                command = command.Replace("{{$nowtime$}}", string.Concat("'", datetimeNow, "'"));
+            }
+            return command;
+        }
+
         private static void ExecuteUpgradeFile(UpgradeInfo info)
         {
             int lastVersion = Derd.GetVersion(info.ModelPath);
@@ -44,7 +107,8 @@ namespace CodeM.FastApi.DbUpgrade
                 {
                     foreach (string cmd in commands)
                     {
-                        Derd.ExecSql(cmd, trans);
+                        string sql = SpecialHandle(info.ModelPath, cmd);
+                        Derd.ExecSql(sql, trans);
                     }
 
                     Derd.SetVersion(info.ModelPath, info.Version, trans);
