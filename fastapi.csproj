@@ -62,6 +62,12 @@
         <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Kdbndp">
+        <HintPath>libs\Third\Kdbndp.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 	<Target Name="CopyBuildFiles2Output" AfterTargets="AfterBuild">
 		<Copy SourceFiles="build\fastapi.sh" DestinationFolder="$(OutDir)" />
 	</Target>

@@ -8,3 +8,62 @@
     <database></database>
     <pool max="100" min="0">true</pool>
 </connection>
+<!--<connection>
+	<dialect>mysql</dialect>
+	<host>127.0.0.1</host>
+	<port></port>
+	<user>root</user>
+	<password>root</password>
+	<database>fastapi</database>
+	<pool max="100" min="0">true</pool>
+</connection>-->
+<!--<connection>
+	<dialect>sqlserver</dialect>
+	<host>127.0.0.1</host>
+	<port></port>
+	<user>sa</user>
+	<password>sa123</password>
+	<database>fastapi</database>
+	<encrypt>true</encrypt>
+	<pool max="100" min="0">true</pool>
+</connection>-->
+<!--<connection>
+	<dialect>postgres</dialect>
+	<host>localhost</host>
+	<port></port>
+	<user>postgres</user>
+	<password>postgres</password>
+	<database>fastapi</database>
+	<charset>utf-8</charset>
+	<pool max="100" min="0">true</pool>
+	<timeout connection="0" command="0" />
+</connection>-->
+<!--<connection>
+	<dialect>oracle</dialect>
+	<host>127.0.0.1</host>
+	<port></port>
+	<user>system</user>
+	<password>System123</password>
+	<database>fastapi</database>
+	<pool max="100" min="0">true</pool>
+</connection>-->
+<!--<connection>
+	<dialect>dm</dialect>
+	<host>localhost</host>
+	<port></port>
+	<user>FASTAPI</user>
+	<password>FASTAPI123</password>
+	<database>fastapi</database>
+	<timeout connection="0" command="0" />
+</connection>-->
+<!--<connection>
+	<dialect>kingbase</dialect>
+	<host>localhost</host>
+	<port></port>
+	<user>system</user>
+	<password>System123</password>
+	<database>fastapi</database>
+	<charset></charset>
+	<pool max="200" min="0">true</pool>
+	<timeout connection="0" command="0" />
+</connection>-->

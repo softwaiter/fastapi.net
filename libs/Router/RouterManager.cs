@@ -214,11 +214,11 @@ namespace CodeM.FastApi.Router
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))
             {
-                individualPath += "{id}";
+                individualPath += "{id:int}";
             }
             else
             {
-                individualPath += "/{id}";
+                individualPath += "/{id:int}";
             }
 
             //增
@@ -301,8 +301,6 @@ namespace CodeM.FastApi.Router
 
         private async Task _HandleDuplicateException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
         {
-            List<dynamic> hints = new List<dynamic>();
-
             Model m = Derd.Model(modelName);
             for (int i = m.PropertyCount - 1; i >= 0; i--)
             {
@@ -327,7 +325,23 @@ namespace CodeM.FastApi.Router
                     return;
                 }
             }
-            await cc.JsonAsync(-1, null, "数据内容存在重复项，请修改后重试。");
+            await cc.JsonAsync(-1, null, "提交数据存在重复项，请检查后重试。");
+        }
+
+        private async Task _HandleNotNullException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
+        {
+            Model m = Derd.Model(modelName);
+            for (int i = m.PropertyCount - 1; i >= 0; i--)
+            {
+                Property p = m.GetProperty(i);
+                if (exp.Message.Contains(p.Field))
+                {
+                    string item = !string.IsNullOrWhiteSpace(p.Label) ? p.Label : p.Name;
+                    await cc.JsonAsync(-1, null, item + "不能为空！");
+                    return;
+                }
+            }
+            await cc.JsonAsync(-1, null, "提交内容缺少必填项，请检查后重试。");
         }
 
         private async Task _CreateModelAsync(ControllerContext cc, 
@@ -441,6 +455,16 @@ namespace CodeM.FastApi.Router
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
                         await _HandleDuplicateException(cc, item.Model, catchObj, exp);
+                    }
+                    else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("无法将 NULL 插入", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("违反了非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("不能将值 NULL 插入列", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -1113,6 +1137,16 @@ namespace CodeM.FastApi.Router
                     {
                         await _HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
+                    else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("无法将 NULL 插入", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("违反了非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("不能将值 NULL 插入列", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
+                    }
                     else
                     {
                         throw exp;
@@ -1200,6 +1234,16 @@ namespace CodeM.FastApi.Router
                     {
                         await _HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
+                    else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("无法将 NULL 插入", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("违反了非空约束", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("不能将值 NULL 插入列", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
+                        exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
+                    }
                     else
                     {
                         throw exp;
@@ -1224,11 +1268,11 @@ namespace CodeM.FastApi.Router
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))
             {
-                individualPath += "{id}";
+                individualPath += "{id:int}";
             }
             else
             {
-                individualPath += "/{id}";
+                individualPath += "/{id:int}";
             }
 
             //新建
