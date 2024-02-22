@@ -23,8 +23,8 @@ namespace CodeM.FastApi.Router
     {
         private ApplicationConfig mAppConfig;
 
-        private RouterConfig mRouterConfig;
-        private MethodInvoker mMethodInvoker;
+        private readonly RouterConfig mRouterConfig;
+        private readonly MethodInvoker mMethodInvoker;
 
         public static RouterManager Current { get; } = new RouterManager();
 
@@ -43,7 +43,7 @@ namespace CodeM.FastApi.Router
         private delegate Task ControllerInvokeDelegate(ControllerContext cc, RouterConfig.RouterItem item, params object[] args);
 
         private long mAllHandlerCounter = 0;    //全部请求处理器计数，总阀门控制
-        private async Task _ThroughRequestPipelineAsync(ControllerInvokeDelegate ControllerDelegate, 
+        private async Task ThroughRequestPipelineAsync(ControllerInvokeDelegate ControllerDelegate, 
             HttpContext context, RouterConfig.RouterItem item, params object[] args)
         {
             if (Interlocked.Increment(ref mAllHandlerCounter) <= mAppConfig.Router.MaxConcurrentTotal)
@@ -151,7 +151,7 @@ namespace CodeM.FastApi.Router
             return handlerFullName;
         }
 
-        private async Task _DefaultRouterHandlerAsync(ControllerContext cc,
+        private async Task DefaultRouterHandlerAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
             string handlerFullName = ProcessApiVersion(cc, "" + args[0]);
@@ -160,7 +160,7 @@ namespace CodeM.FastApi.Router
             await Task.CompletedTask;
         }
 
-        private void _MountSingleHandler(RouterConfig.RouterItem item, RouteBuilder builder)
+        private void MountSingleHandler(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             string method = !string.IsNullOrWhiteSpace(item.Method) ? item.Method.ToUpper() : "GET";
 
@@ -168,8 +168,8 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapGet(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync), 
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync), 
                         context, item, item.Handler);
                 });
             }
@@ -177,8 +177,8 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, item.Handler);
                 });
             }
@@ -186,8 +186,8 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapPut(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, item.Handler);
                 });
             }
@@ -195,15 +195,15 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapDelete(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, item.Handler);
                 });
             }
         }
 
         #region Resource Router
-        private void _MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
+        private void MountResourceRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             object resouceInst = Wukong.GetObject(item.Resource);
             if (resouceInst == null)
@@ -227,8 +227,8 @@ namespace CodeM.FastApi.Router
                 builder.MapPost(item.Path, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Create");
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, handlerFullName);
                 });
             }
@@ -239,8 +239,8 @@ namespace CodeM.FastApi.Router
                 builder.MapDelete(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Delete");
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, handlerFullName);
                 });
             }
@@ -251,8 +251,8 @@ namespace CodeM.FastApi.Router
                 builder.MapPut(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Update");
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, handlerFullName);
                 });
             }
@@ -263,8 +263,8 @@ namespace CodeM.FastApi.Router
                 builder.MapGet(item.Path, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".List");
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, handlerFullName);
                 });
             }
@@ -275,8 +275,8 @@ namespace CodeM.FastApi.Router
                 builder.MapGet(individualPath, async (context) =>
                 {
                     string handlerFullName = string.Concat(item.Resource, ".Detail");
-                    await _ThroughRequestPipelineAsync(
-                        new ControllerInvokeDelegate(_DefaultRouterHandlerAsync),
+                    await ThroughRequestPipelineAsync(
+                        new ControllerInvokeDelegate(DefaultRouterHandlerAsync),
                         context, item, handlerFullName);
                 });
             }
@@ -286,20 +286,19 @@ namespace CodeM.FastApi.Router
 
         #region Model Router
 
-        private object _GetParamValue(ControllerContext cc, string name)
+        private object GetParamValue(ControllerContext cc, string name)
         {
             if (cc.PostJson != null && cc.PostJson.Has(name))
             {
-                object result;
-                if (cc.PostJson.TryGetValue(name, out result))
+                if (cc.PostJson.TryGetValue(name, out object result))
                 {
-                    return result != null ? result : null;
+                    return result;
                 }
             }
             return null;
         }
 
-        private async Task _HandleDuplicateException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
+        private async Task HandleDuplicateException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
         {
             Model m = Derd.Model(modelName);
             for (int i = m.PropertyCount - 1; i >= 0; i--)
@@ -328,7 +327,7 @@ namespace CodeM.FastApi.Router
             await cc.JsonAsync(-1, null, "提交数据存在重复项，请检查后重试。");
         }
 
-        private async Task _HandleNotNullException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
+        private async Task HandleNotNullException(ControllerContext cc, string modelName, dynamic modelObj, Exception exp)
         {
             Model m = Derd.Model(modelName);
             for (int i = m.PropertyCount - 1; i >= 0; i--)
@@ -344,7 +343,7 @@ namespace CodeM.FastApi.Router
             await cc.JsonAsync(-1, null, "提交内容缺少必填项，请检查后重试。");
         }
 
-        private async Task _CreateModelAsync(ControllerContext cc, 
+        private async Task CreateModelAsync(ControllerContext cc, 
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_CREATE");
@@ -378,8 +377,7 @@ namespace CodeM.FastApi.Router
                                     string v = null;
                                     if (postItem.Has(p.Name))
                                     {
-                                        object result;
-                                        if (postItem.TryGetValue(p.Name, out result))
+                                        if (postItem.TryGetValue(p.Name, out object result))
                                         {
                                             v = result != null ? result.ToString() : null;
                                         }
@@ -423,7 +421,7 @@ namespace CodeM.FastApi.Router
                             Property p = m.GetProperty(i);
                             if (!p.AutoIncrement)
                             {
-                                object v = _GetParamValue(cc, p.Name);
+                                object v = GetParamValue(cc, p.Name);
                                 if (v != null)
                                 {
                                     obj.SetValue(p.Name, v);
@@ -454,7 +452,7 @@ namespace CodeM.FastApi.Router
                     else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
+                        await HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
@@ -464,7 +462,7 @@ namespace CodeM.FastApi.Router
                         exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
+                        await HandleNotNullException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -552,7 +550,7 @@ namespace CodeM.FastApi.Router
             return typeof(Object);
         }
 
-        private Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|\\*=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
+        private readonly Regex mReOP = new Regex("\\(|\\)|\\s+AND\\s+|\\s+OR\\s+|>=|<=|<>|~!=|^!=|!=\\$|!=|\\*=|~=|\\^=|=\\$|>|<|=", RegexOptions.IgnoreCase);
 
         private void BuildWhereFilter(Model m, IFilter filter, string op, string name, string value)
         {
@@ -680,7 +678,6 @@ namespace CodeM.FastApi.Router
                 string exprValue;
                 string aop = null;
                 int bracket = 0;
-                string prevOP = null;
                 Stack<IFilter> bracketEntryPoints = new Stack<IFilter>();
 
                 MatchCollection mc = mReOP.Matches(where);
@@ -771,16 +768,14 @@ namespace CodeM.FastApi.Router
                             exprName = null;
                         }
                     }
-
-                    prevOP = curOP.ToUpper();
                 }
             }
 
             return result;
         }
 
-        private ConcurrentDictionary<string, long> mModelRouterConcurrents = new ConcurrentDictionary<string, long>();
-        private async Task _QueryModelListAsync(ControllerContext cc, 
+        private readonly ConcurrentDictionary<string, long> mModelRouterConcurrents = new ConcurrentDictionary<string, long>();
+        private async Task QueryModelListAsync(ControllerContext cc, 
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_LIST");
@@ -874,7 +869,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private async Task _QueryModelDetailAsync(ControllerContext cc, 
+        private async Task QueryModelDetailAsync(ControllerContext cc, 
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_DETAIL");
@@ -950,7 +945,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private async Task _BatchDeleteModelAsync(ControllerContext cc,
+        private async Task BatchDeleteModelAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_DELETE_BATCH");
@@ -1010,7 +1005,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private async Task _DeleteModelAsync(ControllerContext cc,
+        private async Task DeleteModelAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_DELETE");
@@ -1072,7 +1067,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private async Task _BatchUpdateModelAsync(ControllerContext cc,
+        private async Task BatchUpdateModelAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_UPDATE_BATCH");
@@ -1106,7 +1101,7 @@ namespace CodeM.FastApi.Router
                         Property p = m.GetProperty(i);
                         if (!p.AutoIncrement)
                         {
-                            object v = _GetParamValue(cc, p.Name);
+                            object v = GetParamValue(cc, p.Name);
                             if (v != null)
                             {
                                 obj.SetValue(p.Name, v);
@@ -1135,7 +1130,7 @@ namespace CodeM.FastApi.Router
                     else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
+                        await HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
@@ -1145,7 +1140,7 @@ namespace CodeM.FastApi.Router
                         exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
+                        await HandleNotNullException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -1166,7 +1161,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private async Task _UpdateModelAsync(ControllerContext cc,
+        private async Task UpdateModelAsync(ControllerContext cc,
             RouterConfig.RouterItem item, params object[] args)
         {
             string key = string.Concat(item.Model, "_UPDATE");
@@ -1203,7 +1198,7 @@ namespace CodeM.FastApi.Router
                         Property p = m.GetProperty(i);
                         if (!p.AutoIncrement)
                         {
-                            object v = _GetParamValue(cc, p.Name);
+                            object v = GetParamValue(cc, p.Name);
                             if (v != null)
                             {
                                 obj.SetValue(p.Name, v);
@@ -1232,7 +1227,7 @@ namespace CodeM.FastApi.Router
                     else if (exp.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("DUPLICATE", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleDuplicateException(cc, item.Model, catchObj, exp);
+                        await HandleDuplicateException(cc, item.Model, catchObj, exp);
                     }
                     else if (exp.Message.Contains("NOT NULL", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("非空约束", StringComparison.OrdinalIgnoreCase) ||
@@ -1242,7 +1237,7 @@ namespace CodeM.FastApi.Router
                         exp.Message.Contains("doesn't have a default value", StringComparison.OrdinalIgnoreCase) ||
                         exp.Message.Contains("cannot be null", StringComparison.OrdinalIgnoreCase))
                     {
-                        await _HandleNotNullException(cc, item.Model, catchObj, exp);
+                        await HandleNotNullException(cc, item.Model, catchObj, exp);
                     }
                     else
                     {
@@ -1263,7 +1258,7 @@ namespace CodeM.FastApi.Router
             }
         }
 
-        private void _MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
+        private void MountModelRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             string individualPath = item.Path;
             if (individualPath.EndsWith("/"))
@@ -1281,7 +1276,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapPost(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_CreateModelAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(CreateModelAsync), context, item);
                 });
             }
 
@@ -1290,7 +1285,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapGet(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelListAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(QueryModelListAsync), context, item);
                 });
             }
 
@@ -1299,7 +1294,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapGet(individualPath, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_QueryModelDetailAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(QueryModelDetailAsync), context, item);
                 });
             }
 
@@ -1308,7 +1303,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapDelete(individualPath, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_DeleteModelAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(DeleteModelAsync), context, item);
                 });
             }
 
@@ -1317,7 +1312,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapDelete(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_BatchDeleteModelAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(BatchDeleteModelAsync), context, item);
                 });
             }
 
@@ -1326,7 +1321,7 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapPut(individualPath, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_UpdateModelAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(UpdateModelAsync), context, item);
                 });
             }
 
@@ -1335,30 +1330,30 @@ namespace CodeM.FastApi.Router
             {
                 builder.MapPut(item.Path, async (context) =>
                 {
-                    await _ThroughRequestPipelineAsync(new ControllerInvokeDelegate(_BatchUpdateModelAsync), context, item);
+                    await ThroughRequestPipelineAsync(new ControllerInvokeDelegate(BatchUpdateModelAsync), context, item);
                 });
             }
         }
 
         #endregion
 
-        private void _MountRouters(RouterConfig.RouterItem item, RouteBuilder builder)
+        private void MountRouters(RouterConfig.RouterItem item, RouteBuilder builder)
         {
             if (!string.IsNullOrWhiteSpace(item.Model))
             {
-                _MountModelRouters(item, builder);
+                MountModelRouters(item, builder);
             }
             else if (!string.IsNullOrWhiteSpace(item.Resource))
             {
-                _MountResourceRouters(item, builder);
+                MountResourceRouters(item, builder);
             }
             else
             {
-                _MountSingleHandler(item, builder);
+                MountSingleHandler(item, builder);
             }
         }
 
-        Regex reParamRoute = new Regex("\\{[^/]*?\\}");
+        readonly Regex reParamRoute = new Regex("\\{[^/]*?\\}");
         public void MountRouters(IApplicationBuilder app)
         {
             RouteBuilder builder = new RouteBuilder(app);
@@ -1392,7 +1387,7 @@ namespace CodeM.FastApi.Router
 
                 mRouterConfig.Items.ForEach(item =>
                 {
-                    this._MountRouters(item, builder);
+                    this.MountRouters(item, builder);
                 });
             }
 

@@ -11,18 +11,16 @@ namespace CodeM.FastApi.Router
 {
     internal class MethodInvoker
     {
-        ConcurrentDictionary<string, ConcurrentStack<object>> mHandlers = new ConcurrentDictionary<string, ConcurrentStack<object>>();
-        ReaderWriterLockSlim handlerLocker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+        readonly ConcurrentDictionary<string, ConcurrentStack<object>> mHandlers = new ConcurrentDictionary<string, ConcurrentStack<object>>();
+        readonly ReaderWriterLockSlim handlerLocker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
-        ConcurrentDictionary<string, int> mHandlerCounters = new ConcurrentDictionary<string, int>();
-        ConcurrentDictionary<string, int> mHandlerExecNumbers = new ConcurrentDictionary<string, int>();
+        readonly ConcurrentDictionary<string, int> mHandlerCounters = new ConcurrentDictionary<string, int>();
+        readonly ConcurrentDictionary<string, int> mHandlerExecNumbers = new ConcurrentDictionary<string, int>();
 
-        private ConcurrentStack<object> _GetHandlerStack(string handlerFullName)
+        private ConcurrentStack<object> GetHandlerStack(string handlerFullName)
         {
-            ConcurrentStack<object> result = null;
-
             string key = handlerFullName.ToLower();
-            if (!mHandlers.TryGetValue(key, out result))
+            if (!mHandlers.TryGetValue(key, out ConcurrentStack<object> result))
             {
                 handlerLocker.EnterWriteLock();
                 try
@@ -42,7 +40,7 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private bool _IncHandlerCount(string handlerFullName, int maxConcurrent)
+        private bool IncHandlerCount(string handlerFullName, int maxConcurrent)
         {
             bool result = true;
 
@@ -70,7 +68,7 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private bool _DecHandlerCount(string handlerFullName)
+        private bool DecHandlerCount(string handlerFullName)
         {
             bool result = true;
 
@@ -90,20 +88,20 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private object _GetHandler(string handlerFullName, int maxConcurrent)
+        private object GetHandler(string handlerFullName, int maxConcurrent)
         {
             object result = null;
 
             int pos = handlerFullName.LastIndexOf(".");
             string handlerClass = handlerFullName.Substring(0, pos);
 
-            ConcurrentStack<object> stack = _GetHandlerStack(handlerFullName);
+            ConcurrentStack<object> stack = GetHandlerStack(handlerFullName);
             if (stack != null && !stack.IsEmpty)
             {
                 stack.TryPop(out result);
             }
 
-            if (result == null && _IncHandlerCount(handlerFullName, maxConcurrent))
+            if (result == null && IncHandlerCount(handlerFullName, maxConcurrent))
             {
                 try
                 {
@@ -115,7 +113,7 @@ namespace CodeM.FastApi.Router
                 }
                 catch
                 {
-                    _DecHandlerCount(handlerFullName);
+                    DecHandlerCount(handlerFullName);
                     throw new Exception(string.Concat("Instantiation exception(", handlerFullName, ")"));
                 }
             }
@@ -123,7 +121,7 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private void _IncHandlerExecNum(object handler)
+        private void IncHandlerExecNum(object handler)
         {
             mHandlerExecNumbers.AddOrUpdate("handler_" + handler.GetHashCode(), 1, (key, value) =>
             {
@@ -131,12 +129,11 @@ namespace CodeM.FastApi.Router
             });
         }
 
-        private bool _IsNotExpired(object handler, int maxInvokePerInstance)
+        private bool IsNotExpired(object handler, int maxInvokePerInstance)
         {
             bool result = true;
 
-            int execNum = 0;
-            mHandlerExecNumbers.TryGetValue("handler_" + handler.GetHashCode(), out execNum);
+            mHandlerExecNumbers.TryGetValue("handler_" + handler.GetHashCode(), out int execNum);
             if (execNum >= maxInvokePerInstance)
             {
                 result = false;
@@ -145,20 +142,18 @@ namespace CodeM.FastApi.Router
             return result;
         }
 
-        private void _ReleaseHandler(string handlerFullName, object handler, 
+        private void ReleaseHandler(string handlerFullName, object handler, 
             int maxIdle, int maxInvokePerInstance)
         {
-            ConcurrentStack<object> stack = _GetHandlerStack(handlerFullName);
-            if (stack != null && stack.Count < maxIdle && _IsNotExpired(handler, maxInvokePerInstance))
+            ConcurrentStack<object> stack = GetHandlerStack(handlerFullName);
+            if (stack != null && stack.Count < maxIdle && IsNotExpired(handler, maxInvokePerInstance))
             {
                 stack.Push(handler);
             }
             else
             {
-                int execNum;
-                mHandlerExecNumbers.TryRemove("handler_" + handler.GetHashCode(), out execNum);
-
-                _DecHandlerCount(handlerFullName);
+                mHandlerExecNumbers.TryRemove("handler_" + handler.GetHashCode(), out int execNum);
+                DecHandlerCount(handlerFullName);
             }
         }
 
@@ -170,7 +165,7 @@ namespace CodeM.FastApi.Router
 
             dynamic result = null;
 
-            object handlerInst = _GetHandler(handlerFullName, maxConcurrent);
+            object handlerInst = GetHandler(handlerFullName, maxConcurrent);
             if (handlerInst != null)
             {
                 try
@@ -225,11 +220,11 @@ namespace CodeM.FastApi.Router
                         }
                     }
 
-                    _IncHandlerExecNum(handlerInst);
+                    IncHandlerExecNum(handlerInst);
                 }
                 finally
                 {
-                    _ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
+                    ReleaseHandler(handlerFullName, handlerInst, maxIdle, maxInvokePerInstance);
                 }
             }
             else
