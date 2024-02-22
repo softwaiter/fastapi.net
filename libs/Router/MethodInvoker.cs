@@ -177,9 +177,16 @@ namespace CodeM.FastApi.Router
                 {
                     Type handlerType = handlerInst.GetType();
 
-                    if (ignoreMethodNotExists && !FastApiUtils.IsMethodExists(handlerType, handlerMethod))
+                    if (!FastApiUtils.IsMethodExists(handlerType, handlerMethod))
                     {
-                        return null;
+                        if (ignoreMethodNotExists)
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            throw new Exception(String.Concat("Router processor not found: ", handlerFullName));
+                        }
                     }
 
                     result = handlerType.InvokeMember(handlerMethod,

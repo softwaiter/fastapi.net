@@ -48,13 +48,12 @@ namespace CodeM.FastApi.Common
             return sIsProduction;
         }
 
-        private static ConcurrentDictionary<string, bool> sEnvs = new ConcurrentDictionary<string, bool>();
+        private readonly static ConcurrentDictionary<string, bool> sEnvs = new ConcurrentDictionary<string, bool>();
         public static bool IsEnv(string envName)
         {
-            bool bRet = false;
             string env = GetEnvironmentName();
             string key = env != null ? env.ToLower() : "";
-            if (!sEnvs.TryGetValue(key, out bRet))
+            if (!sEnvs.TryGetValue(key, out bool bRet))
             {
                 bRet = key.Equals(envName, StringComparison.OrdinalIgnoreCase);
                 sEnvs.TryAdd(key, bRet);
@@ -62,7 +61,7 @@ namespace CodeM.FastApi.Common
             return bRet;
         }
 
-        private static Dictionary<string, bool> sTypeMethods = new Dictionary<string, bool>();
+        private readonly static Dictionary<string, bool> sTypeMethods = new Dictionary<string, bool>();
         public static bool IsMethodExists(Type _typ, string method)
         {
             string key = string.Concat(_typ.FullName, "`", method);

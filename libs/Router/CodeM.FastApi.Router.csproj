@@ -1,25 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <AssemblyName>CodeM.FastApi.Router</AssemblyName>
-    <RootNamespace>CodeM.FastApi.Router</RootNamespace>
-    <Authors>softwaiter</Authors>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <AssemblyName>CodeM.FastApi.Router</AssemblyName>
+        <RootNamespace>CodeM.FastApi.Router</RootNamespace>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+        <Authors>softwaiter</Authors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CodeM.FastApi.Common.csproj" />
-    <ProjectReference Include="..\JsonResponseWriter\CodeM.FastApi.Context.JsonResponse.csproj" />
-    <ProjectReference Include="..\Logger\CodeM.FastApi.Log.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Derd" Version="2.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.2.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Wukong" Version="2.0.12" />
-    <PackageReference Include="Xmtool" Version="2.2.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Common\CodeM.FastApi.Common.csproj" />
+        <ProjectReference Include="..\JsonResponseWriter\CodeM.FastApi.Context.JsonResponse.csproj" />
+        <ProjectReference Include="..\Logger\CodeM.FastApi.Log.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Derd" Version="2.8.0" />
+        <PackageReference Include="Wukong" Version="2.0.12" />
+        <PackageReference Include="Xmtool" Version="2.2.0" />
+    </ItemGroup>
 
 </Project>
