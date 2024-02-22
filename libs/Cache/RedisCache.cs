@@ -7,7 +7,7 @@ namespace CodeM.FastApi.Cache
 {
     public class RedisCache : CacheBase, ICache
     {
-        private Microsoft.Extensions.Caching.Redis.RedisCache mRedisCache;
+        private Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache mRedisCache;
 
         public RedisCache(dynamic options)
         {
@@ -91,15 +91,15 @@ namespace CodeM.FastApi.Cache
                     }
                 }
 
-                Microsoft.Extensions.Caching.Redis.RedisCacheOptions rcp =
-                    new Microsoft.Extensions.Caching.Redis.RedisCacheOptions();
+                Microsoft.Extensions.Caching.StackExchangeRedis.RedisCacheOptions rcp =
+                    new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCacheOptions();
                 rcp.Configuration = sbConfig.ToString();
                 if (options.Has("InstanceName"))
                 {
                     rcp.InstanceName = options.InstanceName;
                 }
 
-                mRedisCache = new Microsoft.Extensions.Caching.Redis.RedisCache(rcp);
+                mRedisCache = new Microsoft.Extensions.Caching.StackExchangeRedis.RedisCache(rcp);
                 try
                 {
                     mRedisCache.GetString("_$test$_");

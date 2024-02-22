@@ -65,7 +65,7 @@ namespace CodeM.FastApi
             {
                 if (AppConfig.Session.Redis.Enable)
                 {
-                    services.AddDistributedRedisCache(options =>
+                    services.AddStackExchangeRedisCache(options =>
                     {
                         options.Configuration = AppConfig.Session.Redis.ToString();
                         options.InstanceName = AppConfig.Session.Redis.InstanceName;
