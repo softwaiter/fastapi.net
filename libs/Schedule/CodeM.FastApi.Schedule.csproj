@@ -8,8 +8,8 @@
 
     <ItemGroup>
         <PackageReference Include="Quartz" Version="3.8.1" />
-        <PackageReference Include="Wukong" Version="2.0.12" />
-        <PackageReference Include="Xmtool" Version="2.2.0" />
+        <PackageReference Include="Wukong" Version="2.0.13" />
+        <PackageReference Include="Xmtool" Version="2.2.1" />
     </ItemGroup>
 
     <ItemGroup>
