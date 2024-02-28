@@ -75,7 +75,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    if (string.IsNullOrWhiteSpace(mHost))
+                    if (string.IsNullOrWhiteSpace(value))
                     {
                         throw new Exception("Session的Redis配置项Host不能为空。");
                     }
@@ -104,7 +104,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    if (string.IsNullOrWhiteSpace(mSslHost))
+                    if (string.IsNullOrWhiteSpace(value))
                     {
                         throw new Exception("Session的Redis配置项SslHost不能为空。");
                     }
@@ -121,7 +121,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    if (string.IsNullOrWhiteSpace(mSslProtocols))
+                    if (string.IsNullOrWhiteSpace(value))
                     {
                         throw new Exception("Session的Redis配置项SslProtocols不能为空。");
                     }
@@ -138,7 +138,7 @@ namespace CodeM.FastApi.Config.Settings
                 }
                 set
                 {
-                    if (string.IsNullOrWhiteSpace(mInstanceName))
+                    if (string.IsNullOrWhiteSpace(value))
                     {
                         throw new Exception("Session的Redis配置项InstanceName不能为空。");
                     }
