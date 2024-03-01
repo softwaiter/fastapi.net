@@ -1,40 +1,43 @@
 ﻿using CodeM.FastApi.Context;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Concurrent;
-using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CodeM.FastApi.System.Core
 {
-    public class CurrentContext
+    public static class CurrentContext
     {
-        private static ConcurrentDictionary<int, HttpContext> sRequests = new ConcurrentDictionary<int, HttpContext>();
-
-        public static void Add(HttpContext context)
-        {
-            int procId = Thread.GetCurrentProcessorId();
-            sRequests.TryAdd(procId, context);
-        }
+        private static IHttpContextAccessor _accessor;
 
         public static ControllerContext Context
         {
             get
             {
-                HttpContext context = null;
-                int procId = Thread.GetCurrentProcessorId();
-                if (sRequests.TryGetValue(procId, out context))
-                {
-                    return ControllerContext.FromHttpContext(context,
-                        Application.Instance().Config());
-                }
-                return null;
+                HttpContext context = _accessor.HttpContext;
+                return ControllerContext.FromHttpContext(context,
+                    Application.Instance().Config());
             }
         }
 
-        public static void Remove()
+        internal static void Configure(IHttpContextAccessor accessor)
         {
-            HttpContext context;
-            int procId = Thread.GetCurrentProcessorId();
-            sRequests.TryRemove(procId, out context);
+            _accessor = accessor;
         }
     }
+
+    public static class CurrentContextExtensions
+    {
+        public static void AddHttpContextAccessor(this IServiceCollection services)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        }
+
+        public static IApplicationBuilder UseCurrentContext(this IApplicationBuilder app)
+        {
+            var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
+            CurrentContext.Configure(httpContextAccessor);
+            return app;
+        }
+    }
+
 }

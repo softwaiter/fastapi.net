@@ -52,6 +52,8 @@ namespace CodeM.FastApi
         {
             Console.WriteLine("初始化框架配置信息......");
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             if (AppConfig.Compression.Enable)
             {
                 services.AddResponseCompression(options =>
@@ -114,6 +116,8 @@ namespace CodeM.FastApi
                     app.UseDeveloperExceptionPage();
                 }
 
+                app.UseCurrentContext();
+
                 if (AppConfig.Compression.Enable)
                 {
                     app.UseResponseCompression();
@@ -123,8 +127,6 @@ namespace CodeM.FastApi
                 {
                     app.UseSession();
                 }
-
-                app.UseMiddleware<ContextMiddleware>(AppConfig);
 
                 if (AppConfig.Cors.Enable)
                 {
