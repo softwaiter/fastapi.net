@@ -30,6 +30,10 @@ namespace CodeM.FastApi.System.Utils
                         }
                     }
                 }
+                else
+                {
+                    return corsSetting.Options.AllowSites[0];
+                }
             }
             return allowOrigin;
         }
