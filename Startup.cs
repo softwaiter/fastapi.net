@@ -116,6 +116,12 @@ namespace CodeM.FastApi
                     app.UseDeveloperExceptionPage();
                 }
 
+                app.Use(next => context =>
+                {
+                    context.Request.EnableBuffering();
+                    return next(context);
+                });
+
                 app.UseCurrentContext();
 
                 if (AppConfig.Compression.Enable)

@@ -32,11 +32,6 @@ namespace CodeM.FastApi.Context
         {
             mContext = context;
 
-            if (mContext != null)
-            {
-                mContext.Request.EnableBuffering();
-            }
-
             if (config != null)
             {
                 Config = config;
@@ -136,10 +131,9 @@ namespace CodeM.FastApi.Context
                         StreamReader sr = new StreamReader(mContext.Request.Body);
                         Task<string> getContentTask = sr.ReadToEndAsync();
                         Task.WaitAll(getContentTask);
+                        mPostContent = getContentTask.Result;
 
                         mContext.Request.Body.Seek(0, SeekOrigin.Begin);
-
-                        mPostContent = getContentTask.Result;
                     }
                 }
                 return mPostContent;
