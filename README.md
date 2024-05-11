@@ -23,6 +23,13 @@
 
 
 
+# :twisted_rightwards_arrows: 分支
+
+**master**：master分支已升级到最新的.Net8.0 SDK，Bug修改和所有新功能将在此分支进行。<br/>
+**netcore3.1**：netcore3.1是最早基于.NetCore3.1 SDK开发的版本，后续Bug修改将继续在此分支更新。
+
+
+
 # :memo:文档
 
 - [目录结构](docs/structure.md)
