@@ -406,10 +406,10 @@ namespace CodeM.FastApi.Router
                             }
                             Derd.CommitTransaction(transCode);
                         }
-                        catch (Exception exp)
+                        catch
                         {
                             Derd.RollbackTransaction(transCode);
-                            throw exp;
+                            throw;
                         }
                     }
                     else
@@ -466,7 +466,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -852,7 +852,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -928,7 +928,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -988,7 +988,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -1050,7 +1050,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -1144,7 +1144,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally
@@ -1241,7 +1241,7 @@ namespace CodeM.FastApi.Router
                     }
                     else
                     {
-                        throw exp;
+                        throw;
                     }
                 }
                 finally

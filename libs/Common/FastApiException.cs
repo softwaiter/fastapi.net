@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace CodeM.FastApi.Common
 {
@@ -17,11 +16,6 @@ namespace CodeM.FastApi.Common
 
         public FastApiException(string message, Exception innerException)
             : base(message, innerException)
-        {
-        }
-
-        public FastApiException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

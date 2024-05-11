@@ -114,10 +114,10 @@ namespace CodeM.FastApi.DbUpgrade
                     Derd.SetVersion(info.ModelPath, info.Version, trans);
                     Derd.CommitTransaction(trans);
                 }
-                catch (Exception exp)
+                catch
                 {
                     Derd.RollbackTransaction(trans);
-                    throw exp;
+                    throw;
                 }
             }
         }

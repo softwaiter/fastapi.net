@@ -105,11 +105,11 @@ namespace CodeM.FastApi.Context.Params
                     object typValue = Convert.ChangeType(value, typeof(T));
                     return (T)typValue;
                 }
-                catch (Exception ex)
+                catch
                 {
                     if (throwError)
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }
@@ -138,11 +138,11 @@ namespace CodeM.FastApi.Context.Params
                     object typValue = Convert.ChangeType(value, typeof(T));
                     return (T)typValue;
                 }
-                catch (Exception ex)
+                catch
                 {
                     if (throwError)
                     {
-                        throw ex;
+                        throw;
                     }
                 }
             }

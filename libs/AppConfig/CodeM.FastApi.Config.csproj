@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>CodeM.FastApi.Config</AssemblyName>
         <RootNamespace>CodeM.FastApi.Config</RootNamespace>
         <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Xmtool" Version="2.2.1" />
+        <PackageReference Include="Xmtool" Version="3.0.0" />
     </ItemGroup>
 
 </Project>
