@@ -39,6 +39,7 @@
 - [会话(Session)](docs/session.md)
 - [路由(Router)](docs/router.md)
 - [控制器(Controller)](docs/controller.md)
+- [版本控制(Version)](docs/version.md)
 - [数据库操作(ORM)](https://github.com/softwaiter/netcoreORM/blob/master/README.md)
 - [定时任务](docs/schedule.md)
 - [日志](docs/logging.md)
