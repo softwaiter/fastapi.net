@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Derd" Version="3.0.0" />
+        <PackageReference Include="Derd" Version="3.0.1" />
         <PackageReference Include="Wukong" Version="3.0.0" />
         <PackageReference Include="Xmtool" Version="3.0.0" />
     </ItemGroup>
