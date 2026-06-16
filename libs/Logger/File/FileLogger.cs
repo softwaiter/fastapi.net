@@ -78,6 +78,7 @@ namespace CodeM.FastApi.Log.File
 
         public void Dispose()
         {
+            FileWriter.Dispose();
         }
     }
 }
