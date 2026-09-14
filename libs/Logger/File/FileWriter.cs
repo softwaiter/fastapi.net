@@ -268,7 +268,6 @@ namespace CodeM.FastApi.Log.File
 
         private static void WriteHandler()
         {
-            sIsWritingThreadRunning = true;
             StringBuilder sbBuff = new StringBuilder();
             int emptyLoop = 0;
 
@@ -359,6 +358,7 @@ namespace CodeM.FastApi.Log.File
                 {
                     if (!sIsWritingThreadRunning)
                     {
+                        sIsWritingThreadRunning = true;
                         sStopWriting = false; // 重置退出信号
 
                         // 线程终止后必须重新创建实例（无法重启）
